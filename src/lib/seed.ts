@@ -132,7 +132,7 @@ function people(): Person[] {
         ev({
           id: 'e-can-4',
           title: 'Kilometre taşı: 3.000 noktalık rota 5 dakikanın altında',
-          summary: 'Kuzey Lojistik pilotunda ilk başarı kriteri karşılandı: ölçülen süre 3 dk 40 sn.',
+          summary: 'Kuzey Lojistik deneme projesinde ilk başarı kriteri karşılandı: ölçülen süre 3 dk 40 sn.',
           source: 'pilot',
           level: 'S3',
           skills: ['go', 'optimization', 'perf'],
@@ -415,7 +415,7 @@ function people(): Person[] {
         ev({
           id: 'e-def-3',
           title: 'Kilometre taşı: marka kimliği ve kılavuz teslimi',
-          summary: 'Kapanan Atölye Kooperatifi pilotunun çift onaylı ilk kriteri. Pilot kapandı ama bu teslim kanıt olarak kalır.',
+          summary: 'Kapanan Atölye Kooperatifi deneme projesinin çift onaylı ilk kriteri. Proje kapandı ama bu teslim kanıt olarak kalır.',
           source: 'pilot',
           level: 'S3',
           skills: ['brand', 'uiux'],
@@ -629,8 +629,8 @@ function needs(): Need[] {
         ],
         constraints: [
           { kind: 'veri', text: 'Gerçek adres yerine anonimleştirilmiş koordinat verisi verilir' },
-          { kind: 'sure', text: 'Pilot süresi 6 hafta' },
-          { kind: 'butce', text: 'Pilot bütçesi 60.000 TL' },
+          { kind: 'sure', text: 'Deneme projesi süresi 6 hafta' },
+          { kind: 'butce', text: 'Deneme projesi bütçesi 60.000 TL' },
         ],
         decisionMaker: 'Operasyon Direktörü',
         scope: 'Yalnız Tuzla deposu ve 1 haftalık geçmiş sipariş verisi.',
@@ -653,7 +653,7 @@ function needs(): Need[] {
         criteria: [
           crit('c-otp-1', 'Doluluk bilgisi sahadan haritaya 30 saniyeden kısa sürede yansır'),
           crit('c-otp-2', 'Harita orta segment telefonda 3 saniyenin altında açılır'),
-          crit('c-otp-3', 'Pilot bölgede boş yer arama süresi %25 azalır'),
+          crit('c-otp-3', 'Deneme bölgesinde boş yer arama süresi %25 azalır'),
         ],
         constraints: [
           { kind: 'mevzuat', text: 'Açık veri lisansıyla yayımlanır; kişisel veri tutulmaz' },
@@ -844,7 +844,7 @@ function pilots(): Pilot[] {
         ms('m-rota-3', 'c-rota-3', 'Servis sipariş sistemine REST API ile 2 hafta içinde bağlanır', daysFromNow(12), 'open'),
       ],
       log: ledger([
-        { ago: 24, actor: 'system', kind: 'open', text: 'Pilot açıldı. Kanvastaki 3 başarı kriteri kilometre taşına dönüştü.' },
+        { ago: 24, actor: 'system', kind: 'open', text: 'Deneme projesi açıldı. İhtiyaç kartındaki 3 başarı kriteri aşamaya dönüştü.' },
         { ago: 21, actor: 'org', kind: 'decision', text: 'Anonim koordinat verisi ve 1 haftalık sipariş dökümü paylaşıldı.' },
         { ago: 19, actor: 'person', kind: 'decision', text: 'Yöntem: genetik algoritma + 2-opt yerel iyileştirme. Hazır çözücü lisansı gerektirmediği için seçildi.' },
         { ago: 11, actor: 'person', kind: 'update', text: 'İlk ölçüm: 3.000 nokta 3 dk 40 sn (8 çekirdek).' },
@@ -869,7 +869,7 @@ function pilots(): Pilot[] {
         ms('m-doc-3', 'c-doc-3', 'İlk başarılı isteğe ulaşma süresi 10 dakikanın altına iner', daysFromNow(14), 'open'),
       ],
       log: ledger([
-        { ago: 30, actor: 'system', kind: 'open', text: 'Pilot açıldı. Kanvastaki 3 başarı kriteri kilometre taşına dönüştü.' },
+        { ago: 30, actor: 'system', kind: 'open', text: 'Deneme projesi açıldı. İhtiyaç kartındaki 3 başarı kriteri aşamaya dönüştü.' },
         { ago: 26, actor: 'org', kind: 'decision', text: 'Kılavuz dili Türkçe; terimler için TDK karşılıkları kullanılacak.' },
         { ago: 11, actor: 'person', kind: 'submit', text: 'Kilometre taşı teslim edildi: 12 uç noktanın tamamı örnek istek ve yanıtla belgelenir' },
       ]),
@@ -894,7 +894,7 @@ function pilots(): Pilot[] {
         ms('m-sh-3', 'c-sh-3', 'Sıçrama efektinin GPU süresi 1 ms’nin altında kalır', daysAgo(72), 'approved', 72, 71),
       ],
       log: ledger([
-        { ago: 110, actor: 'system', kind: 'open', text: 'Pilot açıldı. Kanvastaki 3 başarı kriteri kilometre taşına dönüştü.' },
+        { ago: 110, actor: 'system', kind: 'open', text: 'Deneme projesi açıldı. İhtiyaç kartındaki 3 başarı kriteri aşamaya dönüştü.' },
         { ago: 104, actor: 'person', kind: 'update', text: 'Profil ölçümü: darboğaz şeffaflık sıralaması ve 4 ayrı geçiş.' },
         { ago: 88, actor: 'person', kind: 'submit', text: 'Kilometre taşı teslim edildi: Test cihazında (2 GB RAM) en az 55 FPS' },
         { ago: 87, actor: 'org', kind: 'approve', text: 'Kurum onayı: 58 FPS, 10 dakikalık oturumda ölçüldü.' },
@@ -902,7 +902,7 @@ function pilots(): Pilot[] {
         { ago: 78, actor: 'org', kind: 'approve', text: 'Kurum onayı: paket ana dala birleştirildi.' },
         { ago: 72, actor: 'person', kind: 'submit', text: 'Kilometre taşı teslim edildi: Sıçrama efektinin GPU süresi 1 ms’nin altında kalır' },
         { ago: 71, actor: 'org', kind: 'approve', text: 'Kurum onayı: 0,6 ms.' },
-        { ago: 70, actor: 'system', kind: 'close', text: 'Pilot başarıyla kapandı. Taraflar kamuya açık özet kartını onayladı.' },
+        { ago: 70, actor: 'system', kind: 'close', text: 'Deneme projesi başarıyla kapandı. Taraflar kamuya açık özet kartını onayladı.' },
       ]),
     },
     {
@@ -925,7 +925,7 @@ function pilots(): Pilot[] {
         ms('m-kim-3', 'c-kim-3', 'Çevrim içi satış ilk ay 50 siparişe ulaşır', daysAgo(40), 'open'),
       ],
       log: ledger([
-        { ago: 95, actor: 'system', kind: 'open', text: 'Pilot açıldı. Kanvastaki 3 başarı kriteri kilometre taşına dönüştü.' },
+        { ago: 95, actor: 'system', kind: 'open', text: 'Deneme projesi açıldı. İhtiyaç kartındaki 3 başarı kriteri aşamaya dönüştü.' },
         { ago: 63, actor: 'person', kind: 'submit', text: 'Kilometre taşı teslim edildi: Logo ve kimlik kılavuzu teslim edilir' },
         { ago: 62, actor: 'org', kind: 'approve', text: 'Kurum onayı: kimlik genel kurulda kabul edildi.' },
         { ago: 55, actor: 'org', kind: 'blocker', text: 'Stüdyo kiralama bütçesi bu çeyrekte ayrılamıyor.' },
@@ -952,12 +952,12 @@ function events(): NetEvent[] {
     e(8, 'milestone_approved', 'Kuzey Lojistik × Can Aksoy: “3.000 noktalık rota 5 dakikanın altında” çift onaylandı.', { orgId: 'o-kuzey', personId: 'p-can', pilotId: 'pl-rota' }),
     e(10, 'need_published', 'Marmara Akıllı Şehir Lab. yeni ihtiyaç yayımladı: “Otopark doluluk verisini canlı haritada göstermek”.', { orgId: 'o-marmara', needId: 'n-otopark' }),
     e(20, 'evidence_verified', 'Baran Öztürk’ün “parkla” deposu GitHub ile doğrulandı.', { personId: 'p-baran' }),
-    e(24, 'pilot_opened', 'Kuzey Lojistik × Can Aksoy pilotu açıldı.', { orgId: 'o-kuzey', personId: 'p-can', pilotId: 'pl-rota' }),
-    e(30, 'pilot_opened', 'Marmara Akıllı Şehir Lab. × İrem Koç pilotu açıldı.', { orgId: 'o-marmara', personId: 'p-irem', pilotId: 'pl-docs' }),
+    e(24, 'pilot_opened', 'Kuzey Lojistik × Can Aksoy deneme projesi açıldı.', { orgId: 'o-kuzey', personId: 'p-can', pilotId: 'pl-rota' }),
+    e(30, 'pilot_opened', 'Marmara Akıllı Şehir Lab. × İrem Koç deneme projesi açıldı.', { orgId: 'o-marmara', personId: 'p-irem', pilotId: 'pl-docs' }),
     e(32, 'person_joined', 'İrem Koç NİRENGİ’ye katıldı ve ilk kanıtını bağladı.', { personId: 'p-irem' }),
-    e(40, 'pilot_closed', 'Atölye Kooperatifi × Defne Arslan pilotu gerekçesiyle kapandı (1/3 kriter).', { orgId: 'o-atolye', personId: 'p-defne', pilotId: 'pl-kimlik' }),
+    e(40, 'pilot_closed', 'Atölye Kooperatifi × Defne Arslan deneme projesi gerekçesiyle kapandı (1/3 kriter).', { orgId: 'o-atolye', personId: 'p-defne', pilotId: 'pl-kimlik' }),
     e(40, 'person_joined', 'Baran Öztürk NİRENGİ’ye katıldı.', { personId: 'p-baran' }),
-    e(70, 'pilot_closed', 'Anka Oyun × Mert Kılıç pilotu başarıyla kapandı (3/3 kriter).', { orgId: 'o-anka', personId: 'p-mert', pilotId: 'pl-shader' }),
+    e(70, 'pilot_closed', 'Anka Oyun × Mert Kılıç deneme projesi başarıyla kapandı (3/3 kriter).', { orgId: 'o-anka', personId: 'p-mert', pilotId: 'pl-shader' }),
   ];
 }
 

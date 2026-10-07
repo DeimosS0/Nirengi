@@ -15,7 +15,10 @@ const PILL: Record<NeedStatus, string> = {
   closed: 'bg-bg-3 text-ink-3',
 };
 
-export const NeedPill = ({ status }: { status: NeedStatus }) => <span className={`pill !py-0.5 ${PILL[status]}`}>{NEED_STATUS[status]}</span>;
+/** A need's stage in plain words for the kurum side: "Pilotta" reads as "Denemede". */
+export const NEED_LABEL = NEED_STATUS;
+
+export const NeedPill = ({ status }: { status: NeedStatus }) => <span className={`pill !py-0.5 ${PILL[status]}`}>{NEED_LABEL[status]}</span>;
 
 /** Order on the kurum screens: what is live first, what is over last. */
 export const STATUS_RANK: Record<NeedStatus, number> = { published: 0, draft: 1, piloting: 2, closed: 3 };

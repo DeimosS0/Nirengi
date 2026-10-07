@@ -9,6 +9,7 @@ import type { Persona, Person, Pilot } from '../../lib/types.ts';
 import { EmptyState, Head, Why } from '../ui/kit';
 import { Lock } from '../ui/icons';
 import { Avatar, OrgMark } from '../ui/primitives';
+import { TriMark } from '../ui/TriMark';
 
 // ---------------------------------------------------------------- shared road logic
 
@@ -33,12 +34,12 @@ export function nextAction(p: Pilot, persona: Persona, person: Person): { text: 
   if (p.status !== 'active') return { text: `${PILOT_STATUS[p.status]} · ${done}/${p.milestones.length} kriter`, tone: p.status === 'succeeded' ? 'green' : 'ink' };
   const waiting = p.milestones.filter((m) => m.state === 'submitted');
   const open = p.milestones.find((m) => m.state === 'open');
-  if (!open && !waiting.length) return { text: 'Tüm adımlar onaylandı. Sıra pilotu kapatmakta.', tone: 'green' };
+  if (!open && !waiting.length) return { text: 'Tüm aşamalar onaylandı. Sıra projeyi kapatmakta.', tone: 'green' };
   if (persona === 'org') {
-    if (waiting.length) return { text: `Onayını bekleyen ${waiting.length} adım`, tone: 'indigo' };
-    return { text: `${firstName(person)} sıradaki adımı hazırlıyor: ${open!.title}`, tone: 'ink' };
+    if (waiting.length) return { text: `Onayını bekleyen ${waiting.length} aşama`, tone: 'indigo' };
+    return { text: `${firstName(person)} sıradaki aşamayı hazırlıyor: ${open!.title}`, tone: 'ink' };
   }
-  if (open) return { text: `Sıradaki adım: ${open.title}`, tone: 'indigo' };
+  if (open) return { text: `Sıradaki aşama: ${open.title}`, tone: 'indigo' };
   return { text: `Kurumun onayını bekliyor: ${waiting[0].title}`, tone: 'ink' };
 }
 
@@ -48,43 +49,23 @@ export type Look = 'done' | 'wait' | 'star' | 'lock' | 'open' | 'missed';
 export const lookOf = (k: NodeKind, persona: Persona): Look =>
   k === 'done' ? 'done' : k === 'waiting' ? (persona === 'org' ? 'star' : 'wait') : k === 'missed' ? 'missed' : persona === 'person' ? (k === 'current' ? 'star' : 'lock') : 'open';
 
-const FACE: Record<Look, { bg: string; lip: string }> = {
-  done: { bg: 'green', lip: 'green-lip' },
-  wait: { bg: 'bg-2', lip: 'line-2' },
-  star: { bg: 'indigo', lip: 'indigo-lip' },
-  lock: { bg: 'bg-3', lip: 'line-2' },
-  open: { bg: 'bg', lip: 'line-2' },
-  missed: { bg: 'bg-3', lip: 'line-2' },
-};
-
-/** A round milestone face with the key lip; the same grammar at 30px (list) and 76px (road). */
-export function Face({ look, size, n, ring = false }: { look: Look; size: number; n?: number; ring?: boolean }) {
-  const f = FACE[look];
-  const lip = size >= 60 ? 6 : 3;
-  const g = Math.round(size * 0.5);
+/** A milestone as a small survey marker; the same grammar as the road on the project page. */
+export function Face({ look, size, n }: { look: Look; size: number; n?: number }) {
+  const g = Math.round(size * 0.42);
+  const filled = look === 'done' || look === 'star';
   return (
-    <span
-      className="grid shrink-0 place-items-center rounded-full"
-      style={{
-        width: size,
-        height: size,
-        background: `rgb(var(--${f.bg}))`,
-        border: look === 'open' ? '2px dashed rgb(var(--line-2))' : look === 'wait' ? '3px solid rgb(var(--line-2))' : undefined,
-        boxShadow: `0 ${lip}px 0 rgb(var(--${f.lip}))${ring ? `, 0 0 0 ${size >= 60 ? 8 : 4}px rgb(var(--${f.bg}) / 0.18)` : ''}`,
-      }}
-      aria-hidden="true"
-    >
+    <TriMark size={size} color={look === 'done' ? 'green' : filled ? 'indigo' : 'line-2'} variant={filled ? 'filled' : look === 'open' ? 'dashed' : 'outline'}>
       {look === 'done' && <Check style={{ width: g, height: g }} className="text-white" strokeWidth={4} />}
       {look === 'wait' && <Clock style={{ width: g, height: g }} className="text-ink-3" strokeWidth={3.2} />}
       {look === 'star' && <Star style={{ width: g, height: g }} className="fill-white text-white" strokeWidth={2} />}
-      {look === 'lock' && <Lock size={Math.round(size * 0.46)} />}
+      {look === 'lock' && <Lock size={g} />}
       {look === 'missed' && <Minus style={{ width: g, height: g }} className="text-ink-3" strokeWidth={3.5} />}
       {look === 'open' && (
-        <span className="num font-black text-ink-3" style={{ fontSize: size * 0.34 }}>
+        <span className="num font-black leading-none text-ink-3" style={{ fontSize: size * 0.3 }}>
           {n}
         </span>
       )}
-    </span>
+    </TriMark>
   );
 }
 
@@ -103,7 +84,7 @@ function PilotCard({ pilot, persona, i }: { pilot: Pilot; persona: Persona; i: n
   const silent = isSilent(pilot) ? daysSince(lastActivity(pilot)) : 0;
   return (
     <motion.li initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, delay: Math.min(i, 4) * 0.05, ease: [0.16, 1, 0.3, 1] }}>
-      <a href={`/pilotlar/${pilot.id}`} className="card-press block p-5">
+      <a href={`/pilotlar/${pilot.id}`} data-coach={i === 0 ? 'proje-kart' : undefined} className="card-press block p-5">
         <div className="flex items-start gap-3">
           <p className="min-w-0 flex-1 text-[18px] font-black leading-snug text-ink">{pilot.title}</p>
           <ChevronRight className="mt-0.5 h-6 w-6 shrink-0 text-ink-3" strokeWidth={3} />
@@ -113,7 +94,7 @@ function PilotCard({ pilot, persona, i }: { pilot: Pilot; persona: Persona; i: n
           <span className="min-w-0 truncate">{persona === 'org' ? person.name : org.name}</span>
         </div>
 
-        <ol className="mt-5 flex items-center" aria-label={`${done}/${pilot.milestones.length} adım onaylı`}>
+        <ol data-coach={i === 0 ? 'proje-yol' : undefined} className="mt-5 flex items-center" aria-label={`${done}/${pilot.milestones.length} aşama onaylı`}>
           {kinds.map((k, n) => (
             <li key={pilot.milestones[n].id} className="flex items-center" style={{ flex: n < kinds.length - 1 ? '1 1 0' : '0 0 auto' }}>
               <Face look={lookOf(k, persona)} size={30} n={n + 1} />
@@ -122,7 +103,7 @@ function PilotCard({ pilot, persona, i }: { pilot: Pilot; persona: Persona; i: n
           ))}
         </ol>
 
-        <p className={`mt-4 text-[15px] font-extrabold leading-snug ${TONE_TEXT[next.tone]}`}>{next.text}</p>
+        <p data-coach={i === 0 ? 'proje-siradaki' : undefined} className={`mt-4 text-[15px] font-extrabold leading-snug ${TONE_TEXT[next.tone]}`}>{next.text}</p>
         {pilot.status !== 'active' && pilot.closedAt && <p className="mt-1 text-[13px] font-bold text-ink-3">{fmtDate(pilot.closedAt)} tarihinde kapandı</p>}
         {silent > 0 && (
           <span className="pill mt-3 bg-red-tint text-red-lip">
@@ -159,17 +140,17 @@ export default function PilotsPage() {
           <Why title="Projeler nasıl ilerler?">
             <p className="text-[15px] font-bold text-ink-2">Bir aşama ancak iki taraf da onaylayınca tamamlanır: genç teslim ederek, kurum onaylayarak.</p>
             <p className="mt-3 text-[15px] font-bold text-ink-2">
-              {SILENCE_DAYS} gün boyunca hiçbir hareket olmazsa proje “sessiz” sayılır. Pilotların çoğu başarısız olduğu için değil, sessizce terk edildiği için biter; bu yüzden sessizliği görünür kılıyoruz.
+              {SILENCE_DAYS} gün boyunca hiçbir hareket olmazsa proje “sessiz” sayılır. Deneme projelerinin çoğu başarısız olduğu için değil, sessizce terk edildiği için biter; bu yüzden sessizliği görünür kılıyoruz.
             </p>
-            <p className="mt-3 text-[15px] font-bold text-ink-2">Her hareket, değiştirilemeyen zincirli bir deftere yazılır. Proje içinde iki taraf birbirini tanır; kör keşif yalnız ilk temasa kadar geçerlidir.</p>
+            <p className="mt-3 text-[15px] font-bold text-ink-2">Her hareket, değiştirilemeyen bir kayıt defterine yazılır. Proje başladıktan sonra iki taraf birbirini tanır; isimsiz inceleme yalnız ilk temasa kadar geçerlidir.</p>
           </Why>
         </div>
         <p className="lead mt-2">
-          {persona === 'org' ? `${org.name} için yürüyen işler. Her adım iki taraf da onaylayınca tamamlanır.` : 'Kurumlarla yürüttüğün işler. Her adımı sen teslim edersin, kurum onaylayınca tamamlanır.'}
+          {persona === 'org' ? `${org.name} için gençlerle yürüttüğün deneme projeleri. Her aşama, genç teslim edip sen onaylayınca tamamlanır.` : 'Kurumlarla yürüttüğün işler. Her aşamayı sen teslim edersin, kurum onaylayınca tamamlanır.'}
         </p>
       </header>
 
-      <section className="mt-8" aria-label="Süren projeler">
+      <section className="mt-8" data-coach={active.length ? undefined : 'proje-bos'} aria-label="Süren projeler">
         {active.length ? (
           <ul className="space-y-4">
             {active.map((p, i) => (
@@ -178,7 +159,7 @@ export default function PilotsPage() {
           </ul>
         ) : persona === 'org' ? (
           <EmptyState
-            title={closed.length ? 'Şu an süren pilot yok' : 'Henüz pilotun yok'}
+            title={closed.length ? 'Şu an süren deneme projen yok' : 'Henüz deneme projen yok'}
             action={
               <a href="/ihtiyaclar" className="btn-primary">
                 İhtiyaçlara git
@@ -186,7 +167,7 @@ export default function PilotsPage() {
               </a>
             }
           >
-            Bir ihtiyaçtan aday seçince pilot burada başlar.
+            Bir ihtiyacın adaylarından birini projeye davet edince deneme projesi burada başlar.
           </EmptyState>
         ) : (
           <EmptyState

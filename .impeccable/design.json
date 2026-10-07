@@ -1,9 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-08T12:00:00+03:00",
+  "generatedAt": "2026-10-08T18:00:00+03:00",
   "title": "Design System: nirengi",
   "extensions": {
-    "source": "src/styles/global.css (RGB channel tokens on :root and [data-theme=\"dark\"], mapped in @theme inline)",
+    "source": "src/styles/global.css (RGB channel tokens on :root and [data-theme=\"dark\"], mapped in @theme inline); survey primitives in src/components/ui/pafta.tsx, TriMark.tsx, icons.tsx, kit.tsx, Niri.tsx + niri.css",
+    "round": "2 — Pafta (2026-10-08), replaces round 1 'The Pressable Road'",
     "colorMeta": {
       "ground": { "role": "neutral", "displayName": "Ground", "canonical": "rgb(255 255 255)", "dark": "rgb(22 21 33)", "tonalRamp": ["#efeff5", "#f7f7fa", "#ffffff"] },
       "ground-2": { "role": "neutral", "displayName": "Ground Wash", "canonical": "rgb(247 247 250)", "dark": "rgb(29 28 43)" },
@@ -13,12 +14,14 @@
       "ink-3": { "role": "neutral", "displayName": "Quiet Ink", "canonical": "rgb(106 105 126)", "dark": "rgb(150 148 172)" },
       "ink-4": { "role": "neutral", "displayName": "Icon Ink (never text)", "canonical": "rgb(150 149 170)", "dark": "rgb(116 114 140)" },
       "seam": { "role": "neutral", "displayName": "Soft Seam", "canonical": "rgb(229 229 237)", "dark": "rgb(52 50 72)" },
-      "seam-2": { "role": "neutral", "displayName": "Deep Seam", "canonical": "rgb(208 207 222)", "dark": "rgb(72 70 96)" },
+      "seam-2": { "role": "neutral", "displayName": "Contour Seam", "canonical": "rgb(208 207 222)", "dark": "rgb(72 70 96)" },
       "indigo": { "role": "primary", "displayName": "Act Indigo", "canonical": "rgb(100 81 231)", "dark": "rgb(132 116 255)", "tonalRamp": ["#4a39c4", "#6451e7", "#eeebff"], "darkRamp": ["#5c4ad6", "#8474ff", "#2c2852"] },
-      "orange": { "role": "secondary", "displayName": "Streak Orange (genç only)", "canonical": "rgb(249 148 0)", "dark": "rgb(255 163 26)", "tonalRamp": ["#d67800", "#f99400", "#fff2de"], "darkRamp": ["#cd7800", "#ffa31a", "#3c2a16"] },
+      "orange": { "role": "secondary", "displayName": "Seri Orange (genç only)", "canonical": "rgb(249 148 0)", "dark": "rgb(255 163 26)", "tonalRamp": ["#d67800", "#f99400", "#fff2de"], "darkRamp": ["#cd7800", "#ffa31a", "#3c2a16"] },
+      "orange-ink": { "role": "secondary", "displayName": "Seri Orange Text", "canonical": "rgb(184 92 0)", "dark": "var(--orange)" },
       "cyan": { "role": "secondary", "displayName": "Verified Cyan", "canonical": "rgb(0 180 216)", "dark": "rgb(40 200 238)", "tonalRamp": ["#008cac", "#00b4d8", "#def6fb"], "darkRamp": ["#0096ba", "#28c8ee", "#143442"] },
       "purple": { "role": "secondary", "displayName": "League Purple", "canonical": "rgb(155 4 218)", "dark": "rgb(196 92 255)", "tonalRamp": ["#7600a8", "#9b04da", "#f6e6fd"], "darkRamp": ["#9628d2", "#c45cff", "#381e4c"] },
       "gold": { "role": "tertiary", "displayName": "XP Gold", "canonical": "rgb(255 196 0)", "dark": "rgb(255 206 40)", "tonalRamp": ["#e0a000", "#ffc400", "#fff6d6"], "darkRamp": ["#d6a000", "#ffce28", "#3e3414"] },
+      "gold-ink": { "role": "tertiary", "displayName": "XP Gold Text", "canonical": "rgb(160 106 0)", "dark": "var(--gold)" },
       "green": { "role": "tertiary", "displayName": "Done Green", "canonical": "rgb(52 194 107)", "dark": "rgb(72 214 128)", "tonalRamp": ["#249c52", "#34c26b", "#e1f8ea"], "darkRamp": ["#28a85c", "#48d680", "#163a28"] },
       "red": { "role": "tertiary", "displayName": "Problem Red", "canonical": "rgb(255 75 75)", "dark": "rgb(255 104 104)", "tonalRamp": ["#d63434", "#ff4b4b", "#ffe7e7"], "darkRamp": ["#d64040", "#ff6868", "#461e24"] },
       "tier-zemin": { "role": "tertiary", "displayName": "Tier Zemin", "canonical": "rgb(196 132 72)" },
@@ -28,42 +31,49 @@
       "tier-zirve": { "role": "tertiary", "displayName": "Tier Zirve", "canonical": "rgb(100 81 231)" }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Landing hero and 404 only." },
-      "headline": { "displayName": "Page Title", "purpose": "One per page via the page head; 28px phone, 32px md+." },
-      "title": { "displayName": "Section", "purpose": "Section, sheet and modal headings." },
+      "display": { "displayName": "Hero (h-hero)", "purpose": "Landing hero and 404 only." },
+      "headline": { "displayName": "Page Title (h-page)", "purpose": "One per page; 30px phone, 34px md+." },
+      "title": { "displayName": "Section (h-sec)", "purpose": "Section, card and rail headings." },
       "lead": { "displayName": "Lead", "purpose": "The sentence under a page title, ink-3." },
-      "body": { "displayName": "Body", "purpose": "Running text, ink-2, weight 550." },
-      "label": { "displayName": "Field Label", "purpose": "Uppercase field/table/filter labels only; never above a heading." },
-      "key": { "displayName": "Key", "purpose": "Uppercase button and nav text." },
-      "mono": { "displayName": "Mono", "purpose": "Ids, hashes and formulas (yöntem, pilot, public card)." }
+      "body": { "displayName": "Body", "purpose": "Running text, ink-2, weight 450." },
+      "caption": { "displayName": "Caption (cap)", "purpose": "Metadata, demo-data notes, map labels; ink-3." },
+      "label": { "displayName": "Field Label", "purpose": "Sentence-case field labels, ink." },
+      "key": { "displayName": "Key", "purpose": "Sentence-case button text; 14px small, 17px large." },
+      "mono": { "displayName": "Mono", "purpose": "Ids, hashes, codes and formulas." },
+      "weightRemap": { "displayName": "Weight remap", "purpose": "Bricolage sets darker: font-semibold 560, font-bold 620, font-extrabold 700, font-black 780." }
     },
     "shadows": [
-      { "name": "key-lip", "value": "0 4px 0 rgb(var(--key-lip))", "purpose": "Every key; collapses to 0 with translateY(4px) on :active." },
-      { "name": "card-lip", "value": "0 4px 0 rgb(var(--line))", "purpose": "Pressable cards; same press behaviour." },
-      { "name": "feature-lip", "value": "0 5px 0 rgb(var(--indigo-lip))", "purpose": "The next-step card." },
-      { "name": "node-lip", "value": "0 6px 0 rgb(var(--<tone>-lip))", "purpose": "72px road nodes; current node adds 0 0 0 8px rgb(var(--<tone>) / 0.18)." },
+      { "name": "key-lip", "value": "0 3px 0 rgb(var(--key-lip))", "purpose": "Every key; collapses to 0 with translateY(3px) on :active." },
+      { "name": "card-lip", "value": "0 3px 0 rgb(var(--line))", "purpose": "card-press; same press travel." },
+      { "name": "feature-lip", "value": "0 4px 0 rgb(var(--indigo-lip))", "purpose": "The pressable next-step card; tap sinks it 4px." },
+      { "name": "selected-option", "value": "0 4px 0 rgb(var(--indigo) / 0.5)", "purpose": "A chosen card-press option with indigo border and indigo-tint face." },
+      { "name": "marker-lip", "value": "triangle path offset translate(0 7) in <tone>-lip (line-2 when locked/waiting)", "purpose": "Tri and TriMark survey markers draw their own lip." },
       { "name": "segment-lift", "value": "0 2px 0 rgb(var(--line-2))", "purpose": "Selected segment in a segmented control." },
       { "name": "field-focus", "value": "0 0 0 4px rgb(var(--indigo) / 0.14)", "purpose": "Focused field, with indigo border." },
-      { "name": "popover-float", "value": "0 12px 32px -12px rgb(0 0 0 / 0.25)", "purpose": "Phone menu and demo-tour panel only." }
+      { "name": "float", "value": "0 12px 32px -12px rgb(0 0 0 / 0.25)", "purpose": "Phone menu popover." },
+      { "name": "float-coach", "value": "0 14px 36px -14px rgb(0 0 0 / 0.4)", "purpose": "Niri's coach card in kurum spotlight tours." }
     ],
     "motion": [
-      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing for rises, pops, bars and reveals." },
-      { "name": "press", "value": "100ms ease-out on transform, box-shadow", "purpose": "Key and card press travel." },
-      { "name": "rise", "value": "rise 420ms ease-out", "purpose": "Content entering (fresh evidence, modal body)." },
-      { "name": "pop", "value": "pop 420ms ease-out (0.6 → 1.12 → 1)", "purpose": "Feedback marks." },
-      { "name": "flame-live", "value": "flicker 1.6s infinite", "purpose": "Lit streak flame." },
-      { "name": "niri", "value": "blink 4.2s, bob 2.8s, cheer 900ms x2", "purpose": "Mascot life." },
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing for rises, pops, bars, trail ink." },
+      { "name": "press", "value": "100ms ease-out on transform, box-shadow", "purpose": "Key and card press travel (3px)." },
+      { "name": "trail-ink", "value": "pathLength 0→1, 0.9s (Trail) / 1.1s (ClimbMap), delay 0.15–0.2s", "purpose": "The dashed trail inks itself up to the current point." },
+      { "name": "ping-soft", "value": "scale 1→2.4, opacity 0.55→0, 2.2s infinite, second ring delayed 1.1s", "purpose": "Ripple rings on the current point; the only 'you are here' signal." },
+      { "name": "flame-live", "value": "flicker 2s ease-in-out infinite (scale 1.06, brightness 1.08)", "purpose": "The lit Seri beacon breathes like a signal light." },
+      { "name": "niri-entrance", "value": "n-hop 0.8s + n-bubble-in 0.26s; typing ≤600ms after 200ms", "purpose": "NiriSays on mount and every new message." },
+      { "name": "niri-reactions", "value": "feedback good → happy + hop 1.3s; bad → sad 1.5s; info → look up + perk 1.2s", "purpose": "Niri answers the feedback bar." },
+      { "name": "celebration-rings", "value": "c-ring 1.8s, four rounded triangles, staggered", "purpose": "Rings spreading behind Niri in celebrate()." },
+      { "name": "survey-flag", "value": "c-flag-drop 1s then cloth ripple", "purpose": "Planted waypoint and celebration flag." },
       { "name": "sheet-spring", "value": "spring stiffness 420 damping 34", "purpose": "Sheet entry." },
       { "name": "feedback-spring", "value": "spring stiffness 460 damping 38, 3.4s dwell", "purpose": "Feedback bar." },
-      { "name": "count-up", "value": "800ms ease-out quart", "purpose": "Numbers count from previous value." },
+      { "name": "count-up", "value": "800ms ease-out quart", "purpose": "Numbers count from the previous value." },
       { "name": "view-transition", "value": "out 140ms fade, in 240ms fade + 6px rise", "purpose": "Cross-page navigation." },
-      { "name": "reduced-motion", "value": "all CSS animation/transition 0.01ms; MotionGlobalConfig.skipAnimations; no confetti; count-ups jump", "purpose": "Mandatory." }
+      { "name": "reduced-motion", "value": "CSS animation/transition 0.01ms; MotionGlobalConfig.skipAnimations; no confetti or rings; count-ups jump; Niri shows each mood's static pose", "purpose": "Mandatory." }
     ],
     "breakpoints": [
-      { "name": "sm", "value": "640px", "note": "page padding 24px; sheet becomes centred panel" },
-      { "name": "md", "value": "768px", "note": "page title 32px" },
-      { "name": "lg", "value": "1024px", "note": "256px sidebar replaces top bar and tab bar" },
-      { "name": "xl", "value": "1280px", "note": "340px right rail appears" }
+      { "name": "sm", "value": "640px", "note": "page padding 24px; sheet becomes centred 512px panel" },
+      { "name": "md", "value": "768px", "note": "page title 34px" },
+      { "name": "lg", "value": "1024px", "note": "256px sidebar replaces phone header and tab bar" },
+      { "name": "xl", "value": "1280px", "note": "340px 'Bu haftan' rail appears" }
     ]
   },
   "components": [
@@ -71,9 +81,9 @@
       "name": "Primary Key",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one main action on a screen. Indigo face on a 4px indigo lip; sinks when pressed.",
+      "description": "The one main action on a screen. Sentence-case label, indigo face on a 3px indigo lip; sinks when pressed.",
       "html": "<button class=\"ds-btn\">Projeye git</button>",
-      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border: 0; border-radius: 14px; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; font-size: 15px; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: rgb(var(--indigo, 100 81 231)); box-shadow: 0 4px 0 rgb(var(--indigo-lip, 74 57 196)); cursor: pointer; transition: transform 100ms cubic-bezier(0.16,1,0.3,1), box-shadow 100ms, filter 100ms; } .ds-btn:hover { filter: brightness(1.06) saturate(1.04); } .ds-btn:active { transform: translateY(4px); box-shadow: 0 0 0 rgb(var(--indigo-lip, 74 57 196)); } .ds-btn:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border: 0; border-radius: 12px; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; font-size: 16px; font-weight: 700; letter-spacing: -0.005em; color: #fff; background: rgb(var(--indigo, 100 81 231)); box-shadow: 0 3px 0 rgb(var(--indigo-lip, 74 57 196)); cursor: pointer; transition: transform 100ms cubic-bezier(0.16,1,0.3,1), box-shadow 100ms, filter 100ms; } .ds-btn:hover { filter: brightness(1.06) saturate(1.04); } .ds-btn:active { transform: translateY(3px); box-shadow: 0 0 0 rgb(var(--indigo-lip, 74 57 196)); } .ds-btn:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
     },
     {
       "name": "Verify Key (tone variant)",
@@ -81,31 +91,31 @@
       "refersTo": "button-primary",
       "description": "Tone keys swap only face and lip; cyan means verify, green approve, red dispute/delete.",
       "html": "<button class=\"ds-btn-cyan\">Doğrula</button>",
-      "css": ".ds-btn-cyan { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border: 0; border-radius: 14px; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; font-size: 15px; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: rgb(var(--cyan, 0 180 216)); box-shadow: 0 4px 0 rgb(var(--cyan-lip, 0 140 172)); cursor: pointer; transition: transform 100ms, box-shadow 100ms, filter 100ms; } .ds-btn-cyan:hover { filter: brightness(1.06); } .ds-btn-cyan:active { transform: translateY(4px); box-shadow: none; } .ds-btn-cyan:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
+      "css": ".ds-btn-cyan { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border: 0; border-radius: 12px; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; font-size: 16px; font-weight: 700; color: #fff; background: rgb(var(--cyan, 0 180 216)); box-shadow: 0 3px 0 rgb(var(--cyan-lip, 0 140 172)); cursor: pointer; transition: transform 100ms, box-shadow 100ms, filter 100ms; } .ds-btn-cyan:hover { filter: brightness(1.06); } .ds-btn-cyan:active { transform: translateY(3px); box-shadow: none; } .ds-btn-cyan:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
     },
     {
       "name": "Line Key",
       "kind": "button",
       "refersTo": "button-line",
       "description": "Secondary action: white face, 2px seam, seam lip, indigo text.",
-      "html": "<button class=\"ds-btn-line\">Yeni ihtiyaç yaz</button>",
-      "css": ".ds-btn-line { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border: 2px solid rgb(var(--line, 229 229 237)); border-radius: 14px; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; font-size: 15px; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; color: rgb(var(--indigo, 100 81 231)); background: rgb(var(--bg, 255 255 255)); box-shadow: 0 4px 0 rgb(var(--line, 229 229 237)); cursor: pointer; transition: transform 100ms, box-shadow 100ms, background-color 100ms; } .ds-btn-line:hover { background: rgb(var(--bg-2, 247 247 250)); } .ds-btn-line:active { transform: translateY(4px); box-shadow: none; } .ds-btn-line:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
+      "html": "<button class=\"ds-btn-line\">Niri'ye sor</button>",
+      "css": ".ds-btn-line { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border: 2px solid rgb(var(--line, 229 229 237)); border-radius: 12px; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; font-size: 16px; font-weight: 700; color: rgb(var(--indigo, 100 81 231)); background: rgb(var(--bg, 255 255 255)); box-shadow: 0 3px 0 rgb(var(--line, 229 229 237)); cursor: pointer; transition: transform 100ms, box-shadow 100ms, background-color 100ms; } .ds-btn-line:hover { background: rgb(var(--bg-2, 247 247 250)); } .ds-btn-line:active { transform: translateY(3px); box-shadow: none; } .ds-btn-line:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
     },
     {
       "name": "Field",
       "kind": "input",
       "refersTo": "field",
-      "description": "Recessed fill, 2px seam, indigo focus border and soft ring.",
-      "html": "<label class=\"ds-label\">İhtiyacın başlığı<input class=\"ds-field\" placeholder=\"Örn. canlı otopark haritası\"></label>",
-      "css": ".ds-label { display: block; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; font-size: 15px; font-weight: 850; color: rgb(var(--ink, 37 35 56)); } .ds-field { display: block; width: 100%; margin-top: 8px; padding: 12px 16px; border: 2px solid rgb(var(--line, 229 229 237)); border-radius: 14px; background: rgb(var(--bg-2, 247 247 250)); font: inherit; font-size: 16px; font-weight: 650; color: rgb(var(--ink, 37 35 56)); caret-color: rgb(var(--indigo, 100 81 231)); transition: border-color 150ms, background-color 150ms, box-shadow 150ms; } .ds-field::placeholder { color: rgb(var(--ink-4, 150 149 170)); } .ds-field:focus { outline: none; border-color: rgb(var(--indigo, 100 81 231)); background: rgb(var(--bg, 255 255 255)); box-shadow: 0 0 0 4px rgb(100 81 231 / 0.14); }"
+      "description": "Recessed fill, 2px seam, sentence-case label, indigo focus border and soft ring.",
+      "html": "<label class=\"ds-label\">İhtiyaç kartının başlığı<input class=\"ds-field\" placeholder=\"Örn. canlı otopark haritası\"></label>",
+      "css": ".ds-label { display: block; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 700; color: rgb(var(--ink, 37 35 56)); } .ds-field { display: block; width: 100%; margin-top: 8px; padding: 12px 16px; border: 2px solid rgb(var(--line, 229 229 237)); border-radius: 14px; background: rgb(var(--bg-2, 247 247 250)); font: inherit; font-size: 16px; font-weight: 500; color: rgb(var(--ink, 37 35 56)); caret-color: rgb(var(--indigo, 100 81 231)); transition: border-color 150ms, background-color 150ms, box-shadow 150ms; } .ds-field::placeholder { color: rgb(var(--ink-4, 150 149 170)); } .ds-field:focus { outline: none; border-color: rgb(var(--indigo, 100 81 231)); background: rgb(var(--bg, 255 255 255)); box-shadow: 0 0 0 4px rgb(100 81 231 / 0.14); }"
     },
     {
       "name": "Sidebar Nav",
       "kind": "nav",
       "refersTo": "nav-item-active",
-      "description": "Uppercase items with two-tone icons; active item in indigo tint with an indigo/35 border.",
-      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" aria-current=\"page\" href=\"#\"><svg viewBox=\"0 0 32 32\" width=\"32\" height=\"32\"><path d=\"M4 15 16 4l12 11v13H4Z\" fill=\"rgb(249 148 0)\"/><path d=\"M13 28v-8h6v8\" fill=\"rgb(214 120 0)\"/></svg>Bugün</a><a class=\"ds-nav-item\" href=\"#\"><svg viewBox=\"0 0 32 32\" width=\"32\" height=\"32\"><path d=\"M16 2.5 4.5 6.8v8C4.5 22 9.5 27.4 16 29.6 22.5 27.4 27.5 22 27.5 14.8v-8Z\" fill=\"rgb(0 180 216)\"/></svg>Lig</a></nav>",
-      "css": ".ds-nav { display: flex; flex-direction: column; gap: 6px; width: 224px; } .ds-nav-item { display: flex; align-items: center; gap: 16px; padding: 8px 12px; border: 2px solid transparent; border-radius: 14px; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: rgb(var(--ink-3, 106 105 126)); text-decoration: none; transition: background-color 150ms; } .ds-nav-item:hover { background: rgb(var(--bg-2, 247 247 250)); } .ds-nav-item[aria-current=page] { background: rgb(var(--indigo-tint, 238 235 255)); border-color: rgb(100 81 231 / 0.35); color: rgb(var(--indigo, 100 81 231)); } .ds-nav-item:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
+      "description": "Sentence-case items with two-tone icons; the active item is indigo with a triangle pointer outside its left edge.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" aria-current=\"page\" href=\"#\"><svg class=\"ds-ptr\" viewBox=\"0 0 12 16\" aria-hidden=\"true\"><path d=\"M2.5 2.5 9.5 8l-7 5.5Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linejoin=\"round\"/></svg><svg viewBox=\"0 0 32 32\" width=\"32\" height=\"32\"><ellipse cx=\"16\" cy=\"25.2\" rx=\"13\" ry=\"4.2\" fill=\"none\" stroke=\"rgb(0 180 216)\" stroke-width=\"2\" opacity=\"0.55\"/><ellipse cx=\"16\" cy=\"25.2\" rx=\"7.6\" ry=\"2.4\" fill=\"rgb(0 180 216)\" opacity=\"0.45\"/><path d=\"M16 4.5 25 21H7Z\" transform=\"translate(0 2.2)\" fill=\"rgb(74 57 196)\" stroke=\"rgb(74 57 196)\" stroke-width=\"3.4\" stroke-linejoin=\"round\"/><path d=\"M16 4.5 25 21H7Z\" fill=\"rgb(100 81 231)\" stroke=\"rgb(100 81 231)\" stroke-width=\"3.4\" stroke-linejoin=\"round\"/><circle cx=\"16\" cy=\"15\" r=\"2.6\" fill=\"#fff\"/></svg>Bugün</a><a class=\"ds-nav-item\" href=\"#\"><svg viewBox=\"0 0 32 32\" width=\"32\" height=\"32\"><path d=\"M2.5 27 11 14.5l3.6 4.6L20.5 8 29.5 27Z\" fill=\"rgb(0 180 216)\" stroke=\"rgb(0 180 216)\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/><path d=\"M20.5 8.4V2.6\" stroke=\"rgb(106 105 126)\" stroke-width=\"1.6\" stroke-linecap=\"round\"/><path d=\"M21 2.6h5.4l-1.6 1.9 1.6 1.9H21Z\" fill=\"rgb(0 180 216)\"/></svg>Lig</a></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 6px; width: 224px; padding-left: 16px; } .ds-nav-item { position: relative; display: flex; align-items: center; gap: 16px; padding: 8px 12px; border-radius: 12px; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; font-size: 16px; font-weight: 560; color: rgb(var(--ink-3, 106 105 126)); text-decoration: none; transition: background-color 150ms, color 150ms; } .ds-nav-item:hover { background: rgb(var(--bg-2, 247 247 250)); } .ds-nav-item[aria-current=page] { font-weight: 620; color: rgb(var(--indigo, 100 81 231)); } .ds-nav-item[aria-current=page]:hover { background: transparent; } .ds-ptr { position: absolute; left: -16px; top: 50%; width: 12px; height: 16px; transform: translateY(-50%); } .ds-nav-item:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
     },
     {
       "name": "Level Pills",
@@ -113,31 +123,39 @@
       "refersTo": "pill-verified",
       "description": "Plain-language verification levels with the triangle glyph: Beyan, Doğrulandı, Kurum onaylı.",
       "html": "<span class=\"ds-pill ds-s1\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\"><path d=\"M8 2.2 14.2 13.3H1.8Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-dasharray=\"2.2 1.8\" stroke-linejoin=\"round\"/></svg>Beyan</span> <span class=\"ds-pill ds-s2\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\"><path d=\"M8 2.2 14.2 13.3H1.8Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"/><circle cx=\"8\" cy=\"9.6\" r=\"1.6\" fill=\"currentColor\"/></svg>Doğrulandı</span> <span class=\"ds-pill ds-s3\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\"><path d=\"M8 2.2 14.2 13.3H1.8Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"/><circle cx=\"8\" cy=\"9.6\" r=\"1.6\" fill=\"#fff\"/></svg>Kurum onaylı</span>",
-      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; font-size: 13px; font-weight: 850; } .ds-s1 { background: rgb(var(--bg-3, 239 239 245)); color: rgb(var(--ink-3, 106 105 126)); } .ds-s2 { background: rgb(var(--cyan-tint, 222 246 251)); color: rgb(var(--cyan-lip, 0 140 172)); } .ds-s3 { background: rgb(var(--indigo-tint, 238 235 255)); color: rgb(var(--indigo, 100 81 231)); }"
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; font-size: 13px; font-weight: 650; } .ds-s1 { background: rgb(var(--bg-3, 239 239 245)); color: rgb(var(--ink-3, 106 105 126)); } .ds-s2 { background: rgb(var(--cyan-tint, 222 246 251)); color: rgb(var(--cyan-lip, 0 140 172)); } .ds-s3 { background: rgb(var(--indigo-tint, 238 235 255)); color: rgb(var(--indigo, 100 81 231)); }"
     },
     {
       "name": "Pressable Card with Neden?",
       "kind": "card",
       "refersTo": "card",
-      "description": "2px seam card on a seam lip that sinks on press; depth offered by a sentence-case indigo 'Neden?'.",
+      "description": "2px seam card on a 3px seam lip that sinks on press; depth offered by a sentence-case indigo 'Neden?'.",
       "html": "<a class=\"ds-card\" href=\"#\"><span class=\"ds-card-row\"><strong class=\"ds-card-title\">Sırada ne var</strong><button class=\"ds-why\" type=\"button\">Neden?</button></span><span class=\"ds-card-text\">Teslim edilen bir aşama onayını bekliyor.</span></a>",
-      "css": ".ds-card { display: block; padding: 20px; border: 2px solid rgb(var(--line, 229 229 237)); border-radius: 18px; background: rgb(var(--bg, 255 255 255)); box-shadow: 0 4px 0 rgb(var(--line, 229 229 237)); color: inherit; text-decoration: none; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; transition: transform 100ms, box-shadow 100ms, background-color 100ms; } .ds-card:hover { background: rgb(var(--bg-2, 247 247 250)); } .ds-card:active { transform: translateY(4px); box-shadow: none; } .ds-card:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; } .ds-card-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; } .ds-card-title { font-size: 20px; font-weight: 850; color: rgb(var(--ink, 37 35 56)); } .ds-card-text { display: block; margin-top: 8px; font-size: 15px; font-weight: 700; color: rgb(var(--ink-3, 106 105 126)); } .ds-why { padding: 2px 8px; border: 0; border-radius: 9999px; background: transparent; font: inherit; font-size: 13px; font-weight: 800; color: rgb(var(--indigo, 100 81 231)); cursor: pointer; } .ds-why:hover { background: rgb(var(--indigo-tint, 238 235 255)); }"
+      "css": ".ds-card { display: block; padding: 20px; border: 2px solid rgb(var(--line, 229 229 237)); border-radius: 18px; background: rgb(var(--bg, 255 255 255)); box-shadow: 0 3px 0 rgb(var(--line, 229 229 237)); color: inherit; text-decoration: none; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; transition: transform 100ms, box-shadow 100ms, background-color 100ms; } .ds-card:hover { background: rgb(var(--bg-2, 247 247 250)); } .ds-card:active { transform: translateY(3px); box-shadow: none; } .ds-card:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; } .ds-card-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; } .ds-card-title { font-size: 21px; font-weight: 750; letter-spacing: -0.02em; color: rgb(var(--ink, 37 35 56)); } .ds-card-text { display: block; margin-top: 8px; font-size: 15px; font-weight: 620; color: rgb(var(--ink-3, 106 105 126)); } .ds-why { padding: 2px 8px; border: 0; border-radius: 9999px; background: transparent; font: inherit; font-size: 13px; font-weight: 700; color: rgb(var(--indigo, 100 81 231)); cursor: pointer; } .ds-why:hover { background: rgb(var(--indigo-tint, 238 235 255)); }"
     },
     {
-      "name": "Next-Step Card",
+      "name": "Next-Step Card on Contours",
       "kind": "custom",
       "refersTo": "next-step-card",
-      "description": "The single next action on Bugün: indigo slab on a 5px lip with a white inner key.",
-      "html": "<a class=\"ds-next\" href=\"#\"><span class=\"ds-next-title\">Kuzey Lojistik projende 3. aşamayı teslim et</span><span class=\"ds-next-sub\">Servis sipariş sistemine REST API ile bağlanır</span><span class=\"ds-next-key\">Projeye git</span></a>",
-      "css": ".ds-next { display: block; padding: 20px; border-radius: 20px; background: rgb(var(--indigo, 100 81 231)); box-shadow: 0 5px 0 rgb(var(--indigo-lip, 74 57 196)); color: #fff; text-decoration: none; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; transition: transform 80ms, box-shadow 80ms; } .ds-next:active { transform: translateY(5px); box-shadow: none; } .ds-next:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; } .ds-next-title { display: block; font-size: 22px; font-weight: 900; line-height: 1.2; } .ds-next-sub { display: block; margin-top: 4px; font-size: 15px; font-weight: 700; color: rgb(255 255 255 / 0.8); } .ds-next-key { display: inline-flex; align-items: center; min-height: 44px; margin-top: 16px; padding: 0 20px; border-radius: 14px; background: #fff; box-shadow: 0 4px 0 rgb(255 255 255 / 0.45); font-size: 15px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: rgb(var(--indigo, 100 81 231)); }"
+      "description": "The single next action on Bugün: indigo panel with faint white contour rings, a 4px lip, and a white inner key.",
+      "html": "<a class=\"ds-next\" href=\"#\"><svg class=\"ds-contours\" viewBox=\"0 0 600 300\" preserveAspectRatio=\"xMidYMid slice\" aria-hidden=\"true\"><ellipse cx=\"516\" cy=\"60\" rx=\"42\" ry=\"26\"/><ellipse cx=\"516\" cy=\"60\" rx=\"84\" ry=\"52\"/><ellipse cx=\"516\" cy=\"60\" rx=\"126\" ry=\"78\"/><ellipse cx=\"516\" cy=\"60\" rx=\"168\" ry=\"104\" stroke-width=\"2.2\"/><ellipse cx=\"516\" cy=\"60\" rx=\"210\" ry=\"130\"/><ellipse cx=\"516\" cy=\"60\" rx=\"252\" ry=\"156\"/></svg><span class=\"ds-next-body\"><span class=\"ds-next-title\">Kuzey Lojistik projende 3. aşamayı teslim et</span><span class=\"ds-next-sub\">Servis sipariş sistemine REST API ile bağlanır</span><span class=\"ds-next-key\">Projeye git</span></span></a>",
+      "css": ".ds-next { position: relative; display: block; overflow: hidden; padding: 20px; border-radius: 20px; background: rgb(var(--indigo, 100 81 231)); box-shadow: 0 4px 0 rgb(var(--indigo-lip, 74 57 196)); color: #fff; text-decoration: none; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; transition: transform 80ms, box-shadow 80ms; } .ds-next:active { transform: translateY(4px); box-shadow: none; } .ds-next:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; } .ds-contours { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; fill: none; stroke: rgb(255 255 255 / 0.16); stroke-width: 1.3; } .ds-next-body { position: relative; display: block; } .ds-next-title { display: block; font-size: 23px; font-weight: 620; line-height: 1.2; letter-spacing: -0.02em; } .ds-next-sub { display: block; margin-top: 4px; font-size: 15px; color: rgb(255 255 255 / 0.8); } .ds-next-key { display: inline-flex; align-items: center; min-height: 44px; margin-top: 16px; padding: 0 20px; border-radius: 12px; background: #fff; box-shadow: 0 3px 0 rgb(255 255 255 / 0.45); font-size: 16px; font-weight: 620; color: rgb(var(--indigo, 100 81 231)); }"
+    },
+    {
+      "name": "Week Markers",
+      "kind": "custom",
+      "refersTo": "week-dots",
+      "description": "Seven triangle survey markers: lit orange with a check, today dashed orange, past outline, future recessed.",
+      "html": "<ol class=\"ds-week\"><li><span>Pt</span><svg viewBox=\"0 0 100 98\" width=\"40\" height=\"39\"><path d=\"M50 9 91 82H9Z\" transform=\"translate(0 7)\" fill=\"rgb(214 120 0)\" stroke=\"rgb(214 120 0)\" stroke-width=\"14\" stroke-linejoin=\"round\"/><path d=\"M50 9 91 82H9Z\" fill=\"rgb(249 148 0)\" stroke=\"rgb(249 148 0)\" stroke-width=\"14\" stroke-linejoin=\"round\"/><path d=\"m38 56 9 9 17-19\" fill=\"none\" stroke=\"#fff\" stroke-width=\"9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></li><li><span>Sa</span><svg viewBox=\"0 0 100 98\" width=\"40\" height=\"39\"><path d=\"M50 9 91 82H9Z\" fill=\"#fff\" stroke=\"rgb(208 207 222)\" stroke-width=\"7\" stroke-linejoin=\"round\"/></svg></li><li class=\"ds-today\"><span>Ça</span><svg viewBox=\"0 0 100 98\" width=\"40\" height=\"39\"><path d=\"M50 9 91 82H9Z\" fill=\"#fff\" stroke=\"rgb(249 148 0 / 0.7)\" stroke-width=\"7\" stroke-dasharray=\"12 9\" stroke-linejoin=\"round\"/></svg></li><li><span>Pe</span><svg viewBox=\"0 0 100 98\" width=\"40\" height=\"39\"><path d=\"M50 9 91 82H9Z\" fill=\"rgb(247 247 250)\" stroke=\"rgb(229 229 237)\" stroke-width=\"7\" stroke-linejoin=\"round\"/></svg></li></ol>",
+      "css": ".ds-week { display: grid; grid-template-columns: repeat(4, 48px); gap: 6px; margin: 0; padding: 0; list-style: none; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; } .ds-week li { display: flex; flex-direction: column; align-items: center; gap: 6px; } .ds-week span { font-size: 13px; font-weight: 620; color: rgb(var(--ink-3, 106 105 126)); } .ds-week .ds-today span { color: rgb(var(--orange-ink, 184 92 0)); } .ds-week svg { overflow: visible; }"
     },
     {
       "name": "Feedback Bar",
       "kind": "custom",
       "refersTo": "feedback",
-      "description": "Bottom bar raised by feedback({tone,title,text}); good = green, bad = red, info = indigo.",
-      "html": "<div class=\"ds-fb\" role=\"status\"><svg width=\"44\" height=\"44\" viewBox=\"0 0 32 32\"><circle cx=\"16\" cy=\"16\" r=\"14\" fill=\"rgb(52 194 107)\"/><path d=\"m10 16.5 4 4 8-9\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><div><p class=\"ds-fb-title\">Hedefin güncellendi</p><p class=\"ds-fb-text\">Haftada 3 gün üretim.</p></div></div>",
-      "css": ".ds-fb { display: flex; align-items: center; gap: 16px; padding: 20px 16px; border-top: 2px solid rgb(52 194 107 / 0.4); background: rgb(var(--green-tint, 225 248 234)); font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; } .ds-fb p { margin: 0; } .ds-fb-title { font-size: 20px; font-weight: 900; color: rgb(var(--green-lip, 36 156 82)); } .ds-fb-text { font-size: 15px; font-weight: 700; color: rgb(var(--green-lip, 36 156 82)); }"
+      "description": "Bottom bar raised by feedback({tone,title,text}); good = green, bad = red, info = indigo. Niri reacts to it.",
+      "html": "<div class=\"ds-fb\" role=\"status\"><svg width=\"44\" height=\"44\" viewBox=\"0 0 32 32\"><circle cx=\"16\" cy=\"16\" r=\"13\" fill=\"rgb(52 194 107)\"/><path d=\"m10 16.5 4 4 8-9\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><div><p class=\"ds-fb-title\">+20 XP kazandın</p><p class=\"ds-fb-text\">Bayrağı diktin: iki gün üretim.</p></div></div>",
+      "css": ".ds-fb { display: flex; align-items: center; gap: 16px; padding: 20px 16px; border-top: 2px solid rgb(52 194 107 / 0.4); background: rgb(var(--green-tint, 225 248 234)); font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; } .ds-fb p { margin: 0; } .ds-fb-title { font-size: 20px; font-weight: 780; color: rgb(var(--green-lip, 36 156 82)); } .ds-fb-text { font-size: 15px; font-weight: 620; color: rgb(var(--green-lip, 36 156 82)); }"
     },
     {
       "name": "Segmented Switch",
@@ -145,51 +163,57 @@
       "refersTo": "segmented-active",
       "description": "Genç / Kurum face switch and other two-to-four-way choices.",
       "html": "<div class=\"ds-seg\" role=\"group\"><button aria-pressed=\"true\">Genç</button><button aria-pressed=\"false\">Kurum</button></div>",
-      "css": ".ds-seg { display: inline-flex; width: 224px; padding: 4px; border: 2px solid rgb(var(--line, 229 229 237)); border-radius: 14px; background: rgb(var(--bg-2, 247 247 250)); } .ds-seg button { flex: 1; padding: 6px 14px; border: 0; border-radius: 10px; background: transparent; font-family: 'Nunito Variable', ui-rounded, system-ui, sans-serif; font-size: 14px; font-weight: 850; color: rgb(var(--ink-3, 106 105 126)); cursor: pointer; transition: color 150ms; } .ds-seg button:hover { color: rgb(var(--ink, 37 35 56)); } .ds-seg button[aria-pressed=true] { background: rgb(var(--bg, 255 255 255)); color: rgb(var(--indigo, 100 81 231)); box-shadow: 0 2px 0 rgb(var(--line-2, 208 207 222)); } .ds-seg button:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
+      "css": ".ds-seg { display: inline-flex; width: 224px; padding: 4px; border: 2px solid rgb(var(--line, 229 229 237)); border-radius: 14px; background: rgb(var(--bg-2, 247 247 250)); } .ds-seg button { flex: 1; padding: 6px 14px; border: 0; border-radius: 10px; background: transparent; font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; font-weight: 650; color: rgb(var(--ink-3, 106 105 126)); cursor: pointer; transition: color 150ms; } .ds-seg button:hover { color: rgb(var(--ink, 37 35 56)); } .ds-seg button[aria-pressed=true] { background: rgb(var(--bg, 255 255 255)); color: rgb(var(--indigo, 100 81 231)); box-shadow: 0 2px 0 rgb(var(--line-2, 208 207 222)); } .ds-seg button:focus-visible { outline: 3px solid rgb(100 81 231 / 0.55); outline-offset: 2px; }"
     }
   ],
   "narrative": {
-    "northStar": "The Pressable Road",
-    "overview": "nirengi shows one next step on the surface and keeps the whole reasoning one tap below. The world is a white ground cut by 2px soft seams, with keys and pressable cards that sit on a 4px darker lip and sink onto it when touched. Type is rounded Nunito at heavy weights (800 to 900 for anything that names something), and colour is never decoration: every hue in the palette owns one concept, so a glance at a colour already says what the number next to it means. Niri, a rounded indigo triangle with an orange survey point for a belly, is the only character and appears at most once per screen.\n\nThe interface grammar is a lesson app's: a week strip of flames, a winding road of round step nodes, a feedback bar that rises from the bottom after every action, and a full-screen celebration for moments that matter. Depth is in sheets, not on the page: explanations, formulas and edge cases live behind a \"Neden?\" trigger that opens a bottom sheet on phones and a centred panel on desktop. The same grammar serves two faces. The genç face (young builders, phone-first) gets the full game layer. The kurum face (institutions, desk-first) keeps the keys, cards, sheets and feedback but drops every XP, league and streak element.\n\nThe world refuses two things it replaced: the instrument-bench dashboard (grey enclosures, dense tables, measurement chrome) and the career-site card grid. Density stays low; a screen carries one primary action.",
+    "northStar": "Pafta",
+    "overview": "A pafta is a survey map sheet. Nirengi means triangulation point: every verified piece of work is one more point on your map, and leagues are elevations from Zemin to Zirve. The world is a white ground cut by 2px seams, drawn with survey geometry: rounded triangle markers instead of circles and coins, faint contour lines on hero panels, a dashed trail that inks itself up to where you stand, ripple rings instead of bounces. Type is Bricolage Grotesque in sentence case. Keys sit on a 3px lip of their own hue and sink onto it when pressed. Every hue owns one concept.\n\nThe mechanics are a lesson app's (weekly goal, streak, league, quests, feedback bar, celebration). The geometry, type, icons, motion and structure are ours. Depth stays one tap below: reasoning, formulas and thresholds live behind \"Neden?\" in a sheet. Niri, the triangle surveyor, guides, reacts and celebrates, at most once per screen. The genç face (phone-first) gets the game layer; the kurum face (desk-first) keeps keys, cards, sheets, feedback and Niri as assistant, and drops XP, league and streak.\n\nWhy Pafta. Round 1 read as a Duolingo copy (rounded heavy type, uppercase chunky keys, a circle lesson path, flames and chests). Round 2 kept the mechanics and the simplicity and replaced everything you can see: geometry, type, iconography, motion and screen structure.",
     "keyCharacteristics": [
-      "White ground, 2px seams in `seam`, no hairlines and no drop shadows on resting surfaces.",
-      "Keys and pressable cards carry a 4px lip in a darker shade of their own face; pressing translates the face 4px down onto it.",
+      "White ground, 2px seams, no hairlines, no blurred shadows on resting surfaces.",
+      "The triangle is the primitive: logo, Niri, survey markers, week days, trail steps, confetti, rank medals, verification glyphs.",
+      "Contour lines and dashed survey trails carry the map; the current point pings with ripple rings.",
+      "Bricolage Grotesque Variable, sentence case everywhere, keys included.",
+      "Keys and pressable cards carry a 3px same-hue lip and sink 3px on press.",
       "Seven palette roles, each bound to one concept, each with a lip and a tint.",
-      "Nunito Variable throughout, 550 body, 850 to 900 headings and keys.",
-      "Uppercase is reserved for keys (buttons, nav items, key-like text actions) and field/table labels.",
-      "Every action answers with `feedback()`; milestones answer with `celebrate()`.",
-      "Light and dark themes share one token set; dark is a re-pointed channel set, not a separate design."
+      "Every action answers with `feedback()`; milestones answer with `celebrate()`; Niri reacts to both."
     ],
     "rules": [
-      { "name": "The One Concept, One Hue Rule", "body": "Indigo = act/primary, orange = youth streak, cyan = Doğrulandı, purple = league/community, gold = XP, green = done, red = error/problem. Never borrow a hue for its look; a cyan button means \"verify\", a green bar means \"finished\".", "section": "colors" },
-      { "name": "The Orange Stays Young Rule", "body": "Orange belongs to the genç face. No kurum screen shows orange: a low fit score on the kurum side renders in indigo (\"a low fit is not a streak warning\", `matchbits.tsx`), and status warnings there use red or neutral ink.", "section": "colors" },
-      { "name": "The Ink-4 Is Not Text Rule", "body": "`ink-4` is for icons, disabled states and placeholders. Readable text bottoms out at `ink-3`.", "section": "colors" },
-      { "name": "The Lip Is The Same Hue Rule", "body": "Every coloured face sits on its own `-lip` shade. Neutral faces (white keys, cards) sit on `seam`. Never put a black or grey offset under a coloured key.", "section": "colors" },
-      { "name": "The No Kicker Rule", "body": "Nothing small and uppercase sits above a heading. Uppercase lives on keys and on field/table labels; headings stand alone in sentence case.", "section": "typography" },
-      { "name": "The Sentence-Case Depth Rule", "body": "The \"Neden?\" trigger is sentence case, indigo, 13px at 800, never a key. Depth is offered, not shouted.", "section": "typography" },
-      { "name": "The Plain Names Rule", "body": "Verification levels are written Beyan / Doğrulandı / Kurum onaylı everywhere. The S1 to S3 codes appear only on /yontem.", "section": "typography" },
-      { "name": "The Lip Means Press Rule", "body": "A lip appears only on something that responds to a press, and pressing must sink it. A static card never carries a lip.", "section": "elevation" }
+      { "name": "The One Concept, One Hue Rule", "body": "Indigo = act, orange = seri, cyan = doğrulandı, purple = lig/topluluk, gold = XP, green = tamam, red = problem. Never borrow a hue for its look.", "section": "colors" },
+      { "name": "The Orange Stays Young Rule", "body": "No kurum screen shows orange. A low fit score on the kurum side is indigo; kurum warnings are red or neutral ink.", "section": "colors" },
+      { "name": "The Ink Tokens Rule", "body": "`orange`, `gold` and their lips are fills, never text on a light ground; coloured text uses `orange-ink` / `gold-ink` (they re-point to the bright tones in dark mode). `ink-4` is never text a person must read; readable text bottoms out at `ink-3`.", "section": "colors" },
+      { "name": "The Sentence Case Rule", "body": "Nothing is uppercase: not keys, not nav, not labels, not day names. A key's label is a short sentence (\"Projeye git\", \"Bayrağı dik\").", "section": "typography" },
+      { "name": "The No Kicker Rule", "body": "Nothing small sits above a heading. Headings stand alone; context goes in the lead below.", "section": "typography" },
+      { "name": "The Plain Words Rule", "body": "Address the reader as \"sen\". Use plain terms: netlik puanı, deneme projesi (short: proje), kayıt defteri, isimsiz inceleme, ihtiyaç kartı; levels are Beyan / Doğrulandı / Kurum onaylı (S1 to S3 only on /yontem). Never sandık, alev or şimşek. Demo data says it is fictional (\"kurgusal\").", "section": "typography" },
+      { "name": "The Lip Means Press Rule", "body": "A lip appears only on something that responds to a press, and pressing must sink it. A static section or card never carries a lip.", "section": "elevation" }
     ],
     "dos": [
-      "Do give every key and pressable card its 4px same-hue lip and make `:active` translate 4px onto it.",
-      "Do answer every user action with `feedback()`; use `celebrate({title, sub, xp?, streak?, cta?, href?})` for verification, finished quests, approved milestones and other milestones.",
-      "Do put explanations, formulas and thresholds behind `<Why>` / `<Sheet>` (\"Neden?\"), sentence case, indigo, 800.",
-      "Do read every number from the engine (`src/lib/engine/progress.ts`: `XP`, `TIERS`, `PROMOTE` 5, `DEMOTE` 3; canvas publish gate 70 in `canvas.ts`) and explain it on /yontem. Never hard-code a figure in a screen.",
-      "Do label fictional demo data where it appears (\"Kurumlar ve kişiler kurgusal demo verisidir.\", 13px 700 `ink-3`).",
-      "Do use one Niri per screen, at most.",
-      "Do keep the kurum face on the same grammar (keys, cards, sheets, feedback, plain level names) with no XP, league or streak elements.",
-      "Do respect reduced motion: the global rule zeroes CSS animation, and the kit sets `MotionGlobalConfig.skipAnimations` and skips confetti and count-ups.",
-      "Do keep both themes working by using tokens only; dark mode re-points the same channel names."
+      "Do give every key and pressable card its 3px same-hue lip and make `:active` sink 3px onto it.",
+      "Do draw progress, markers and \"you are here\" with the triangle, the dashed trail and ripple rings.",
+      "Do put Contours behind hero panels only (the next-step card, page heroes), never behind body text.",
+      "Do write every label in sentence case and address the reader as \"sen\".",
+      "Do answer every action with `feedback()` and milestones with `celebrate()`.",
+      "Do put explanations, formulas and thresholds behind \"Neden?\" in a Sheet.",
+      "Do read every number from the engine (`src/lib/engine/progress.ts`) and explain it on /yontem.",
+      "Do label fictional demo data where it appears (13px bold `ink-3`).",
+      "Do keep the kurum face on the same grammar with Niri as assistant and no XP, league or streak.",
+      "Do keep reduced motion working: CSS animation zeroed, `MotionGlobalConfig.skipAnimations`, no confetti or rings, count-ups jump, Niri static."
     ],
     "donts": [
-      "Don't use orange on any kurum screen; disputes and problems are red, honesty labels (\"Örnek veri\") are neutral.",
-      "Don't use `ink-4` for text a person must read.",
-      "Don't put a kicker or eyebrow label above a heading; uppercase is for keys and field/table labels.",
-      "Don't show S1 / S2 / S3 outside /yontem; say Beyan, Doğrulandı, Kurum onaylı.",
-      "Don't set `gold`, `orange` or their `-lip` shades as text on a light ground; coloured text uses `orange-ink` / `gold-ink` (4.6:1, bright tones in dark mode).",
-      "Don't use blurred drop shadows on resting surfaces, hairline (1px) borders, or a lip on something that cannot be pressed.",
+      "Don't use more than one Niri on a screen.",
+      "Don't use orange on any kurum screen.",
+      "Don't set `orange`, `gold` or their lips as text on a light ground, or use `ink-4` for readable text.",
+      "Don't put a lip on a static section or card.",
+      "Don't use blurred shadows on resting surfaces or 1px hairlines.",
       "Don't use a Unicode glyph or emoji as an icon or status mark.",
-      "Don't add a second accent for decoration; every hue already has a job."
+      "Don't show S1 / S2 / S3 outside /yontem.",
+      "Don't bring back the circle lesson path; steps are triangle markers on a trail or the climb map.",
+      "Don't use a reward chest; quests are waypoints you plant a flag on.",
+      "Don't set uppercase keys, nav or labels.",
+      "Don't pin a lesson footer (X plus a fixed Devam bar) on flows; the key sits in flow.",
+      "Don't put a counter strip (league, streak, XP) in the phone header; it carries the wordmark only.",
+      "Don't use pin bubbles or bobbing callouts over the current step; it gets ripple rings and a plain caption below.",
+      "Don't use flame, chest or lightning imagery; Seri is a beacon, XP is a gem."
     ]
   }
 }

@@ -1,6 +1,6 @@
 // Guided demo for the jury: one track per side, ticked from real state where a
 // flag exists and from the route otherwise. Opened by the layouts' tour button
-// (`nirengi:tour` event) or the edge tab.
+// (`nirengi:tour` event).
 
 import { useEffect, useMemo, useState } from 'react';
 import { Check, X } from 'lucide-react';
@@ -66,7 +66,7 @@ export default function DemoTour() {
       /* ignore */
     }
   };
-  // The menus open the tour on small screens, where no edge tab is shown.
+  // The sidebar and the phone menu open the tour.
   useEffect(() => {
     const onOpen = () => toggle(true);
     window.addEventListener('nirengi:tour', onOpen);
@@ -92,17 +92,17 @@ export default function DemoTour() {
       ],
       kurum: [
         { title: 'Kurum ana sayfası', hint: 'Onay bekleyenler ve açık ihtiyaçlar.', href: '/kurum', done: visited('/kurum') },
-        { title: 'İhtiyacı yaz, yayına al', hint: 'Şikâyetten taslak, çözülebilirlik puanı, yayın eşiği.', href: '/ihtiyaclar/yeni', done: Boolean(demoNeed) },
+        { title: 'İhtiyacı yaz, yayına al', hint: 'Şikâyetten taslak, netlik puanı, yayın eşiği.', href: '/ihtiyaclar/yeni', done: Boolean(demoNeed) },
         { title: 'Adayın nedenine bak', hint: 'Puanın dört parçası ve eksik kanıt.', href: needHref, done: Boolean(s.demo.viewedMatchesFor) },
-        { title: 'Pilot teklif et', hint: 'Başarı kriterleri aşamalara dönüşür.', href: `${needHref}#adaylar`, done: Boolean(newPilot) },
-        { title: 'Aşamayı onayla', hint: 'Genç teslim eder, kurum onaylar; defter yazar.', href: target ? `/pilotlar/${target.id}` : '/pilotlar', done: Boolean(approvedAfter) },
+        { title: 'Projeye davet et', hint: 'Başarı kriterleri aşamalara dönüşür.', href: `${needHref}#adaylar`, done: Boolean(newPilot) },
+        { title: 'Aşamayı onayla', hint: 'Genç teslim eder, kurum onaylar; kayıt defterine yazılır.', href: target ? `/pilotlar/${target.id}` : '/pilotlar', done: Boolean(approvedAfter) },
         {
           title: 'Onay profile düştü',
           hint: 'Onaylı aşama gencin profilinde yeni bir kanıt.',
           href: targetPerson ? `/profil/${targetPerson.handle}` : '/kesfet',
           done: Boolean(approvedAfter && s.demo.viewedProfileAfterApproval),
         },
-        { title: 'Herkese açık kartı gör', hint: 'Pilotun özeti, tek bir bağlantıyla paylaşılır.', href: target ? `/kart/${target.id}` : '/pilotlar', done: visited('/kart') },
+        { title: 'Herkese açık kartı gör', hint: 'Projenin özeti, tek bir bağlantıyla paylaşılır.', href: target ? `/kart/${target.id}` : '/pilotlar', done: visited('/kart') },
       ],
     };
   }, [s, seen]);
@@ -113,8 +113,6 @@ export default function DemoTour() {
   const next = steps.findIndex((x) => !x.done);
   const finished = next < 0;
   const other: Track = track === 'genc' ? 'kurum' : 'genc';
-  const total = tracks.genc.length + tracks.kurum.length;
-  const doneAll = tracks.genc.filter((x) => x.done).length + tracks.kurum.filter((x) => x.done).length;
 
   const reset = () => {
     actions.reset();
@@ -127,23 +125,8 @@ export default function DemoTour() {
     location.href = '/';
   };
 
-  if (!open)
-    return (
-      <button
-        onClick={() => toggle(true)}
-        aria-label="Demo turunu aç"
-        className="no-print fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 items-center gap-2 rounded-l-[14px] border-2 border-r-0 border-line bg-bg px-2 py-3.5 text-[13px] font-black text-ink-2 shadow-[0_4px_0_rgb(var(--line))] transition-colors [writing-mode:vertical-rl] hover:bg-bg-2 sm:flex"
-      >
-        <span className="relative grid h-5 w-5 place-items-center">
-          {doneAll < total && <span className="ping-soft absolute inset-0 rounded-full bg-indigo/40" />}
-          <span className="relative h-3 w-3 rounded-full bg-indigo" />
-        </span>
-        <span>Demo turu</span>
-        <span className="num text-ink-3">
-          {doneAll}/{total}
-        </span>
-      </button>
-    );
+  // Opened from the sidebar or the phone menu; no edge tab, so Niri'ye sor stays the one help entry on screen.
+  if (!open) return null;
 
   return (
     <aside

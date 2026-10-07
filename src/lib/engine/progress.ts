@@ -391,7 +391,7 @@ export function journey(state: State, person: Person): Unit[] {
       steps: [
         step('oss', 'Açık kaynağa katkı', 'Birleştirilen bir PR, başkasının senin işini onayladığı anlamına gelir.', oss, '/gorevler#acik-kaynak', 'Görev seç'),
         step('uc-onay', 'Üç kurum onayı', 'Üç ayrı onay, tek bir başarının tesadüf olmadığını gösterir.', s3 >= 3, pilots[0] ? `/pilotlar/${pilots[0].id}` : '/bugun', 'Projeye git'),
-        step('zirve', 'Başarıyla kapanan pilot', 'Kriterlerin hepsi iki tarafça onaylandı: nirengi noktan artık sabit.', pilots.some((x) => x.status === 'succeeded'), pilots[0] ? `/pilotlar/${pilots[0].id}` : '/bugun', 'Projeye git'),
+        step('zirve', 'Başarıyla kapanan proje', 'Kriterlerin hepsi iki tarafça onaylandı: nirengi noktan artık sabit.', pilots.some((x) => x.status === 'succeeded'), pilots[0] ? `/pilotlar/${pilots[0].id}` : '/bugun', 'Projeye git'),
       ],
     },
   ];

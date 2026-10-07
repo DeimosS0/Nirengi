@@ -19,7 +19,7 @@ export function SealMoment({ open, name, last, onDone }: { open: boolean; name: 
       fired = true;
       celebrate(
         last
-          ? { title: 'Son adım onaylandı', sub: `${name} için tüm aşamalar Kurum onaylı. Şimdi pilotu kapatıp herkese açık kartı yayımlayabilirsiniz.`, cta: 'Devam et' }
+          ? { title: 'Son adım onaylandı', sub: `${name} için tüm aşamalar Kurum onaylı. Şimdi projeyi kapatıp herkese açık kartı yayımlayabilirsiniz.`, cta: 'Devam et' }
           : { title: 'Adım onaylandı', sub: `${name} için bu aşama artık Kurum onaylı kanıt olarak profilinde.`, cta: 'Devam et' },
       );
       done.current();
@@ -59,7 +59,7 @@ export function SealMoment({ open, name, last, onDone }: { open: boolean; name: 
               Kurum onaylı
             </motion.p>
             <motion.p className="mt-1 text-[16px] font-bold text-ink-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-              Çift onay tamam, defterde mühürlendi.
+              Çift onay tamam, kayıt defterinde mühürlendi.
             </motion.p>
           </div>
         </motion.div>

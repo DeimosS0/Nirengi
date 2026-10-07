@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, ChevronRight, Star } from 'lucide-react';
+import { Check, ChevronRight, Crosshair } from 'lucide-react';
 import { actions, currentMe, useAppState } from '../../lib/store.ts';
 import { journey, progress, weekKey, type Step, type Unit } from '../../lib/engine/progress.ts';
 import { needsForPerson } from '../../lib/engine/match.ts';
 import { skillLabel } from '../../lib/skills.ts';
 import type { Person, State, WeeklyGoal } from '../../lib/types.ts';
-import Niri from '../ui/Niri';
+import NiriSays from '../ui/NiriSays';
 import { Bar, feedback, Head, Ring, Sheet, WeekDots } from '../ui/kit';
 import { Flame, Lock } from '../ui/icons';
+import { ClimbMap, Contours } from '../ui/pafta';
 
 const firstName = (p: Person) => p.name.split(' ')[0];
 
@@ -47,8 +48,6 @@ function nextStep(s: State, me: Person, met: boolean, left: number) {
   };
 }
 
-const OFFSETS = [0, -64, -92, -64, 0, 64, 92, 64];
-
 export default function TodayPage() {
   const s = useAppState();
   const me = currentMe(s);
@@ -59,8 +58,7 @@ export default function TodayPage() {
   const [goalOpen, setGoalOpen] = useState(false);
   const [stepOpen, setStepOpen] = useState<{ step: Step; unit: Unit } | null>(null);
 
-  const flat = units.flatMap((u) => u.steps.map((st) => ({ st, u })));
-  const currentId = flat.find((x) => !x.st.done)?.st.id;
+  const currentId = units.flatMap((u) => u.steps).find((st) => !st.done)?.id;
 
   const say = p.rest
     ? 'Bu hafta moladasın. Serin seni bekliyor, acele yok.'
@@ -73,19 +71,15 @@ export default function TodayPage() {
   return (
     <div className="mx-auto max-w-[600px]">
       {/* Greeting */}
-      <div className="flex items-end gap-3">
-        <Niri mood={p.met ? 'happy' : 'wave'} size={92} />
-        <div className="relative mb-4 flex-1 rounded-[18px] border-2 border-line bg-bg px-4 py-3">
-          <span className="absolute -left-[9px] bottom-4 h-4 w-4 rotate-45 border-b-2 border-l-2 border-line bg-bg" aria-hidden="true" />
-          <p className="text-[17px] font-extrabold text-ink">
-            {greeting()}, {firstName(me)}!
-          </p>
-          <p className="text-[15px] font-bold text-ink-3">{say}</p>
-        </div>
-      </div>
+      <NiriSays mood={p.met ? 'happy' : 'wave'} size={92} typing>
+        <p className="text-[17px] font-extrabold text-ink">
+          {greeting()}, {firstName(me)}!
+        </p>
+        <p className="text-[15px] font-bold text-ink-3">{say}</p>
+      </NiriSays>
 
       {/* This week */}
-      <section className="card mt-4 p-5" aria-labelledby="hafta">
+      <section data-coach="g-hafta" className="card mt-4 p-5" aria-labelledby="hafta">
         <div className="flex items-center justify-between gap-3">
           <h1 id="hafta" className="h-sec">
             Bu hafta
@@ -121,88 +115,62 @@ export default function TodayPage() {
       {/* Next step */}
       <motion.a
         href={next.href}
-        className="mt-5 block rounded-[20px] bg-indigo p-5 text-white"
-        style={{ boxShadow: '0 5px 0 rgb(var(--indigo-lip))' }}
-        whileTap={{ y: 5, boxShadow: '0 0 0 rgb(var(--indigo-lip))' }}
+        data-coach="g-sirada"
+        className="relative mt-5 block overflow-hidden rounded-[20px] bg-indigo p-5 text-white"
+        style={{ boxShadow: '0 4px 0 rgb(var(--indigo-lip))' }}
+        whileTap={{ y: 4, boxShadow: '0 0 0 rgb(var(--indigo-lip))' }}
         transition={{ duration: 0.08 }}
       >
-        <p className="text-[22px] font-black leading-tight">{next.title}</p>
-        <p className="mt-1 text-[15px] font-bold text-white/80">{next.sub}</p>
-        <span
-          className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-5 text-[15px] font-black uppercase tracking-[0.06em] text-indigo"
-          style={{ boxShadow: '0 4px 0 rgb(255 255 255 / 0.45)' }}
-        >
-          {next.cta}
-          <ChevronRight className="h-5 w-5" strokeWidth={3} />
-        </span>
+        <Contours color="white" opacity={0.16} x={0.86} y={0.2} seed={3} />
+        <div className="relative">
+          <p className="text-[23px] font-bold leading-tight tracking-[-0.02em]">{next.title}</p>
+          <p className="mt-1 text-[15px] text-white/80">{next.sub}</p>
+          <span
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-[12px] bg-white px-5 text-[16px] font-bold text-indigo"
+            style={{ boxShadow: '0 3px 0 rgb(255 255 255 / 0.45)' }}
+          >
+            {next.cta}
+            <ChevronRight className="h-5 w-5" strokeWidth={3} />
+          </span>
+        </div>
       </motion.a>
 
-      {/* The road */}
-      <section className="mt-10" aria-label="Yolun">
-        {units.map((u, ui) => {
-          const done = u.steps.filter((x) => x.done).length;
-          return (
-            <div key={u.id} className={ui ? 'mt-10' : ''}>
-              <div className="flex items-center justify-between gap-4 rounded-[18px] px-5 py-4 text-white" style={{ background: `rgb(var(--${u.tone}))`, boxShadow: `0 4px 0 rgb(var(--${u.tone}-lip))` }}>
-                <div>
-                  <p className="text-[21px] font-black leading-tight">{u.title}</p>
-                  <p className="text-[14px] font-bold text-white/80">{u.sub}</p>
-                </div>
-                <span className="num shrink-0 rounded-full bg-white/20 px-3 py-1 text-[14px] font-black">
-                  {ui + 1}. bölüm · {done}/{u.steps.length}
-                </span>
-              </div>
-              <ol className={`relative flex flex-col items-center gap-5 ${u.steps[0].id === currentId ? 'mt-16' : 'mt-6'}`}>
-                {u.steps.map((st) => {
-                  const gi = flat.findIndex((x) => x.st.id === st.id);
-                  const current = st.id === currentId;
-                  const locked = !st.done && !current;
-                  const x = OFFSETS[gi % OFFSETS.length];
-                  return (
-                    <li key={st.id} className="relative" style={{ transform: `translateX(${x}px)` }}>
-                      {current && (
-                        <motion.span
-                          className="absolute -top-11 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-[12px] border-2 border-line bg-bg px-3 py-1.5 text-[14px] font-black uppercase tracking-wide"
-                          style={{ color: `rgb(var(--${u.tone}))` }}
-                          animate={{ y: [0, -5, 0] }}
-                          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-                        >
-                          Sıradaki
-                          <span className="absolute -bottom-[7px] left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-line bg-bg" />
-                        </motion.span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setStepOpen({ step: st, unit: u })}
-                        aria-label={`${st.title}${st.done ? ' — tamamlandı' : current ? ' — sıradaki' : ' — kilitli'}`}
-                        className="group relative grid h-[72px] w-[72px] place-items-center rounded-full transition-transform duration-100 active:translate-y-[6px]"
-                        style={{
-                          background: locked ? 'rgb(var(--bg-3))' : `rgb(var(--${u.tone}))`,
-                          boxShadow: `0 6px 0 ${locked ? 'rgb(var(--line-2))' : `rgb(var(--${u.tone}-lip))`}${current ? `, 0 0 0 8px rgb(var(--${u.tone}) / 0.18)` : ''}`,
-                        }}
-                      >
-                        {st.done ? (
-                          <Check className="h-9 w-9 text-white" strokeWidth={4} />
-                        ) : current ? (
-                          <Star className="h-9 w-9 fill-white text-white" strokeWidth={2} />
-                        ) : (
-                          <Lock size={34} />
-                        )}
-                      </button>
-                      <p className={`mt-3 w-28 text-center text-[13px] font-extrabold leading-tight ${locked ? 'text-ink-3' : 'text-ink-2'}`} style={{ marginLeft: -20 }}>
-                        {st.title}
-                      </p>
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-          );
-        })}
+      {/* The pafta: every verified step is a point on your own map, climbing to the summit */}
+      <section data-coach="g-pafta" className="card mt-10 p-4 sm:p-5" aria-labelledby="pafta">
+        <h2 id="pafta" className="h-sec">
+          Paftan
+        </h2>
+        <p className="mt-1 text-[15px] text-ink-3">Her doğrulanmış iş haritana bir nokta ekler. Aşağıdan başlar, zirveye tırmanırsın.</p>
+        <div className="mt-4">
+          <ClimbMap
+            zones={units.map((u) => ({
+              id: u.id,
+              title: u.title,
+              tone: u.tone,
+              points: u.steps.map((st) => {
+                const current = st.id === currentId;
+                return {
+                  id: st.id,
+                  title: st.title,
+                  state: st.done ? 'done' : current ? 'current' : 'locked',
+                  label: st.done ? 'tamamlandı' : current ? 'sıradaki' : 'kilitli',
+                  onClick: () => setStepOpen({ step: st, unit: u }),
+                  icon: st.done ? (
+                    <Check className="h-7 w-7 text-white" strokeWidth={4} />
+                  ) : current ? (
+                    <Crosshair className="h-7 w-7 text-white" strokeWidth={3} />
+                  ) : (
+                    <Lock size={26} />
+                  ),
+                };
+              }),
+            }))}
+          />
+        </div>
       </section>
 
       {/* Doors */}
-      <section id="ihtiyaclar" className="mt-12 scroll-mt-6">
+      <section id="ihtiyaclar" data-coach="g-ihtiyaclar" className="mt-12 scroll-mt-6">
         <Head title="Sana uyan ihtiyaçlar" action={<span className="text-[13px] font-bold text-ink-3">Kurumlar kurgusal demo</span>} />
         <ul className="mt-4 space-y-3">
           {matches.map((m) => {

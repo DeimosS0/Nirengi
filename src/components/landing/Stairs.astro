@@ -1,42 +1,46 @@
 ---
-// The three verification steps drawn as stairs: each column is as tall as its
-// weight in a match, so "doğrulanmış iş daha çok sayılır" is something you see.
+// The three verification steps as survey markers on rising ground: each step is as
+// tall as its weight in a match, so "doğrulanmış iş daha çok sayılır" is something you see.
 import { LEVELS } from '../../lib/labels.ts';
-import { LevelGlyph, LEVEL_NAME } from '../ui/primitives';
+import { LEVEL_NAME } from '../ui/primitives';
+import { Tri } from '../ui/pafta';
 
-const MAX = 190;
+const MAX = 150;
 const f = (n: number) => n.toLocaleString('tr-TR');
 const steps = [
-  { level: 'S1', face: 'bg-bg-3 border-2 border-dashed border-line-2', lip: 'rgb(var(--line-2))' },
-  { level: 'S2', face: 'bg-cyan', lip: 'rgb(var(--cyan-lip))' },
-  { level: 'S3', face: 'bg-indigo', lip: 'rgb(var(--indigo-lip))' },
+  { level: 'S1', tone: 'indigo', state: 'waiting', size: 62, ground: 'border-2 border-dashed border-line-2 bg-bg-2', lip: '' },
+  { level: 'S2', tone: 'cyan', state: 'done', size: 70, ground: 'bg-cyan', lip: 'box-shadow:0 5px 0 rgb(var(--cyan-lip))' },
+  { level: 'S3', tone: 'indigo', state: 'done', size: 78, ground: 'bg-indigo', lip: 'box-shadow:0 5px 0 rgb(var(--indigo-lip))' },
 ] as const;
 ---
 
-<div class="card p-4 sm:p-6">
-  <div class="flex items-end gap-3 sm:gap-4" style={`height:${MAX}px`}>
+<div>
+  <div class="flex items-end gap-3 sm:gap-4" role="img" aria-label="Üç basamak: Beyan, Doğrulandı, Kurum onaylı; her biri bir öncekinden daha yüksek ağırlıkta">
     {
-      steps.map((s) => (
+      steps.map((s, i) => (
         <div class="flex flex-1 flex-col items-center justify-end">
-          <div
-            class={`relative flex w-full justify-center rounded-t-[20px] rounded-b-[8px] pt-3 ${s.face}`}
-            style={`height:${Math.round(LEVELS[s.level].weight * MAX)}px;box-shadow:0 5px 0 ${s.lip}`}
-          >
-            <span class="grid h-11 w-11 place-items-center rounded-full bg-bg">
-              <LevelGlyph level={s.level} size={28} />
-            </span>
+          <div class="pop -mb-1 flex flex-col items-center" style={`animation-delay:${i * 140}ms`}>
+            <Tri size={s.size} tone={s.tone} state={s.state}>
+              {s.level === 'S2' && <span class="block h-3 w-3 rounded-full bg-white" />}
+              {s.level === 'S3' && (
+                <span class="grid h-3.5 w-3.5 place-items-center rounded-full bg-white">
+                  <span class="block h-2 w-2 rounded-full bg-orange" />
+                </span>
+              )}
+            </Tri>
           </div>
+          <div class={`mt-2 w-full rounded-t-[10px] rounded-b-[6px] ${s.ground}`} style={`height:${Math.round(LEVELS[s.level].weight * MAX)}px;${s.lip}`} />
         </div>
       ))
     }
   </div>
-  <ol class="mt-5 grid grid-cols-3 gap-3 sm:gap-4">
+  <ol class="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
     {
       steps.map((s) => (
         <li class="text-center">
           <p class="text-[15px] font-black text-ink">{LEVEL_NAME[s.level]}</p>
           <p class="num text-[13px] font-extrabold text-ink-3">ağırlık {f(LEVELS[s.level].weight)}</p>
-          <p class="mt-1 text-[13px] font-bold leading-snug text-ink-3">{LEVELS[s.level].short}</p>
+          <p class="mt-1 text-[13px] font-semibold leading-snug text-ink-3">{LEVELS[s.level].short}</p>
         </li>
       ))
     }

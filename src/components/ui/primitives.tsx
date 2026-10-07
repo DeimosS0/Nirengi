@@ -85,7 +85,7 @@ export function Avatar({ person, size = 44, reveal = false }: { person: Person; 
       <span
         className="grid shrink-0 place-items-center rounded-full border-2 border-dashed border-line-2 bg-bg-2 text-ink-3"
         style={{ width: size, height: size }}
-        title="Kör keşif: kimlik ilk temasa kadar gizli"
+        title="İsimsiz inceleme: isim ilk temasa kadar gizli"
       >
         <svg viewBox="0 0 16 16" width={size * 0.44} height={size * 0.44} aria-hidden="true">
           <path d="M8 2.2 14.2 13.3H1.8Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />

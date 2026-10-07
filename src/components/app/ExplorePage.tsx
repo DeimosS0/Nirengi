@@ -8,8 +8,8 @@ import type { Evidence, Level, Person } from '../../lib/types.ts';
 import { currentOrg, setView, useAppState, useView } from '../../lib/store.ts';
 import { evidenceWeight, findConflicts, scoreMatch, searchByProblem, VERIFIED_FLOOR, type Conflict, type Match, type SearchHit } from '../../lib/engine/match.ts';
 import { progress, type WeekState } from '../../lib/engine/progress.ts';
-import { AVAILABILITY } from '../../lib/labels.ts';
 import { skillLabel } from '../../lib/skills.ts';
+import { AVAILABILITY } from '../../lib/labels.ts';
 import { EmptyState, feedback, Ring, Sheet, Why } from '../ui/kit';
 import { Avatar, LevelBadge, LevelGlyph, useIdentity } from '../ui/primitives.tsx';
 import { activeWeeks, calmTone, Consistency } from './matchbits.tsx';
@@ -20,6 +20,7 @@ const EXAMPLES = [
   'sensör verisini canlı haritaya taşıyabilecek biri',
 ];
 
+// "Pilota açık" reads as "Projeye açık" for someone who has never met the word.
 type Conflicts = Map<string, Conflict>;
 type Sort = 'fit' | 'recent' | 'steady';
 type Floor = 'all' | 'verified' | 'org';
@@ -93,7 +94,7 @@ export default function ExplorePage() {
     setCity(null);
   };
   const toggle = (k: string) => setPicked((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
-  const sortNote = q.trim() ? 'ilgiye göre' : sortBy === 'fit' ? 'seçili ihtiyaca uyuma göre' : sortBy === 'recent' ? 'en yeni kanıta göre' : 'düzenliliğe göre';
+  const sortNote = q.trim() ? 'ilgiye göre' : sortBy === 'fit' ? 'seçili ihtiyaca uyuma göre' : sortBy === 'recent' ? 'en yeni işe göre' : 'düzenliliğe göre';
 
   const removable = (label: string, onClick: () => void) => (
     <button key={label} type="button" onClick={onClick} aria-label={`${label} filtresini kaldır`} className="chip !border-indigo/40 !bg-indigo-tint !text-indigo transition-colors hover:!border-indigo">
@@ -116,9 +117,10 @@ export default function ExplorePage() {
   return (
     <div className="mx-auto max-w-[1000px]">
       <h1 className="h-page">Yetenek keşfet</h1>
-      <p className="lead mt-1">Unvanla değil problemle ara. Sonuç doğrulanmış işten gelir; takipçi sayısı yok.</p>
+      <p className="lead mt-1">Çözmek istediğin işi yaz; bu işi daha önce gerçekten yapmış gençleri, yaptıkları işle birlikte gör.</p>
 
       <form
+        data-coach="kesfet-ara"
         className="mt-6 flex items-center gap-3 rounded-[16px] border-2 border-line bg-bg-2 px-4 transition-colors focus-within:border-indigo focus-within:bg-bg"
         role="search"
         onSubmit={(e) => e.preventDefault()}
@@ -154,34 +156,34 @@ export default function ExplorePage() {
         </div>
       )}
       <p className="mt-3 flex flex-wrap items-center gap-x-1 text-[13px] font-bold text-ink-3">
-        Kişiler kurgusal demo verisi. {blind ? 'Kimlik ilk temasa kadar gizli.' : 'Kör keşif kapalı: isimler görünüyor.'}
-        <Why title="Kör keşif nedir?">
+        Kişiler kurgusal demo verisi. {blind ? 'İsimsiz inceleme açık: adlar ilk temasa kadar gizli.' : 'İsimsiz inceleme kapalı: adlar görünüyor.'}
+        <Why title="İsimsiz inceleme nedir?">
           <p className="text-[15px] font-bold text-ink-2">
-            Kör keşifte ad, yaş, okul ve şehir gizlenir; yalnız kanıt, yetkinlik ve düzenlilik görünür. Böylece ilk bakışta okul adı ya da isim değil, yapılan iş konuşur ve önyargı azalır.
+            İsimsiz incelemede ad, yaş, okul ve şehir gizlenir; yalnız yapılan işler, yetkinlikler ve düzenlilik görünür. Böylece ilk bakışta okul adı ya da isim değil, yapılan iş konuşur ve önyargı azalır.
           </p>
-          <p className="mt-3 text-[15px] font-bold text-ink-2">Kimlik, bir adayla pilot açtığında (ilk temas) görünür olur. Şehir filtresi de bu yüzden yalnız kör keşif kapalıyken çalışır.</p>
+          <p className="mt-3 text-[15px] font-bold text-ink-2">İsim, bir adayla deneme projesi başlattığında (ilk temas) görünür olur. Şehir filtresi de bu yüzden yalnız isimsiz inceleme kapalıyken çalışır.</p>
           <button
             type="button"
             className="btn-line btn-block mt-5"
             onClick={() => {
               setView({ blind: !blind });
-              feedback({ tone: 'info', title: blind ? 'Kör keşif kapandı' : 'Kör keşif açıldı', text: blind ? 'Adaylar adlarıyla görünüyor.' : 'Kimlik ilk temasa kadar gizli.' });
+              feedback({ tone: 'info', title: blind ? 'İsimsiz inceleme kapandı' : 'İsimsiz inceleme açıldı', text: blind ? 'Adaylar adlarıyla görünüyor.' : 'Adlar ilk temasa kadar gizli.' });
             }}
           >
-            {blind ? 'Kimlikleri göster' : 'Kör keşfi aç'}
+            {blind ? 'Adları göster' : 'İsimsiz incelemeyi aç'}
           </button>
         </Why>
       </p>
 
       {needs.length > 0 && (
-        <div className="mt-6">
+        <div data-coach="kesfet-ihtiyac" className="mt-6">
           <div className="flex items-center justify-between gap-3">
             <label htmlFor="ihtiyac" className="label !mb-0">
               Hangi ihtiyaç için?
             </label>
             <Why title="Uyum nasıl hesaplanıyor?" label="Uyum nasıl?">
               <p className="text-[15px] font-bold text-ink-2">
-                Bir ihtiyaç seçince herkes o ihtiyaca karşı puanlanır: aranan yetkinliklerdeki doğrulanmış iş, bağlam, kapasite ve iş birliği geçmişi. Puan her seferinde kanıttan hesaplanır, elle yazılmaz.
+                Bir ihtiyaç seçince herkes o ihtiyaca karşı puanlanır: yaptığı işin uyumu, sektör ve ölçek uyumu, ayırabileceği zaman ve birlikte çalışma geçmişi. Puan her seferinde doğrulanmış işlerden hesaplanır, elle yazılmaz.
               </p>
               <p className="mt-3 text-[15px] font-bold text-ink-2">Bir adayın puanını parçalarına ayrılmış hâliyle görmek için ihtiyacın sayfasındaki “Uyan adaylar” listesini aç.</p>
               {need && (
@@ -207,7 +209,7 @@ export default function ExplorePage() {
           {results.length} profil
           {results.length > 0 && <span className="font-bold"> · {sortNote}</span>}
         </p>
-        <button type="button" className="btn-line btn-sm shrink-0" onClick={() => setSheet(true)}>
+        <button type="button" data-coach="kesfet-filtre" className="btn-line btn-sm shrink-0" onClick={() => setSheet(true)}>
           Filtrele{activeCount > 0 && ` · ${activeCount}`}
         </button>
       </div>
@@ -237,7 +239,7 @@ export default function ExplorePage() {
       ) : (
         <ul className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
           {results.map((h, i) => (
-            <li key={h.person.id} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}>
+            <li key={h.person.id} data-coach={i === 0 ? 'kesfet-liste' : undefined} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}>
               <PersonRow hit={h} hist={weeks.get(h.person.id)!} match={fit.get(h.person.id)} conflicts={conflicts} marked={[...picked, ...(need?.skills ?? [])]} />
             </li>
           ))}
@@ -252,15 +254,15 @@ export default function ExplorePage() {
             <p className="mt-2 text-[13px] font-bold text-ink-3">Birden fazla seçersen hepsi birlikte aranır.</p>
           </div>
           <div>
-            <p className="cap">Kanıt düzeyi</p>
-            <div className="seg mt-2" role="group" aria-label="Kanıt düzeyi">
+            <p className="cap">Doğrulama düzeyi</p>
+            <div className="seg mt-2" role="group" aria-label="Doğrulama düzeyi">
               {FLOORS.map(([k, l]) => (
                 <button key={k} type="button" aria-pressed={floor === k} onClick={() => setFloor(k)}>
                   {l}
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-[13px] font-bold text-ink-3">Doğrulandı: en az bir makine doğrulamalı iş. Kurum onaylı: bir kurumun imzaladığı iş.</p>
+            <p className="mt-2 text-[13px] font-bold text-ink-3">Doğrulandı: en az bir iş sistem tarafından kontrol edilmiş. Kurum onaylı: bir kurumun imzaladığı iş.</p>
           </div>
           <div>
             <p className="cap">Sırala</p>
@@ -271,7 +273,7 @@ export default function ExplorePage() {
                 {(
                   [
                     ['fit', 'Uyum'],
-                    ['recent', 'En yeni kanıt'],
+                    ['recent', 'En yeni iş'],
                     ['steady', 'Düzenlilik'],
                   ] as const
                 )
@@ -287,7 +289,7 @@ export default function ExplorePage() {
           <div>
             <p className="cap">Şehir</p>
             {blind ? (
-              <p className="mt-2 text-[14px] font-bold text-ink-3">Şehir kimliğin bir parçası olduğu için kör keşifte gizli. Kör keşif kapalıyken burada seçebilirsin.</p>
+              <p className="mt-2 text-[14px] font-bold text-ink-3">Şehir, kişinin kimliğinin bir parçası olduğu için isimsiz incelemede gizli. İsimsiz inceleme kapalıyken burada seçebilirsin.</p>
             ) : (
               <div className="mt-2 flex flex-wrap gap-2">{cities.map((c) => toggleChip(city === c, c, () => setCity(city === c ? null : c)))}</div>
             )}

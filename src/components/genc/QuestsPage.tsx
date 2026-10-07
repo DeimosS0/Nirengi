@@ -1,17 +1,19 @@
-// Görevler: this week's quests, growth quests drawn from your own match gaps,
-// and real open-source issues that count only once a PR is merged.
+// Görevler: this week's route (three waypoints, each finished one gets a survey flag),
+// growth quests drawn from your own match gaps, and real open-source issues that
+// count only once a PR is merged.
 
-import { useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { ChevronRight, Clock, ExternalLink, Loader2, MessageSquare } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
+import { Check, ChevronRight, Clock, Crosshair, ExternalLink, Flag as FlagGlyph, Loader2, MessageSquare } from 'lucide-react';
 import { actions, currentMe, getState, useAppState } from '../../lib/store.ts';
 import { questsFor, totalXp, weekKey, XP, type Quest } from '../../lib/engine/progress.ts';
 import { checkMergedPr, githubLogin, goodFirstIssues, OssError, ossLanguages, searchLink, type OssIssue } from '../../lib/oss.ts';
 import { relTime, uid } from '../../lib/format.ts';
 import { LANGUAGE_SKILLS } from '../../lib/skills.ts';
 import type { Evidence, QuestKind } from '../../lib/types.ts';
-import { Bar, celebrate, EmptyState, feedback, Head, Sheet, Why } from '../ui/kit';
-import { Bolt, Bubbles, CheckCircle, Chest, Compass, Flag, Flame, GitHub } from '../ui/icons';
+import { Bar, celebrate, EmptyState, feedback, Head, Sheet, SurveyFlag, Why } from '../ui/kit';
+import { Bolt, Bubbles, CheckCircle, Compass, Flag, Flame, GitHub } from '../ui/icons';
+import { Contours, Ridge, Tri } from '../ui/pafta';
 
 const DAY = 86_400_000;
 
@@ -62,7 +64,6 @@ export default function QuestsPage() {
   const doneThisWeek = mine.filter((q) => weekKey(q.at) === week);
   const weekEnd = new Date(`${week}T00:00:00`).getTime() + 7 * DAY;
   const ready = weekly.filter((q) => q.complete).length;
-  const allClaimed = weekly.every((q) => claimedIds.has(q.id));
 
   const [whyOpen, setWhyOpen] = useState(false);
 
@@ -76,8 +77,8 @@ export default function QuestsPage() {
   const claim = (q: Quest) => {
     actions.completeQuest({ questId: q.id, personId: me.id, kind: 'haftalik', title: q.title, xp: q.xp });
     const last = weekly.every((x) => x.id === q.id || claimedIds.has(x.id));
-    if (last) celebrate({ title: 'Haftanın görevleri tamam', sub: 'Üç sandığı da açtın. Haftayı düzenli üretimle kapatıyorsun.', xp: totalXp(getState(), me), cta: 'Harika' });
-    else feedback({ tone: 'good', title: `+${q.xp} XP kazandın`, text: `${q.title} görevi tamam.` });
+    if (last) celebrate({ title: 'Haftanın rotası tamam', sub: 'Üç noktaya da bayrağını diktin. Haftayı düzenli üretimle kapatıyorsun.', xp: totalXp(getState(), me), cta: 'Harika' });
+    else feedback({ tone: 'good', title: 'Bayrağı diktin', text: q.title, xp: q.xp });
   };
 
   // ------------------------------------------------------------ open source
@@ -155,12 +156,13 @@ export default function QuestsPage() {
   return (
     <div className="mx-auto max-w-[600px]">
       {/* Banner */}
-      <section className="flex items-center gap-4 rounded-[20px] bg-indigo p-5 text-white" style={{ boxShadow: '0 5px 0 rgb(var(--indigo-lip))' }} aria-labelledby="gorevler">
-        <div className="min-w-0 flex-1">
-          <h1 id="gorevler" className="text-[26px] font-black leading-tight text-white">
-            Haftanın görevleri
+      <section className="relative flex items-center gap-4 overflow-hidden rounded-[20px] bg-indigo p-5 text-white" aria-labelledby="gorevler">
+        <Contours color="white" opacity={0.16} x={0.86} y={0.25} seed={7} />
+        <div className="relative min-w-0 flex-1">
+          <h1 id="gorevler" className="text-[26px] font-bold leading-tight tracking-[-0.02em] text-white">
+            Bu haftanın rotası
           </h1>
-          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[15px] font-extrabold text-white/85">
+          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[15px] font-semibold text-white/85">
             <span className="inline-flex items-center gap-1.5">
               <Clock className="h-4 w-4" strokeWidth={3} />
               <span className="num">{left(weekEnd - now)}</span> kaldı
@@ -169,26 +171,25 @@ export default function QuestsPage() {
               {ready}/{weekly.length} tamam
             </span>
           </p>
-          <button type="button" onClick={() => setWhyOpen(true)} className="mt-2 text-[13px] font-extrabold text-white underline-offset-2 hover:underline">
+          <button type="button" onClick={() => setWhyOpen(true)} className="mt-2 text-[13px] font-bold text-white underline-offset-2 hover:underline">
             Görevler nereden geliyor?
           </button>
         </div>
-        <span className="grid h-[92px] w-[92px] shrink-0 place-items-center rounded-[22px] bg-white/15">
-          <Chest size={72} open={allClaimed} />
-        </span>
+        <div className="relative hidden h-[70px] w-[120px] shrink-0 min-[420px]:block" aria-hidden="true">
+          <Ridge level={2} className="absolute inset-0 h-full w-full" />
+          <SurveyFlag size={40} delay={0.3} className="absolute left-[51px] top-[-9px]" />
+        </div>
       </section>
 
-      {/* Weekly */}
-      <ul className="mt-5 space-y-3" aria-label="Haftalık görevler">
-        {weekly.map((q) => (
-          <li key={q.id}>
-            <WeeklyRow q={q} claimed={claimedIds.has(q.id)} onClaim={() => claim(q)} />
-          </li>
+      {/* Weekly: three waypoints on a short survey trail */}
+      <ol data-coach="g-waypoints" className="mt-6" aria-label="Haftalık görevler">
+        {weekly.map((q, i) => (
+          <Waypoint key={q.id} q={q} claimed={claimedIds.has(q.id)} last={i === weekly.length - 1} next={claimedIds.has(q.id) ? undefined : weekly.find((x) => !claimedIds.has(x.id))?.id === q.id} onClaim={() => claim(q)} />
         ))}
-      </ul>
+      </ol>
 
       {/* Growth */}
-      <section className="mt-12" aria-labelledby="gelisim">
+      <section data-coach="g-gelisim" className="mt-12" aria-labelledby="gelisim">
         <Head title={<span id="gelisim">Gelişim görevleri</span>} action={<span className="pill bg-cyan-tint text-cyan-lip">Sana özel</span>} />
         <p className="mt-1 text-[15px] font-bold text-ink-3">
           Profilinle gerçek açık ihtiyaçlar arasındaki boşluklardan üretildi. Başkasında farklı görünür.{' '}
@@ -225,7 +226,7 @@ export default function QuestsPage() {
       </section>
 
       {/* Open source */}
-      <section id="acik-kaynak" className="mt-12 scroll-mt-24" aria-labelledby="oss">
+      <section id="acik-kaynak" data-coach="g-oss" className="mt-12 scroll-mt-24" aria-labelledby="oss">
         <Head title={<span id="oss">Açık kaynak görevleri</span>} action={<span className="hidden text-[13px] font-bold text-ink-3 sm:inline">GitHub’daki gerçek issue’lar</span>} />
         <p className="mt-1 text-[15px] font-bold text-ink-3">Yalnız PR’ın birleştirilince sayılır. Bunu GitHub’dan biz doğrularız, sen beyan etmezsin.</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -395,7 +396,7 @@ export default function QuestsPage() {
                 </a>
               }
             >
-              Haftalık bir görevi tamamlayıp sandığını aç ya da gerçek bir issue’ya katkı ver. Bitenler burada birikir.
+              Haftalık bir görevi tamamlayıp bayrağını dik ya da gerçek bir issue’ya katkı ver. Bitenler burada birikir.
             </EmptyState>
           </div>
         )}
@@ -482,84 +483,96 @@ export default function QuestsPage() {
   );
 }
 
-// ---------------------------------------------------------------- weekly row
+// ---------------------------------------------------------------- weekly waypoints
 
-function WeeklyRow({ q, claimed, onClaim }: { q: Quest; claimed: boolean; onClaim: () => void }) {
-  const reduce = useReducedMotion();
+/**
+ * One waypoint of the week's route. Not complete = grey marker, complete = the
+ * marker is lit and offers "Bayrağı dik", planted = filled marker with its flag.
+ */
+function Waypoint({ q, claimed, last, next, onClaim }: { q: Quest; claimed: boolean; last: boolean; next?: boolean; onClaim: () => void }) {
   const Icon = WEEKLY_ICON[q.id.split('-')[1] as keyof typeof WEEKLY_ICON] ?? Flag;
   const ready = q.complete && !claimed;
-  const done = q.complete;
+  // Remember that this one was planted in this visit, so the flag drops in once and stays still on later visits.
+  const planted = useRef(false);
+  const plant = () => {
+    planted.current = true;
+    onClaim();
+  };
+  const href = q.href === '/gorevler' ? '#acik-kaynak' : q.href;
 
-  const body = (
+  const head = (
     <>
-      <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-[14px] ${done ? 'bg-green-tint' : 'bg-bg-2'}`}>
-        <Icon size={30} />
+      <span className="flex items-start justify-between gap-2">
+        <span className={`block text-[16px] font-bold leading-snug ${claimed ? 'text-ink-2' : 'text-ink'}`}>{q.title}</span>
+        {href && !q.complete && <ChevronRight className="mt-0.5 h-5 w-5 shrink-0 text-ink-3" strokeWidth={3} />}
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[16px] font-extrabold leading-snug text-ink">{q.title}</p>
-        <div className="mt-2 flex items-center gap-3">
-          <Bar value={q.done / q.of} tone={done ? 'green' : 'gold'} />
-          <span className="num shrink-0 text-[14px] font-black text-ink-3">
-            {q.done} / {q.of}
-          </span>
-        </div>
-        {!done && <p className="mt-1.5 hidden text-[13px] font-bold text-ink-3 sm:block">{q.why}</p>}
-        {ready && (
-          <button type="button" onClick={onClaim} className="btn-primary btn-sm mt-3">
-            Sandığı aç
-          </button>
-        )}
-      </div>
+      <span className="mt-2 flex items-center gap-3">
+        <Bar value={q.done / q.of} tone={q.complete ? 'green' : 'gold'} />
+        <span className="num shrink-0 text-[14px] font-bold text-ink-3">
+          {q.done} / {q.of}
+        </span>
+      </span>
+      {!q.complete && <span className="mt-1.5 block text-[13px] font-medium text-ink-3">{q.why}</span>}
     </>
   );
 
-  if (ready)
-    return (
-      <div className="card flex items-center gap-4 !border-gold bg-gold-tint p-4">
-        {body}
-        <button type="button" onClick={onClaim} tabIndex={-1} aria-hidden="true" className="flex w-[64px] shrink-0 flex-col items-center gap-0.5">
-          <motion.span
-            animate={reduce ? undefined : { rotate: [0, -10, 10, -6, 6, 0] }}
-            transition={{ duration: 0.9, repeat: Infinity, repeatDelay: 1.4 }}
-            className="block"
-          >
-            <Chest size={46} />
-          </motion.span>
-          <span className="num inline-flex items-center gap-0.5 text-[13px] font-black text-gold-ink">
-            <Bolt size={14} />+{q.xp}
-          </span>
-        </button>
-      </div>
-    );
-
-  const chest = (
-    <div className="flex w-[64px] shrink-0 flex-col items-center gap-0.5" aria-hidden="true">
-      <span className={claimed ? 'pop block' : 'block opacity-45'}>
-        <Chest size={46} open={claimed} />
-      </span>
-      <span className={`num inline-flex items-center gap-0.5 text-[13px] font-black ${claimed ? 'text-green-lip' : 'text-ink-3'}`}>
-        {claimed ? 'Alındı' : (
+  return (
+    <li className={`relative flex gap-4 ${last ? '' : 'pb-7'}`}>
+      {!last && (
+        <svg width="4" className="pointer-events-none absolute left-[26px] top-[34px] h-full overflow-visible" aria-hidden="true">
+          <line x1="2" y1="0" x2="2" y2="100%" stroke={claimed ? 'rgb(var(--green) / 0.55)' : 'rgb(var(--line-2))'} strokeWidth="4" strokeDasharray="2 12" strokeLinecap="round" />
+        </svg>
+      )}
+      <div className="relative z-[1] w-[56px] shrink-0 pt-1">
+        {(ready || next) && !claimed && (
           <>
-            <Bolt size={14} />+{q.xp}
+            <span className="ping-soft absolute left-1/2 top-[34px] h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'rgb(var(--indigo) / 0.35)' }} aria-hidden="true" />
+            <span className="ping-soft absolute left-1/2 top-[34px] h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'rgb(var(--indigo) / 0.25)', animationDelay: '1.1s' }} aria-hidden="true" />
           </>
         )}
-      </span>
-    </div>
-  );
+        <span className="relative mx-auto block w-fit">
+          <Tri size={52} tone={claimed ? 'green' : 'indigo'} state={claimed || ready ? 'done' : next ? 'current' : 'waiting'}>
+            {claimed ? (
+              <Check className="h-6 w-6 text-white" strokeWidth={4} />
+            ) : ready ? (
+              <FlagGlyph className="h-6 w-6 text-white" strokeWidth={3} />
+            ) : next ? (
+              <Crosshair className="h-6 w-6 text-white" strokeWidth={3} />
+            ) : (
+              <Icon size={24} className="opacity-60" />
+            )}
+          </Tri>
+        </span>
+        <span className="sr-only">{claimed ? 'Bayrak dikildi' : ready ? 'Bayrağı dikmeye hazır' : 'Henüz tamam değil'}</span>
+      </div>
 
-  // The weekly quest that points back at this page jumps to the issues below.
-  const href = q.href === '/gorevler' ? '#acik-kaynak' : q.href;
-  if (href && !done)
-    return (
-      <a href={href} className="card-press flex items-center gap-4 p-4">
-        {body}
-        {chest}
-      </a>
-    );
-  return (
-    <div className="card flex items-center gap-4 p-4">
-      {body}
-      {chest}
-    </div>
+      <div className="min-w-0 flex-1 pt-1">
+        {href && !q.complete ? (
+          <a href={href} className="block rounded-[14px] transition-colors hover:bg-bg-2 sm:-mx-2 sm:px-2 sm:py-1">
+            {head}
+          </a>
+        ) : (
+          <div>{head}</div>
+        )}
+        {ready && (
+          <button type="button" data-coach="g-bayrak" onClick={plant} className="btn-primary btn-sm mt-3">
+            Bayrağı dik
+          </button>
+        )}
+      </div>
+
+      <div className="flex w-[60px] shrink-0 flex-col items-center pt-1" aria-hidden={!claimed}>
+        {claimed ? (
+          <>
+            <SurveyFlag size={46} delay={0.05} className={planted.current ? '' : '!animate-none'} />
+            <span className="num mt-1 text-[13px] font-bold text-gold-ink">+{q.xp} XP</span>
+          </>
+        ) : (
+          <span className={`num mt-2 inline-flex items-center gap-0.5 text-[13px] font-bold ${ready ? 'text-gold-ink' : 'text-ink-3'}`}>
+            <Bolt size={14} />+{q.xp}
+          </span>
+        )}
+      </div>
+    </li>
   );
 }

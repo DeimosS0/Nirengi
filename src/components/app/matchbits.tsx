@@ -121,16 +121,16 @@ export function partRows(m: Match, org: Org, you: boolean) {
 
   const capacity =
     p.availability === 'open'
-      ? you ? `Pilota açıksın, haftada ${p.weeklyHours} saat ayırabiliyorsun.` : `Pilota açık, haftada ${p.weeklyHours} saat ayırabiliyor.`
+      ? you ? `Deneme projesine açıksın, haftada ${p.weeklyHours} saat ayırabiliyorsun.` : `Deneme projesine açık, haftada ${p.weeklyHours} saat ayırabiliyor.`
       : p.availability === 'partial'
         ? you ? `Kısmi müsaitsin: haftada ${p.weeklyHours} saat.` : `Kısmi müsait: haftada ${p.weeklyHours} saat.`
-        : you ? 'Şu an kapalısın; müsaitliğini açarsan bu puan artar.' : 'Şu an pilota kapalı; bu puanı düşürüyor.';
+        : you ? 'Şu an kapalısın; müsaitliğini açarsan bu puan artar.' : 'Şu an deneme projesine kapalı; bu puanı düşürüyor.';
 
   const { succeeded, approvedMilestones } = m.pilots;
   const history =
     succeeded || approvedMilestones
-      ? `${succeeded ? `${succeeded} başarıyla kapanan pilot, ` : ''}${approvedMilestones} çift onaylı kilometre taşı.`
-      : 'Henüz pilot geçmişi yok; başlangıç puanı verildi, kimse bu yüzden geride kalmaz.';
+      ? `${succeeded ? `${succeeded} başarıyla kapanan deneme projesi, ` : ''}${approvedMilestones} iki tarafça onaylı aşama.`
+      : 'Henüz deneme projesi geçmişi yok; başlangıç puanı verildi, kimse bu yüzden geride kalmaz.';
 
   const row = (key: keyof Match['parts'], label: string, text: string) => ({
     key,
@@ -143,16 +143,16 @@ export function partRows(m: Match, org: Org, you: boolean) {
   return [
     row(
       'evidence',
-      'Kanıt yakınlığı',
+      you ? 'Yaptığın işin uyumu' : 'Yaptığı işin uyumu',
       verified + claim === 0
         ? `Aranan ${n} yetkinliğin hiçbirinde henüz ${you ? 'kanıtın' : 'kanıtı'} yok.`
         : you
           ? `Kanıtların aranan ${n} yetkinliği şöyle karşılıyor: ${list}.`
           : `Aranan ${n} yetkinlik: ${list}.`,
     ),
-    row('context', 'Bağlam uyumu', context),
-    row('capacity', 'Kapasite', capacity),
-    row('history', 'İş birliği geçmişi', history),
+    row('context', 'Sektör ve ölçek uyumu', context),
+    row('capacity', you ? 'Ayırabileceğin zaman' : 'Ayırabileceği zaman', capacity),
+    row('history', 'Birlikte çalışma geçmişi', history),
   ];
 }
 

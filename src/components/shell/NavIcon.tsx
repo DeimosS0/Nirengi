@@ -1,7 +1,7 @@
 import type { NavItem } from './nav';
-import { Book, Bubbles, Building, Chest, Clipboard, Compass, Face, Flag, Home, Shield } from '../ui/icons';
+import { Book, Bubbles, Building, Clipboard, Compass, Face, Flag, Home, Route, Shield } from '../ui/icons';
 
-const MAP = { home: Home, chest: Chest, shield: Shield, bubbles: Bubbles, face: Face, building: Building, clipboard: Clipboard, compass: Compass, flag: Flag, book: Book };
+const MAP = { home: Home, route: Route, shield: Shield, bubbles: Bubbles, face: Face, building: Building, clipboard: Clipboard, compass: Compass, flag: Flag, book: Book };
 
 export default function NavIcon({ icon, size = 30 }: { icon: NavItem['icon']; size?: number }) {
   const I = MAP[icon];

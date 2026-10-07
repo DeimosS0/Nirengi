@@ -11,7 +11,8 @@ import { rankCandidates, similarNeeds } from '../../lib/engine/match.ts';
 import { CONSTRAINT, PILOT_STATUS } from '../../lib/labels.ts';
 import { uid } from '../../lib/format.ts';
 import { SKILLS, skillLabel, skillsInText } from '../../lib/skills.ts';
-import Niri, { type Mood } from '../ui/Niri';
+import { type Mood } from '../ui/Niri';
+import NiriSays from '../ui/NiriSays';
 import { Bar, celebrate, CountUp, feedback, Ring, Sheet, Why } from '../ui/kit';
 import { CheckCircle } from '../ui/icons';
 import { OrgMark, StatusIcon } from '../ui/primitives';
@@ -37,13 +38,13 @@ const ORDER: StepId[] = ['dert', 'current', 'pain', 'painMetric', 'outcome', 'cr
 
 const LABEL: Record<Q, string> = {
   current: 'Mevcut durum',
-  pain: 'Acı noktası',
-  painMetric: 'Acının ölçüsü',
-  outcome: 'Hedef çıktı',
+  pain: 'Sorun',
+  painMetric: 'Sorunun ölçüsü',
+  outcome: 'Beklenen sonuç',
   criteria: 'Başarı kriterleri',
   constraints: 'Kısıtlar',
   decisionMaker: 'Karar verici',
-  scope: 'Pilot kapsamı',
+  scope: 'Deneme projesinin kapsamı',
   skills: 'Yetkinlikler',
   title: 'Başlık',
 };
@@ -59,19 +60,19 @@ const META: Record<Q, { q: string; hint: string; tip: string; ex: string; ph: st
   pain: {
     q: 'Sorun tam olarak ne?',
     hint: 'Sorun kimi, nasıl etkiliyor? Tek cümle yeter.',
-    tip: 'Çözümü değil acıyı yaz: kim neyi yapamıyor?',
+    tip: 'Çözümü değil sorunu yaz: kim neyi yapamıyor?',
     ex: 'Hesaplama bitmeden araçlar depodan çıkamıyor; sabahın ilk teslimatları gecikiyor.',
     ph: 'ör. Hastalar sıra beklerken vazgeçiyor…',
   },
   painMetric: {
     q: 'Bu sorun bugün hangi sayıyla ölçülüyor?',
-    hint: 'Süre, oran, maliyet ya da adet. Sayı yoksa pilotun başarısı ölçülemez.',
+    hint: 'Süre, oran, maliyet ya da adet. Sayı yoksa deneme projesinin başarısı ölçülemez.',
     tip: 'Tahmini bir sayı bile işe yarar. En az bir rakam yaz.',
     ex: 'Hesaplama süresi ortalama 45 dk; sabah ilk teslimat gecikmesi %18',
     ph: 'ör. Ortalama bekleme 45 dk; şikâyet oranı %27',
   },
   outcome: {
-    q: 'Pilot bitince elinde ne olacak?',
+    q: 'Deneme projesi bitince elinde ne olacak?',
     hint: 'Bir ürün, servis ya da rapor. Çıktıyı somut tarif et.',
     tip: '“Şu işi yapan bir servis” gibi tarif edersen adaylar seni hızla anlar.',
     ex: 'Aynı kısıtlarla çalışan, ölçülebilir hızda yeni bir rota servisi.',
@@ -79,7 +80,7 @@ const META: Record<Q, { q: string; hint: string; tip: string; ex: string; ph: st
   },
   criteria: {
     q: 'Başarıyı hangi sayılar gösterir?',
-    hint: 'En az iki kriter yaz. Her biri pilotta bir aşama olur.',
+    hint: 'En az iki kriter yaz. Her biri deneme projesinde bir aşama olur.',
     tip: 'Kriterde bir eşik değer ya da “teslim edilir” gibi net bir ifade olsun.',
     ex: '3.000 noktalık rota hesaplaması 5 dakikanın altında tamamlanır',
     ph: 'ör. Konum bilgisi panele 30 saniyeden kısa sürede yansır',
@@ -88,7 +89,7 @@ const META: Record<Q, { q: string; hint: string; tip: string; ex: string; ph: st
     q: 'Sınırların neler?',
     hint: 'Bütçe, süre, veri ya da mevzuat. En az birini ekle.',
     tip: 'Kısıtı baştan söylemek adayın hızlı karar vermesini sağlar.',
-    ex: 'Süre: pilot 6 hafta sürer',
+    ex: 'Süre: deneme projesi 6 hafta sürer',
     ph: '',
   },
   decisionMaker: {
@@ -99,9 +100,9 @@ const META: Record<Q, { q: string; hint: string; tip: string; ex: string; ph: st
     ph: 'ör. Bilgi İşlem Müdürü',
   },
   scope: {
-    q: 'Pilotu en küçük hâliyle nerede deneyelim?',
+    q: 'Deneme projesini en küçük hâliyle nerede deneyelim?',
     hint: 'Tek bölge, tek müşteri ya da tek ürün grubu.',
-    tip: 'Küçük başlamak pilotun bitme şansını artırır.',
+    tip: 'Küçük başlamak projenin bitme şansını artırır.',
     ex: 'Yalnız Tuzla deposu ve 1 haftalık geçmiş sipariş verisi.',
     ph: 'ör. Yalnız tek şube ve son bir ayın verisi',
   },
@@ -122,8 +123,8 @@ const META: Record<Q, { q: string; hint: string; tip: string; ex: string; ph: st
 };
 
 const CONSTRAINT_PH: Record<ConstraintKind, string> = {
-  butce: 'ör. Pilot bütçesi 60.000 TL',
-  sure: 'ör. Pilot süresi 6 hafta',
+  butce: 'ör. Deneme projesi bütçesi 60.000 TL',
+  sure: 'ör. Deneme projesi süresi 6 hafta',
   veri: 'ör. Gerçek adres yerine anonim koordinat verilir',
   mevzuat: 'ör. KVKK: veri maskelenir',
   teknoloji: 'ör. Sensörler MQTT üzerinden yayın yapıyor',
@@ -178,7 +179,7 @@ export default function CanvasEditor() {
   // The moment the gate opens deserves a nod, but only when it actually flips.
   const gate = useRef(a.canPublish);
   useEffect(() => {
-    if (a.canPublish && !gate.current) feedback({ tone: 'good', title: 'Yayın kapısı açıldı', text: `Çözülebilirlik ${a.score}. İstersen yayımlayabilirsin.` });
+    if (a.canPublish && !gate.current) feedback({ tone: 'good', title: 'Artık yayımlayabilirsin', text: `Netlik puanın ${a.score}. Hazırsan yayımla ya da biraz daha netleştir.` });
     gate.current = a.canPublish;
   }, [a.canPublish, a.score]);
   useEffect(() => {
@@ -263,7 +264,7 @@ export default function CanvasEditor() {
 
   return (
     <div className="mx-auto max-w-[640px]">
-      <div className="flex items-center gap-3">
+      <div data-coach="wiz-ilerleme" className="flex items-center gap-3">
         <button
           type="button"
           onClick={() => (dirty ? setQuit(true) : (location.href = '/ihtiyaclar'))}
@@ -280,13 +281,13 @@ export default function CanvasEditor() {
         </span>
       </div>
 
-      <div className="mt-4 rounded-[16px] bg-bg-2 px-4 py-3">
+      <div data-coach="wiz-netlik" className="mt-4 rounded-[16px] bg-bg-2 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-1 text-[15px] font-extrabold text-ink">
-            Çözülebilirlik
-            <Why title="Çözülebilirlik nasıl hesaplanıyor?">
+            Netlik puanı
+            <Why title="Netlik puanı nasıl hesaplanıyor?">
               <p className="text-[16px] font-bold text-ink-2">
-                İhtiyaç on maddelik bir listeden puan alır; hepsi 100 eder. Yayın için hem {PUBLISH_THRESHOLD} puan hem de zorunlu üç maddenin tamamı gerekir.
+                Netlik puanı, ihtiyacın ne kadar net ve çözülebilir yazıldığını gösterir. İhtiyaç on maddelik bir listeden puan alır; hepsi 100 eder. Yayımlamak için hem {PUBLISH_THRESHOLD} puan hem de zorunlu üç maddenin tamamı gerekir.
               </p>
               <ul className="mt-4 space-y-2">
                 {a.checks.map((k) => (
@@ -312,7 +313,7 @@ export default function CanvasEditor() {
           <span className="absolute -top-1 h-[22px] w-[3px] -translate-x-1/2 rounded-full bg-ink" style={{ left: `${PUBLISH_THRESHOLD}%` }} aria-hidden="true" />
         </div>
         <div className="relative mt-2 h-5 text-[13px] font-extrabold">
-          <span className={a.canPublish ? 'text-green-lip' : 'text-ink-2'}>{a.canPublish ? 'Yayın kapısı açık' : gateNote(a)}</span>
+          <span className={a.canPublish ? 'text-green-lip' : 'text-ink-2'}>{a.canPublish ? 'Yayımlamaya hazır' : gateNote(a)}</span>
           <span className="absolute top-0 -translate-x-1/2 whitespace-nowrap text-ink-3" style={{ left: `${PUBLISH_THRESHOLD}%` }}>
             {PUBLISH_THRESHOLD}
           </span>
@@ -320,6 +321,7 @@ export default function CanvasEditor() {
       </div>
 
       <div
+        data-coach="wiz-soru"
         className="mt-6 overflow-x-clip"
         onKeyDown={(e) => {
           if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing || id === 'dert' || id === 'review') return;
@@ -370,7 +372,7 @@ export default function CanvasEditor() {
       </div>
 
       {id === 'dert' && (
-        <div className="mt-6 space-y-2 p-1">
+        <div data-coach="wiz-devam" className="mt-6 space-y-2 p-1">
           <button type="button" className="btn-primary btn-lg btn-block" disabled={raw.trim().length < 30} onClick={convert}>
             Taslağa dönüştür
           </button>
@@ -380,7 +382,7 @@ export default function CanvasEditor() {
         </div>
       )}
       {q && (
-        <div className={`mt-8 grid gap-3 p-1 ${i > 0 ? 'grid-cols-[auto_1fr]' : ''}`}>
+        <div data-coach="wiz-devam" className={`mt-8 grid gap-3 p-1 ${i > 0 ? 'grid-cols-[auto_1fr]' : ''}`}>
           {i > 0 && (
             <button type="button" className="btn-line btn-lg" onClick={() => go(i - 1)}>
               Geri
@@ -432,13 +434,9 @@ export default function CanvasEditor() {
 /** Niri with one tip in a speech bubble; the mood follows the answer. */
 function Coach({ tip, mood }: { tip: string; mood: Mood }) {
   return (
-    <div className="mt-5 flex items-end gap-3">
-      <Niri mood={mood} size={72} />
-      <div className="relative mb-3 flex-1 rounded-[18px] border-2 border-line bg-bg px-4 py-3">
-        <span className="absolute -left-[9px] bottom-4 h-4 w-4 rotate-45 border-b-2 border-l-2 border-line bg-bg" aria-hidden="true" />
-        <p className="text-[15px] font-extrabold leading-snug text-ink">{tip}</p>
-      </div>
-    </div>
+    <NiriSays mood={mood} size={72} className="mt-5">
+      <p className="text-[15px] font-extrabold leading-snug text-ink">{tip}</p>
+    </NiriSays>
   );
 }
 
@@ -648,7 +646,7 @@ function DertStep({ raw, setRaw }: { raw: string; setRaw: (v: string) => void })
   return (
     <div>
       <h1 className="text-[26px] font-black leading-tight text-ink sm:text-[30px]">Derdini kendi sözlerinle anlat</h1>
-      <p className="mt-2 text-[16px] font-bold text-ink-3">Nasıl anlatıyorsan öyle yaz. Alanları ben doldururum, yalnız eksik kalanları sorarım.</p>
+      <p className="mt-2 text-[16px] font-bold text-ink-3">Kurumunun çözmek istediği problemi yaz. Nasıl anlatıyorsan öyle: alanları ben doldururum, yalnız eksik kalanları sorarım.</p>
       <Coach tip="Rakam, kısıt ve istediğin sonuç varsa hepsini ekle." mood="wave" />
       <textarea
         className="field mt-2 min-h-[168px] resize-none"
@@ -664,7 +662,7 @@ function DertStep({ raw, setRaw }: { raw: string; setRaw: (v: string) => void })
           Örnekle doldur
         </button>
       </div>
-      <p className="hint">Kural tabanlı çalışır, çevrim dışıdır. Yazdıkların cihazından çıkmaz.</p>
+      <p className="hint">Metni bu cihazda işlerim; yazdıkların dışarı gönderilmez.</p>
     </div>
   );
 }
@@ -755,10 +753,10 @@ function Review({ org, c, title, skills, a, titleOk, ready, draftLeft, canMem, o
       </p>
 
       <div className="card mt-5 flex items-center gap-4 p-4">
-        <Ring value={a.score} size={72} label="çözülebilirlik" tone={a.canPublish ? 'green' : 'indigo'} />
+        <Ring value={a.score} size={72} label="netlik puanı" tone={a.canPublish ? 'green' : 'indigo'} />
         <div className="min-w-0">
           <p className="text-[18px] font-black text-ink">{ready ? 'Yayına hazır' : (gateNote(a) ?? 'Neredeyse hazır')}</p>
-          <p className="text-[14px] font-bold text-ink-3">Çözülebilirlik puanı. Yayın kapısı {PUBLISH_THRESHOLD}.</p>
+          <p className="text-[14px] font-bold text-ink-3">Netlik puanı. Yayımlamak için en az {PUBLISH_THRESHOLD} gerekir.</p>
         </div>
       </div>
 
@@ -832,7 +830,7 @@ function Review({ org, c, title, skills, a, titleOk, ready, draftLeft, canMem, o
 
 function Finished({ done, onResume }: { done: Done; onResume: () => void }) {
   const copy = {
-    published: { h: 'İhtiyacın yayında', p: done.fits ? `${done.fits} aday ihtiyacına uyuyor. Kimlikler ilk temasa kadar gizli kalır.` : 'Henüz uyan aday yok; yeni kanıtlar geldikçe burada görünür.' },
+    published: { h: 'İhtiyacın yayında', p: done.fits ? `${done.fits} aday ihtiyacına uyuyor. Adayların isimleri ilk temasa kadar gizli kalır.` : 'Henüz uyan aday yok; yeni kanıtlar geldikçe burada görünür.' },
     draft: { h: 'Taslak kaydedildi', p: 'Kaldığın yerden istediğin zaman devam edebilirsin.' },
     saved: { h: 'Değişiklikler kaydedildi', p: 'İhtiyacın güncel hâli adaylara yansıdı.' },
   }[done.kind];

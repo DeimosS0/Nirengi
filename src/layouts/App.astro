@@ -2,16 +2,16 @@
 // App shell: sidebar on desktop, top bar + tab bar on phones. Both faces
 // (genç / kurum) are rendered; html[data-mode] shows one, so the right nav
 // is there before any script runs.
-import '@fontsource-variable/nunito';
+import '@fontsource-variable/bricolage-grotesque/opsz.css';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import { NAV, isActive, type Mode } from '../components/shell/nav';
 import NavIcon from '../components/shell/NavIcon';
 import ModeSwitch from '../components/shell/ModeSwitch';
-import MeStats from '../components/shell/MeStats';
 import { Mark } from '../components/ui/icons';
 import { Overlays } from '../components/ui/kit';
 import DemoTour from '../components/app/DemoTour';
+import Assistant from '../components/assistant/Assistant';
 
 interface Props {
   title: string;
@@ -100,10 +100,15 @@ const hasRail = Astro.slots.has('rail');
                   href={item.href}
                   aria-current={on ? 'page' : undefined}
                   class:list={[
-                    'flex items-center gap-4 rounded-[14px] border-2 px-3 py-2 text-[15px] font-extrabold uppercase tracking-[0.05em] transition-colors',
-                    on ? 'border-indigo/35 bg-indigo-tint text-indigo' : 'border-transparent text-ink-3 hover:bg-bg-2',
+                    'relative flex items-center gap-4 rounded-[12px] px-3 py-2 text-[16px] transition-colors',
+                    on ? 'font-bold text-indigo' : 'font-semibold text-ink-3 hover:bg-bg-2',
                   ]}
                 >
+                  {on && (
+                    <svg viewBox="0 0 12 16" class="absolute -left-4 top-1/2 h-4 w-3 -translate-y-1/2" aria-hidden="true">
+                      <path d="M2.5 2.5 9.5 8l-7 5.5Z" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
+                    </svg>
+                  )}
                   <NavIcon icon={item.icon} size={32} />
                   {item.label}
                 </a>
@@ -119,7 +124,7 @@ const hasRail = Astro.slots.has('rail');
             <svg viewBox="0 0 20 20" class="h-5 w-5" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"></path></svg>
             Tema
           </button>
-          <button type="button" data-tour-open class="btn-quiet btn-sm flex-1 !justify-start !px-2 !text-[13px] !text-ink-3">Demo turu</button>
+          <button type="button" data-tour-open class="only-genc btn-quiet btn-sm flex-1 !justify-start !px-2 !text-[13px] !text-ink-3">Demo turu</button>
         </div>
       </div>
     </aside>
@@ -128,9 +133,8 @@ const hasRail = Astro.slots.has('rail');
     <header class="sticky top-0 z-40 flex h-16 items-center justify-between border-b-2 border-line bg-bg/95 px-4 backdrop-blur lg:hidden">
       <a href="/" aria-label="nirengi ana sayfa" class="flex items-center gap-2">
         <Mark size={30} />
-        <span class="only-kurum text-[20px] font-black tracking-[-0.03em] text-indigo">nirengi</span>
+        <span class="text-[20px] font-black tracking-[-0.03em] text-indigo">nirengi</span>
       </a>
-      <div class="only-genc"><MeStats client:only="react" /></div>
       <details class="relative">
         <summary class="btn-ink btn-sm cursor-pointer list-none !min-h-10 [&::-webkit-details-marker]:hidden" aria-label="Menü">Menü</summary>
         <div class="card absolute right-0 top-14 z-50 w-72 space-y-3 p-4 shadow-[0_12px_32px_-12px_rgb(0_0_0/0.25)]">
@@ -157,14 +161,16 @@ const hasRail = Astro.slots.has('rail');
             {NAV[m].map((item) => {
               const on = isActive(item, path);
               return (
-                <li class="min-w-0 flex-1">
+                <li class="relative min-w-0 flex-1">
+                  {on && (
+                    <svg viewBox="0 0 16 10" class="absolute -top-[5px] left-1/2 h-2.5 w-4 -translate-x-1/2 text-indigo" aria-hidden="true">
+                      <path d="M2.5 2h11L8 8Z" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
+                    </svg>
+                  )}
                   <a
                     href={item.href}
                     aria-current={on ? 'page' : undefined}
-                    class:list={[
-                      'flex h-[58px] flex-col items-center justify-center gap-0.5 rounded-[14px] border-2 transition-colors',
-                      on ? 'border-indigo/35 bg-indigo-tint text-indigo' : 'border-transparent text-ink-3',
-                    ]}
+                    class:list={['flex h-[58px] flex-col items-center justify-center gap-0.5 rounded-[14px] transition-colors', on ? 'text-indigo' : 'text-ink-3']}
                   >
                     <NavIcon icon={item.icon} size={26} />
                     <span class="max-w-full truncate px-0.5 text-[11px] font-extrabold leading-tight">{item.label}</span>
@@ -179,6 +185,7 @@ const hasRail = Astro.slots.has('rail');
 
     <Overlays client:only="react" />
     <DemoTour client:only="react" />
+    <Assistant client:only="react" />
 
     <script>
       for (const b of document.querySelectorAll('[data-theme-toggle]'))

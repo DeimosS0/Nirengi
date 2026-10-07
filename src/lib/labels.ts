@@ -27,15 +27,15 @@ export const CONSTRAINT: Record<ConstraintKind, string> = {
 };
 
 export const AVAILABILITY: Record<Availability, string> = {
-  open: 'Pilota açık',
-  partial: 'Kısmi müsait',
+  open: 'Projeye açık',
+  partial: 'Kısmen müsait',
   closed: 'Şu an kapalı',
 };
 
 export const NEED_STATUS: Record<NeedStatus, string> = {
   draft: 'Taslak',
   published: 'Yayında',
-  piloting: 'Pilotta',
+  piloting: 'Denemede',
   closed: 'Kapandı',
 };
 
@@ -53,7 +53,7 @@ export const SOURCE: Record<EvidenceSource, string> = {
   doi: 'Yayın (DOI)',
   behance: 'Behance',
   figma: 'Figma',
-  pilot: 'NİRENGİ pilotu',
+  pilot: 'NİRENGİ projesi',
   endorsement: 'Kurum tasdiki',
   claim: 'Beyan',
 };

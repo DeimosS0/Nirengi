@@ -1,31 +1,49 @@
 ---
-// One idea per section: a sentence with one coloured phrase, two lines, an
-// illustration on a tinted panel. `*phrase*` in the heading takes the tone.
+// One idea per section: a sentence with one coloured phrase, Niri explaining it, and a
+// drawn sheet on the other side. A survey marker pins the sheet's corner.
+// `*phrase*` in the heading takes the tone; `*word*` in Niri's line is bold.
+import { Tri } from '../ui/pafta';
+import Say from './Say';
+import type { Line } from './Say';
+
 interface Props {
   id: string;
   heading: string;
-  body: string;
+  say: Pick<Line, 'mood' | 'text'>;
   tone: 'orange' | 'cyan' | 'indigo' | 'purple';
   reverse?: boolean;
   more?: { href: string; label: string };
 }
 
-const { id, heading, body, tone, reverse = false, more } = Astro.props;
+const { id, heading, say, tone, reverse = false, more } = Astro.props;
 const parts = heading.split('*');
+const spoken = say.text.split('*');
+// Bright orange and cyan are too light as heading text on white: use their darker tones.
+const ink = { orange: '--orange-ink', cyan: '--cyan-lip', indigo: '--indigo', purple: '--purple' }[tone];
 ---
 
-<section id={id} class="scroll-mt-16 border-t-2 border-line">
-  <div class="mx-auto grid max-w-[1040px] items-center gap-8 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-24">
+<section id={id} data-narrate={id} class="scroll-mt-16 border-t-2 border-line">
+  <div class="mx-auto grid max-w-[1040px] items-center gap-8 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:py-24 xl:gap-12">
     <div data-reveal class:list={['min-w-0', reverse && 'lg:order-2']}>
       <h2 class="text-[clamp(28px,3.6vw,40px)] font-black leading-[1.12] tracking-[-0.02em] text-ink">
-        {parts.map((t, i) => (i % 2 ? <span style={`color:rgb(var(--${tone}))`}>{t}</span> : t))}
+        {parts.map((t, i) => (i % 2 ? <span style={`color:rgb(var(${ink}))`}>{t}</span> : t))}
       </h2>
-      <p class="lead mt-4 max-w-[44ch]">{body}</p>
-      {more && <a href={more.href} class="-ml-2 mt-2 inline-block rounded-full px-2 py-1 text-[15px] font-extrabold text-indigo transition-colors hover:bg-indigo-tint">{more.label}</a>}
+      <div class="say-inline mt-5">
+        <Say client:visible mood={say.mood} text={say.text} point="down" />
+      </div>
+      <p class="say-sr">{spoken.map((t, i) => (i % 2 ? <b>{t}</b> : t))}</p>
+      {more && <a href={more.href} class="-ml-2 mt-3 inline-block rounded-full px-2 py-1 text-[15px] font-extrabold text-indigo transition-colors hover:bg-indigo-tint">{more.label}</a>}
     </div>
     <div data-reveal style="--d:120ms" class:list={['min-w-0', reverse && 'lg:order-1']}>
-      <div class="rounded-[28px] p-3 sm:p-8" style={`background:rgb(var(--${tone}-tint))`}>
-        <slot />
+      <div class="relative">
+        <span class="absolute -left-2 -top-3 z-10 sm:-left-3 sm:-top-4" aria-hidden="true">
+          <Tri size={34} tone={tone} state="done">
+            <span class="block h-2 w-2 rounded-full bg-white"></span>
+          </Tri>
+        </span>
+        <div class="relative overflow-hidden rounded-[20px] border-2 border-line bg-bg p-4 sm:p-6" style="box-shadow:0 4px 0 rgb(var(--line))">
+          <slot />
+        </div>
       </div>
     </div>
   </div>

@@ -5,7 +5,7 @@ export type Mode = 'genc' | 'kurum';
 export interface NavItem {
   href: string;
   label: string;
-  icon: 'home' | 'chest' | 'shield' | 'bubbles' | 'face' | 'building' | 'clipboard' | 'compass' | 'flag' | 'book';
+  icon: 'home' | 'route' | 'shield' | 'bubbles' | 'face' | 'building' | 'clipboard' | 'compass' | 'flag' | 'book';
   /** Extra path prefixes that light this item. */
   also?: string[];
 }
@@ -13,7 +13,7 @@ export interface NavItem {
 export const NAV: Record<Mode, NavItem[]> = {
   genc: [
     { href: '/bugun', label: 'Bugün', icon: 'home' },
-    { href: '/gorevler', label: 'Görevler', icon: 'chest' },
+    { href: '/gorevler', label: 'Görevler', icon: 'route' },
     { href: '/lig', label: 'Lig', icon: 'shield' },
     { href: '/topluluk', label: 'Topluluk', icon: 'bubbles' },
     { href: '/profil', label: 'Profil', icon: 'face', also: ['/kanit-bagla'] },

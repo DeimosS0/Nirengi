@@ -1,17 +1,19 @@
 // Proje yolu: the milestones are the hero. Each node opens its own sheet; the ledger lives one tap below.
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Check, ChevronLeft, ChevronRight, Clock, X } from 'lucide-react';
+import { useReducedMotion } from 'framer-motion';
+import { Check, ChevronLeft, ChevronRight, Clock, Minus, Star, X } from 'lucide-react';
 import { actions, byId, lastActivity, SILENCE_DAYS, useAppState, useView } from '../../lib/store.ts';
 import type { LogEntry, Milestone, Org, Persona, Person, Pilot } from '../../lib/types.ts';
 import { GENESIS, shortHash, verifyChain } from '../../lib/engine/ledger.ts';
 import { PILOT_STATUS } from '../../lib/labels.ts';
 import { daysSince, fmtDate, fmtDateTime, relTime } from '../../lib/format.ts';
-import Niri from '../ui/Niri';
+import NiriSays from '../ui/NiriSays';
 import { Bar, EmptyState, feedback, Head, Sheet, Why, celebrate } from '../ui/kit';
 import { Avatar, LevelBadge, OrgMark } from '../ui/primitives';
-import { Face, firstName, isSilent, lookOf, nodeKinds, type NodeKind } from './PilotsPage';
+import { Lock } from '../ui/icons';
+import { Trail, type TrailNode } from '../ui/pafta';
+import { firstName, isSilent, lookOf, nodeKinds, type NodeKind } from './PilotsPage';
 import { SealMoment } from './SealMoment';
 
 const KIND: Record<LogEntry['kind'], string> = {
@@ -25,9 +27,8 @@ const KIND: Record<LogEntry['kind'], string> = {
   close: 'kapanış',
   nudge: 'hatırlatma',
 };
-const ACTOR = { person: 'Yetenek', org: 'Kurum', system: 'Sistem' } as const;
+const ACTOR = { person: 'Genç', org: 'Kurum', system: 'Sistem' } as const;
 const ACTOR_TONE = { person: 'bg-cyan-tint text-cyan-lip', org: 'bg-indigo-tint text-indigo', system: 'bg-bg-3 text-ink-3' } as const;
-const OFFSETS = [0, -44, -64, -44, 0, 44, 64, 44];
 const STATUS_TONE = { active: 'bg-indigo-tint text-indigo', succeeded: 'bg-green-tint text-green-lip', failed: 'bg-bg-3 text-ink-2' } as const;
 
 export default function PilotDetail({ id }: { id: string }) {
@@ -132,13 +133,13 @@ function Detail({ pilot }: { pilot: Pilot }) {
       : pilot.status === 'failed'
         ? { mood: 'think' as const, text: 'Bu proje gerekçesiyle kapandı. Onaylanan aşamalar yine de kanıt olarak kalır.' }
         : allDone
-          ? { mood: 'happy' as const, text: 'Tüm aşamalar onaylandı! Şimdi projeyi kapatıp kartı yayımlayabilirsiniz.' }
+          ? { mood: 'happy' as const, text: 'Tüm aşamalar onaylandı! Şimdi projeyi kapatıp kartı yayımlayabilirsin.' }
           : persona === 'org'
             ? waiting.length
-              ? { mood: 'wave' as const, text: `${firstName(person)} bir adımı teslim etti. Bakıp onaylayabilirsin.` }
-              : { mood: 'think' as const, text: `${firstName(person)} sıradaki adımı hazırlıyor. Teslim edince burada görürsün.` }
+              ? { mood: 'wave' as const, text: `${firstName(person)} bir aşamayı teslim etti. Bakıp onaylayabilirsin.` }
+              : { mood: 'think' as const, text: `${firstName(person)} sıradaki aşamayı hazırlıyor. Teslim edince burada görürsün.` }
             : kinds.includes('current')
-              ? { mood: 'wave' as const, text: 'Sıradaki adım seni bekliyor. Teslim edince kurum onaylar.' }
+              ? { mood: 'wave' as const, text: 'Sıradaki aşama seni bekliyor. Teslim edince kurum onaylar.' }
               : { mood: 'think' as const, text: `${org.name} onayını bekliyoruz. Gelince burada haber veririz.` };
 
   return (
@@ -149,7 +150,7 @@ function Detail({ pilot }: { pilot: Pilot }) {
       </a>
 
       {/* Who and where */}
-      <section className="card mt-3 p-5" aria-labelledby="proje">
+      <section data-coach="proje-ozet" className="card mt-3 p-5" aria-labelledby="proje">
         <div className="flex max-w-[460px] items-center gap-3">
           <div className="flex min-w-0 flex-col items-center gap-1.5 text-center">
             <OrgMark name={org.name} size={52} />
@@ -169,6 +170,9 @@ function Detail({ pilot }: { pilot: Pilot }) {
         <h1 id="proje" className="mt-5 text-[26px] font-black leading-tight text-ink">
           {pilot.title}
         </h1>
+        <p className="lead mt-2">
+          {persona === 'org' ? 'Gençle birlikte yürüttüğün deneme projesi: aşamaları genç teslim eder, sen onaylarsın.' : 'Kurumla birlikte yürüttüğün proje: aşamaları sen teslim edersin, kurum onaylar.'}
+        </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className={`pill ${STATUS_TONE[pilot.status]}`}>{PILOT_STATUS[pilot.status]}</span>
           {need && (
@@ -184,7 +188,7 @@ function Detail({ pilot }: { pilot: Pilot }) {
             <Bar value={approved / Math.max(1, total)} tone="green" />
           </div>
           <span className="num text-[16px] font-black text-ink-2">
-            {approved}/{total} adım
+            {approved}/{total} aşama
           </span>
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[13px] font-bold text-ink-3">
@@ -193,7 +197,7 @@ function Detail({ pilot }: { pilot: Pilot }) {
           </span>
           <Why title="İlerleme nasıl sayılıyor?">
             <p className="text-[15px] font-bold text-ink-2">Bir aşama yalnız iki taraf da onaylayınca sayılır: genç teslim ederek, kurum onaylayarak. Teslim edilip onay bekleyen aşama henüz ilerlemeye yazılmaz.</p>
-            <p className="mt-3 text-[15px] font-bold text-ink-2">Aşamalar, pilot açıldığı anda ihtiyaç kanvasındaki başarı kriterlerinden doğdu. Hedef sonradan değiştirilemez.</p>
+            <p className="mt-3 text-[15px] font-bold text-ink-2">Aşamalar, deneme projesi başladığı anda ihtiyaç kartındaki başarı kriterlerinden doğdu. Hedef sonradan değiştirilemez.</p>
           </Why>
         </div>
       </section>
@@ -208,7 +212,7 @@ function Detail({ pilot }: { pilot: Pilot }) {
             <div className="min-w-0">
               <p className="text-[17px] font-black text-red-lip">{silent} gündür hareket yok</p>
               <p className="text-[14px] font-bold text-ink-2">
-                {waiting.length ? 'Sıra kurumda: teslim edilen adım onay bekliyor.' : 'Sıra gençte: sıradaki adım henüz teslim edilmedi.'} {SILENCE_DAYS} günü geçen proje sessiz sayılır.
+                {waiting.length ? 'Sıra kurumda: teslim edilen aşama onay bekliyor.' : 'Sıra gençte: sıradaki aşama henüz teslim edilmedi.'} {SILENCE_DAYS} günü geçen proje sessiz sayılır.
               </p>
             </div>
           </div>
@@ -217,7 +221,7 @@ function Detail({ pilot }: { pilot: Pilot }) {
             className="btn-line btn-sm mt-3 w-full sm:w-auto"
             onClick={() => {
               actions.addLog(pilot.id, persona, 'nudge', `Hatırlatma gönderildi: ${silent} gündür sessiz.`);
-              feedback({ tone: 'info', title: 'Hatırlatma gitti', text: 'İki tarafa da bildirildi ve deftere yazıldı.' });
+              feedback({ tone: 'info', title: 'Hatırlatma gitti', text: 'İki tarafa da bildirildi ve kayıt defterine yazıldı.' });
             }}
           >
             İki tarafa hatırlat
@@ -226,29 +230,25 @@ function Detail({ pilot }: { pilot: Pilot }) {
       )}
 
       {/* Niri says the one thing */}
-      <div className="mt-5 flex items-end gap-3">
-        <Niri mood={say.mood} size={80} />
-        <div className="relative mb-3 flex-1 rounded-[18px] border-2 border-line bg-bg px-4 py-3">
-          <span className="absolute -left-[9px] bottom-4 h-4 w-4 rotate-45 border-b-2 border-l-2 border-line bg-bg" aria-hidden="true" />
-          <p className="text-[16px] font-extrabold leading-snug text-ink">{say.text}</p>
-        </div>
-      </div>
+      <NiriSays mood={say.mood} size={80} typing className="mt-5">
+        <p className="text-[16px] font-extrabold leading-snug text-ink">{say.text}</p>
+      </NiriSays>
 
       {active && focus >= 0 && !allDone && (
-        <button type="button" className="btn-primary btn-block mt-2" onClick={() => setSheet(focus)}>
+        <button type="button" data-coach="proje-onay" className="btn-primary btn-block mt-2" onClick={() => setSheet(focus)}>
           {persona === 'org' ? 'İncele ve onayla' : 'Teslim et'}
           <ChevronRight className="h-5 w-5" strokeWidth={3} />
         </button>
       )}
 
       {allDone && (
-        <section className="mt-4 rounded-[20px] bg-green p-5 text-white" style={{ boxShadow: '0 5px 0 rgb(var(--green-lip))' }}>
+        <section className="mt-4 rounded-[20px] bg-green p-5 text-white">
           <p className="text-[22px] font-black leading-tight">Tüm aşamalar iki taraflı onaylandı</p>
           <p className="mt-1 text-[15px] font-bold text-white/85">Projeyi kapat, isterseniz herkese açık özet kartını yayımla.</p>
           <button
             type="button"
             onClick={() => setClosing(true)}
-            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-5 text-[15px] font-black uppercase tracking-[0.06em] text-green-lip"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-5 text-[15px] font-black text-green-lip"
             style={{ boxShadow: '0 4px 0 rgb(255 255 255 / 0.45)' }}
           >
             Kapat ve kartı yayımla
@@ -258,13 +258,16 @@ function Detail({ pilot }: { pilot: Pilot }) {
       )}
 
       {/* The road */}
-      <section className="mt-9" aria-label="Aşamalar">
-        <Head title="Aşamalar" action={<span className="text-[13px] font-bold text-ink-3">Bir adıma dokun</span>} />
-        <ol className={`mt-4 flex flex-col items-center gap-6 pb-2 ${focus === 0 ? 'pt-12' : 'pt-4'}`}>
-          {pilot.milestones.map((m, i) => (
-            <RoadNode key={m.id} m={m} i={i} kind={kinds[i]} persona={persona} pilot={pilot} x={OFFSETS[i % OFFSETS.length]} focus={i === focus} onOpen={() => setSheet(i)} />
-          ))}
-        </ol>
+      <section data-coach="proje-yol" className="mt-9" aria-label="Aşamalar">
+        <Head title="Aşamalar" action={<span className="text-[13px] font-bold text-ink-3">Bir aşamaya dokun</span>} />
+        <div className={focus === 0 ? 'mt-16' : 'mt-6'}>
+          <Trail
+            row={212}
+            from={2}
+            pin={persona === 'person' ? 'Sıradaki' : 'Sıra sende'}
+            nodes={pilot.milestones.map((m, i) => roadNode(m, i, kinds[i], persona, pilot, i === focus, () => setSheet(i)))}
+          />
+        </div>
       </section>
 
       {/* After the road: closing, closure, ledger */}
@@ -278,10 +281,10 @@ function Detail({ pilot }: { pilot: Pilot }) {
         </div>
       )}
 
-      <button type="button" onClick={() => setLedger(true)} className="card-press mt-8 flex w-full items-center gap-4 p-4 text-left">
+      <button type="button" data-coach="proje-defter" onClick={() => setLedger(true)} className="card-press mt-8 flex w-full items-center gap-4 p-4 text-left">
         <ChainGlyph />
         <span className="min-w-0 flex-1">
-          <span className="block text-[17px] font-black text-ink">Defter</span>
+          <span className="block text-[17px] font-black text-ink">Kayıt defteri</span>
           <span className="block text-[14px] font-bold text-ink-3">{pilot.log.length} kayıt · her kayıt öncekine zincirle bağlı</span>
         </span>
         <ChevronRight className="h-6 w-6 shrink-0 text-ink-3" strokeWidth={3} />
@@ -306,7 +309,7 @@ function Detail({ pilot }: { pilot: Pilot }) {
           />
         )}
       </Sheet>
-      <Sheet open={ledger} onClose={() => setLedger(false)} title="Defter">
+      <Sheet open={ledger} onClose={() => setLedger(false)} title="Kayıt defteri">
         {ledger && <LedgerBody pilot={pilot} persona={persona} />}
       </Sheet>
       <Sheet open={closing} onClose={() => setClosing(false)} title="Projeyi kapat">
@@ -331,26 +334,8 @@ function ChainGlyph() {
 
 // ---------------------------------------------------------------- the road
 
-function RoadNode({
-  m,
-  i,
-  kind,
-  persona,
-  pilot,
-  x,
-  focus,
-  onOpen,
-}: {
-  m: Milestone;
-  i: number;
-  kind: NodeKind;
-  persona: Persona;
-  pilot: Pilot;
-  x: number;
-  focus: boolean;
-  onOpen: () => void;
-}) {
-  const reduce = useReducedMotion();
+/** One milestone as a survey marker: its state, icon and the line that says whose turn it is. */
+function roadNode(m: Milestone, i: number, kind: NodeKind, persona: Persona, pilot: Pilot, focus: boolean, onOpen: () => void): TrailNode {
   const revised = revisionOf(pilot, m) !== null;
   const overdue = kind !== 'done' && pilot.status === 'active' && Date.parse(m.due) < Date.now();
   const caption: { text: string; cls: string } | null =
@@ -369,33 +354,31 @@ function RoadNode({
               : persona === 'org'
                 ? { text: 'Teslim bekleniyor', cls: 'text-ink-3' }
                 : null;
-  const bubble = focus ? (persona === 'person' ? 'Sıradaki' : 'Sıra sende') : null;
-  const dim = kind === 'later' || kind === 'missed';
-  return (
-    <li className={`relative flex flex-col items-center ${bubble && i > 0 ? 'mt-8' : ''}`} style={{ transform: `translateX(${x}px)` }}>
-      {bubble && (
-        <motion.span
-          className="absolute -top-11 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-[12px] border-2 border-line bg-bg px-3 py-1.5 text-[14px] font-black uppercase tracking-wide"
-          style={{ color: 'rgb(var(--indigo))' }}
-          animate={reduce ? undefined : { y: [0, -5, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          {bubble}
-          <span className="absolute -bottom-[7px] left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-line bg-bg" />
-        </motion.span>
-      )}
-      <button
-        type="button"
-        onClick={onOpen}
-        aria-label={`${i + 1}. aşama: ${m.title}${caption ? ` — ${caption.text}` : ''}`}
-        className="rounded-full transition-transform duration-100 active:translate-y-[6px]"
-      >
-        <Face look={lookOf(kind, persona)} size={76} n={i + 1} ring={focus} />
-      </button>
-      <p className={`mt-4 line-clamp-3 w-[200px] text-center text-[14px] font-extrabold leading-tight ${dim ? 'text-ink-3' : 'text-ink-2'}`}>{m.title}</p>
-      {caption && <p className={`mt-1 text-[12px] font-extrabold ${caption.cls}`}>{caption.text}</p>}
-    </li>
-  );
+  const look = lookOf(kind, persona);
+  const icon =
+    look === 'done' ? (
+      <Check className="h-8 w-8 text-white" strokeWidth={4} />
+    ) : look === 'star' ? (
+      <Star className="h-7 w-7 fill-white text-white" strokeWidth={2} />
+    ) : look === 'wait' ? (
+      <Clock className="h-7 w-7 text-ink-3" strokeWidth={3} />
+    ) : look === 'lock' ? (
+      <Lock size={28} />
+    ) : look === 'missed' ? (
+      <Minus className="h-7 w-7 text-ink-3" strokeWidth={3.5} />
+    ) : (
+      <span className="num text-[24px] font-black text-ink-3">{i + 1}</span>
+    );
+  return {
+    id: m.id,
+    title: m.title,
+    state: focus ? 'current' : look === 'done' || look === 'star' ? 'done' : look === 'wait' || look === 'open' ? 'waiting' : 'locked',
+    tone: look === 'done' ? 'green' : 'indigo',
+    label: caption?.text ?? `${i + 1}. aşama`,
+    onClick: onOpen,
+    icon,
+    caption: caption ?? undefined,
+  };
 }
 
 // ---------------------------------------------------------------- milestone sheet
@@ -432,7 +415,7 @@ function MilestoneBody({
         : kind === 'missed'
           ? { text: 'Karşılanmadı', cls: 'bg-bg-3 text-ink-3' }
           : kind === 'current' && persona === 'person'
-            ? { text: 'Sıradaki adım', cls: 'bg-indigo-tint text-indigo' }
+            ? { text: 'Sıradaki aşama', cls: 'bg-indigo-tint text-indigo' }
             : persona === 'person'
               ? { text: 'Sırası gelmedi', cls: 'bg-bg-3 text-ink-3' }
               : { text: 'Teslim bekleniyor', cls: 'bg-bg-3 text-ink-3' };
@@ -475,7 +458,7 @@ function MilestoneBody({
 
       {m.submittedNote && (
         <div className="mt-4">
-          <p className="text-[15px] font-black text-ink">Teslim edilen kanıt</p>
+          <p className="text-[15px] font-black text-ink">Teslim notu</p>
           <p className="mt-1.5 rounded-[14px] bg-bg-2 p-3.5 text-[15px] font-bold leading-snug text-ink-2">
             <Linkified text={m.submittedNote} />
           </p>
@@ -489,7 +472,7 @@ function MilestoneBody({
       <div className="mt-6 border-t-2 border-line pt-5">
         <p className="text-[16px] font-black text-ink">{summary}</p>
         <ul className="mt-3 space-y-2.5">
-          <Approval done={!!m.approvals.person} who={`${person.name} · Yetenek`} at={m.approvals.person} did="Teslim ederek onayladı" pending="Henüz teslim etmedi" />
+          <Approval done={!!m.approvals.person} who={`${person.name} · Genç`} at={m.approvals.person} did="Teslim ederek onayladı" pending="Henüz teslim etmedi" />
           <Approval done={!!m.approvals.org} who={`${org.name} · Kurum`} at={m.approvals.org} did="Onayladı" pending={m.state === 'submitted' ? 'Onay bekliyor' : 'Teslimden sonra'} />
         </ul>
       </div>
@@ -497,7 +480,7 @@ function MilestoneBody({
       {m.state === 'approved' && (
         <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[16px] bg-indigo-tint p-4">
           <LevelBadge level="S3" />
-          <p className="min-w-0 flex-1 text-[14px] font-bold text-ink-2">Bu aşama, {person.name} adlı kişinin profiline Kurum onaylı kanıt olarak işlendi.</p>
+          <p className="min-w-0 flex-1 text-[14px] font-bold text-ink-2">Bu aşama, {person.name} adlı kişinin profiline Kurum onaylı iş olarak eklendi.</p>
           <a href={`/profil/${person.handle}`} className="btn-primary btn-sm">
             Profilde gör
           </a>
@@ -592,8 +575,8 @@ function Actions({
       );
     }
     if (kind === 'waiting')
-      return wrap(<p className="text-[14px] font-bold text-ink-3">Teslimin kuruma gitti. Demoda sol menüden Kurum yüzüne geçip bu adımı onaylayabilirsin.</p>);
-    return wrap(<p className="text-[14px] font-bold text-ink-3">Adımlar sırayla teslim edilir. Önce sıradaki adımı teslim et, bu adım ondan sonra açılır.</p>);
+      return wrap(<p className="text-[14px] font-bold text-ink-3">Teslimin kuruma gitti. Demoda sol menüden Kurum yüzüne geçip bu aşamayı onaylayabilirsin.</p>);
+    return wrap(<p className="text-[14px] font-bold text-ink-3">Aşamalar sırayla teslim edilir. Önce sıradaki aşamayı teslim et, bu aşama ondan sonra açılır.</p>);
   }
 
   if (kind === 'waiting')
@@ -615,7 +598,7 @@ function Actions({
               onClick={() => {
                 actions.requestRevision(pilot.id, m.id, note.trim());
                 onClose();
-                feedback({ tone: 'info', title: 'Düzeltme istendi', text: `${who} teslimi güncelleyecek. İstek deftere yazıldı.` });
+                feedback({ tone: 'info', title: 'Düzeltme istendi', text: `${who} teslimi güncelleyecek. İstek kayıt defterine yazıldı.` });
               }}
             >
               Düzeltme iste
@@ -628,7 +611,7 @@ function Actions({
             Nasıl doğruladın? <span className="font-bold text-ink-3">(isteğe bağlı)</span>
           </label>
           <textarea id="onay-not" className="field min-h-20" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Örn. ölçüm sunucuda tekrarlandı." />
-          <p className="hint">Onayınla bu aşama iki taraflı tamamlanır, deftere yazılır ve kişinin profiline Kurum onaylı kanıt olarak işlenir.</p>
+          <p className="hint">Onayınla bu aşama iki taraflı tamamlanır, kayıt defterine yazılır ve gencin profiline Kurum onaylı iş olarak eklenir.</p>
           <div className="mt-5 grid grid-cols-2 gap-3">
             <button type="button" className="btn-line" onClick={() => setRevise(true)}>
               Düzeltme iste
@@ -647,7 +630,7 @@ function Actions({
         </>
       ),
     );
-  return wrap(<p className="text-[14px] font-bold text-ink-3">{who} bu adımı teslim edince burada onayına düşer.</p>);
+  return wrap(<p className="text-[14px] font-bold text-ink-3">{who} bu aşamayı teslim edince burada onayına düşer.</p>);
 }
 
 // ---------------------------------------------------------------- closure
@@ -690,7 +673,7 @@ function CloseBody({ pilot, onDone }: { pilot: Pilot; onDone: () => void }) {
       <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Kapanış türü">
         {(
           [
-            ['succeeded', 'Başarıyla', 'Tüm adımlar onaylı'],
+            ['succeeded', 'Başarıyla', 'Tüm aşamalar onaylı'],
             ['failed', 'Gerekçesiyle', 'Bir kısmı karşılanmadı'],
           ] as const
         ).map(([k, l, d]) => {
@@ -713,7 +696,7 @@ function CloseBody({ pilot, onDone }: { pilot: Pilot; onDone: () => void }) {
       </div>
       {!allMet && (
         <p className="hint">
-          “Başarıyla” için tüm adımların iki taraflı onaylı olması gerekir ({met}/{total}).
+          “Başarıyla” için tüm aşamaların iki taraflı onaylı olması gerekir ({met}/{total}).
         </p>
       )}
 
@@ -730,14 +713,14 @@ function CloseBody({ pilot, onDone }: { pilot: Pilot; onDone: () => void }) {
         <div className="flex items-center justify-between gap-3">
           <p className="text-[16px] font-black text-ink">Herkese açık kart</p>
           <Why title="Kartta neler görünür?">
-            <p className="text-[15px] font-bold text-ink-2">Kart yalnız iki taraf da onay verirse yayımlanır. İçinde proje adı, kurum, kişi, süre, karşılanan kriterler ve defter özeti olur.</p>
+            <p className="text-[15px] font-bold text-ink-2">Kart yalnız iki taraf da onay verirse yayımlanır. İçinde proje adı, kurum, kişi, süre, karşılanan kriterler ve kayıt defteri özeti olur.</p>
             <p className="mt-3 text-[15px] font-bold text-ink-2">Kartı bağlantıyı bilen herkes görür. Bu demoda iki tarafın onayı bu formdan verilir.</p>
           </Why>
         </div>
         <ul className="mt-3 space-y-3">
           {(
             [
-              ['person', 'Yetenek yayımlanmasını onaylıyor'],
+              ['person', 'Genç yayımlanmasını onaylıyor'],
               ['org', 'Kurum yayımlanmasını onaylıyor'],
             ] as const
           ).map(([k, l]) => (
@@ -763,7 +746,7 @@ function CloseBody({ pilot, onDone }: { pilot: Pilot; onDone: () => void }) {
             onDone();
             if (outcome === 'succeeded')
               celebrate({ title: 'Proje tamamlandı', sub: `${met}/${total} kriter iki tarafça onaylandı.${both ? ' Herkese açık kart yayında.' : ''}`, ...(both ? { cta: 'Kartı gör', href: `/kart/${pilot.id}` } : { cta: 'Devam et' }) });
-            else feedback({ tone: 'info', title: 'Proje kapandı', text: 'Gerekçe deftere yazıldı; onaylanan aşamalar kanıt olarak kalır.' });
+            else feedback({ tone: 'info', title: 'Proje kapandı', text: 'Gerekçe kayıt defterine yazıldı; onaylanan aşamalar kanıt olarak kalır.' });
           }}
         >
           Projeyi kapat
@@ -845,8 +828,8 @@ function LedgerBody({ pilot, persona }: { pilot: Pilot; persona: Persona }) {
       <div className="flex items-center justify-between gap-3">
         <p className="text-[15px] font-bold text-ink-3">{entries.length} kayıt · SHA-256 zinciri</p>
         <Why title="Zincir nasıl çalışır?">
-          <p className="text-[15px] font-bold text-ink-2">Her kayıt, kendi içeriğinin ve bir önceki kaydın özetini (SHA-256) taşır; böylece kayıtlar tek bir zincir olur.</p>
-          <p className="mt-3 text-[15px] font-bold text-ink-2">Geçmişte tek bir harf değişse bile o kaydın özeti tutmaz ve ondan sonraki her bağ bozulur; bu yüzden defter sessizce yeniden yazılamaz.</p>
+          <p className="text-[15px] font-bold text-ink-2">Her kayıt, kendi içeriğinin ve bir önceki kaydın parmak izini (SHA-256 özeti) taşır; böylece kayıtlar tek bir zincir olur.</p>
+          <p className="mt-3 text-[15px] font-bold text-ink-2">Geçmişte tek bir harf değişse bile o kaydın özeti tutmaz ve ondan sonraki her bağ bozulur; bu yüzden kayıt defteri sessizce yeniden yazılamaz.</p>
         </Why>
       </div>
 
@@ -925,10 +908,10 @@ function LedgerBody({ pilot, persona }: { pilot: Pilot; persona: Persona }) {
             wrote.current = true;
             actions.addLog(pilot.id, persona, kind, text.trim());
             setText('');
-            feedback({ tone: 'good', title: 'Deftere yazıldı', text: 'Yeni kayıt zincirin sonuna eklendi.' });
+            feedback({ tone: 'good', title: 'Kayıt defterine yazıldı', text: 'Yeni kayıt zincirin sonuna eklendi.' });
           }}
         >
-          <p className="label !mb-2">Deftere yaz · {persona === 'org' ? 'Kurum' : 'Yetenek'} olarak</p>
+          <p className="label !mb-2">Kayıt defterine yaz · {persona === 'org' ? 'Kurum' : 'Genç'} olarak</p>
           <div className="seg" role="group" aria-label="Kayıt türü">
             {(
               [
@@ -945,7 +928,7 @@ function LedgerBody({ pilot, persona }: { pilot: Pilot; persona: Persona }) {
           <input className="field mt-3" value={text} onChange={(e) => setText(e.target.value)} placeholder="Kısa ve ölçülebilir yaz" aria-label="Kayıt metni" />
           <p className="hint">Kayıtlar düzenlenemez ve silinemez; yalnız yeni kayıt eklenebilir.</p>
           <button type="submit" className="btn-primary btn-block mt-4" disabled={!text.trim()}>
-            Deftere yaz
+            Kayıt defterine yaz
           </button>
         </form>
       )}

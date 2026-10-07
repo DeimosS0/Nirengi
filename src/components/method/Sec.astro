@@ -1,5 +1,6 @@
 ---
 // One chapter of the method page: icon, heading, one lead line, then folds.
+// A dotted survey line links each chapter to the one before it.
 interface Props {
   id: string;
   title: string;
@@ -8,7 +9,7 @@ interface Props {
 const { id, title, lead } = Astro.props;
 ---
 
-<section id={id} class="mt-14 scroll-mt-24">
+<section id={id} class="relative mt-14 scroll-mt-24">
   <div class="flex items-center gap-3">
     <slot name="icon" />
     <h2 class="text-[26px] font-black leading-tight text-ink md:text-[28px]">{title}</h2>
@@ -18,3 +19,14 @@ const { id, title, lead } = Astro.props;
     <slot />
   </div>
 </section>
+
+<style>
+  section + section::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: -52px;
+    height: 46px;
+    border-left: 3px dotted rgb(var(--line-2));
+  }
+</style>

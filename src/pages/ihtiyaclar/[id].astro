@@ -6,6 +6,6 @@ import { Loading } from '../../components/ui/primitives';
 const { id = '' } = Astro.params;
 ---
 
-<App title="İhtiyaç" mode="auto" description="İhtiyaç kartı, çözülebilirlik puanı ve gerekçesiyle sıralanmış adaylar.">
+<App title="İhtiyaç" mode="auto" description="İhtiyaç kartı, netlik puanı ve gerekçesiyle sıralanmış adaylar.">
   <NeedDetail client:only="react" id={id}><Loading slot="fallback" /></NeedDetail>
 </App>

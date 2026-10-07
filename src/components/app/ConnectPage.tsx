@@ -1,10 +1,10 @@
-// Kanıt bağla: onboarding as a lesson. One thing per screen, a thick progress
-// bar on top and one big key at the bottom. Every check still goes to the real
+// Kanıt bağla: onboarding as a short walk. One thing per screen, survey markers
+// on top that fill in as you go, and the key right under the step. Every check still goes to the real
 // services (GitHub API, DNS over HTTPS); whatever cannot be proven stays Beyan.
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Check, ChevronLeft, ChevronRight, Copy, ExternalLink, Loader2, X } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Copy, ExternalLink, Loader2 } from 'lucide-react';
 import type { Evidence, Level, Person, State, WeeklyGoal } from '../../lib/types.ts';
 import { actions, getState, useAppState } from '../../lib/store.ts';
 import { progress, totalXp, XP } from '../../lib/engine/progress.ts';
@@ -32,10 +32,12 @@ import {
 import { LEVELS } from '../../lib/labels.ts';
 import { daysAgo, relTime, uid } from '../../lib/format.ts';
 import { skillLabel } from '../../lib/skills.ts';
-import Niri, { type Mood } from '../ui/Niri';
-import { Bar, celebrate, CountUp, feedback, Head, WeekDots, Why } from '../ui/kit';
+import { type Mood } from '../ui/Niri';
+import NiriSays from '../ui/NiriSays';
+import { celebrate, CountUp, feedback, Head, WeekDots, Why } from '../ui/kit';
 import { CheckCircle, Flame, Star } from '../ui/icons';
 import { Avatar, LevelBadge } from '../ui/primitives';
+import { TriMark } from '../ui/TriMark';
 
 type StepId = 'home' | 'add' | 'user' | 'found' | 'goal' | 'prove' | 'domain' | 'done';
 const FLOW: StepId[] = ['user', 'found', 'goal', 'prove', 'domain'];
@@ -393,7 +395,7 @@ export default function ConnectPage() {
   }, [step]);
 
   const idx = FLOW.indexOf(step);
-  const bar = step === 'done' ? 1 : idx >= 0 ? Math.max(0.05, idx / FLOW.length) : null;
+  const reached = step === 'done' ? FLOW.length : idx >= 0 ? idx : null;
 
   // Enter acts like the big key unless it already means something where the focus is.
   const footRef = useRef(foot);
@@ -509,25 +511,26 @@ export default function ConnectPage() {
     }
   })();
 
+  const quiet = 'inline-flex shrink-0 items-center gap-0.5 rounded-full py-1 pl-1 pr-3 text-[15px] font-bold text-ink-3 transition-colors hover:bg-bg-2 hover:text-ink';
+
   return (
-    <div className="mx-auto mb-[calc(66px_+_env(safe-area-inset-bottom)_-_128px)] flex min-h-[calc(100dvh_-_154px_-_env(safe-area-inset-bottom))] w-full max-w-[560px] flex-col lg:mb-[-64px] lg:min-h-[calc(100dvh_-_40px)]">
-      <div className="sticky top-16 z-10 flex items-center gap-2 bg-bg py-2 lg:top-0">
-        <a href="/bugun" aria-label="Kapat ve Bugün’e dön" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-bg-2 hover:text-ink">
-          <X className="h-6 w-6" strokeWidth={3} />
-        </a>
-        {back && (
-          <button type="button" onClick={goBack} aria-label="Geri" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-bg-2 hover:text-ink">
-            <ChevronLeft className="h-6 w-6" strokeWidth={3} />
+    <div className="mx-auto w-full max-w-[560px]">
+      <div className="flex items-center gap-3 py-2">
+        {back ? (
+          <button type="button" onClick={goBack} className={quiet}>
+            <ChevronLeft className="h-5 w-5" strokeWidth={3} aria-hidden="true" />
+            Geri
           </button>
+        ) : (
+          <a href="/profil" className={quiet}>
+            <ChevronLeft className="h-5 w-5" strokeWidth={3} aria-hidden="true" />
+            Profil
+          </a>
         )}
-        {bar !== null && (
-          <div className="min-w-0 flex-1" role="progressbar" aria-label="Adımlar" aria-valuemin={0} aria-valuemax={FLOW.length} aria-valuenow={Math.round(bar * FLOW.length)}>
-            <Bar value={bar} tone="green" h={16} />
-          </div>
-        )}
+        {reached !== null && <Steps reached={reached} />}
       </div>
 
-      <div className="flex-1 overflow-x-clip pb-6 pt-4">
+      <div className="overflow-x-clip pt-4">
         <AnimatePresence mode="wait" initial={false} custom={{ dir, reduce }}>
           <motion.div
             key={step}
@@ -543,12 +546,10 @@ export default function ConnectPage() {
         </AnimatePresence>
       </div>
 
-      <footer className="sticky bottom-[calc(env(safe-area-inset-bottom)+66px)] z-10 border-t-2 border-line bg-bg pb-3 pt-3 lg:bottom-0">
-        <div className="flex gap-3">
-          {foot.side && <Key {...foot.side} className="btn-line btn-lg !px-4 !text-[14px]" />}
-          <Key {...foot} className="btn-primary btn-lg min-w-0 flex-1 !px-4" />
-        </div>
-      </footer>
+      <div className="mt-8 flex flex-col-reverse items-start gap-3 pb-6 sm:flex-row sm:items-center">
+        {foot.side && <Key {...foot.side} className="btn-quiet" />}
+        <Key {...foot} className="btn-primary btn-lg sm:min-w-[200px]" />
+      </div>
     </div>
   );
 }
@@ -575,16 +576,48 @@ function Key({ label, href, onClick, disabled, busy, className }: { label: strin
   );
 }
 
+/** Survey markers joined by a line: done = filled with a check, current = filled with a ripple, next = outline. */
+function Steps({ reached }: { reached: number }) {
+  return (
+    <div className="flex min-w-0 flex-1 items-center" role="progressbar" aria-label="Adımlar" aria-valuemin={0} aria-valuemax={FLOW.length} aria-valuenow={reached}>
+      {FLOW.map((id, i) => {
+        const done = i < reached;
+        const current = i === reached;
+        return (
+          <Fragment key={id}>
+            {i > 0 && (
+              <span className="relative mx-1 h-[4px] min-w-2 flex-1 translate-y-[2px] overflow-hidden rounded-full bg-bg-3" aria-hidden="true">
+                <span className={`absolute inset-0 origin-left rounded-full bg-indigo transition-transform duration-300 ease-out ${i <= reached ? 'scale-x-100' : 'scale-x-0'}`} />
+              </span>
+            )}
+            <span key={done ? 'done' : current ? 'current' : 'next'} className={`relative grid h-8 w-8 shrink-0 place-items-center ${done ? 'pop' : ''}`} aria-hidden="true">
+              {current && (
+                <>
+                  <span className="ping-soft absolute left-1/2 top-[62%] h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'rgb(var(--indigo) / 0.35)' }} />
+                  <span className="ping-soft absolute left-1/2 top-[62%] h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'rgb(var(--indigo) / 0.25)', animationDelay: '1.1s' }} />
+                </>
+              )}
+              {done || current ? (
+                <TriMark size={current ? 30 : 26} color="indigo" lip={!current}>
+                  {done ? <Check className="h-3 w-3 text-white" strokeWidth={4.5} /> : <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                </TriMark>
+              ) : (
+                <TriMark size={26} color="ink-4" variant="outline" />
+              )}
+            </span>
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Niri says what this step is for, in one sentence. */
 function Guide({ mood, children }: { mood: Mood; children: ReactNode }) {
   return (
-    <div className="flex items-end gap-3">
-      <Niri mood={mood} size={92} />
-      <div className="relative mb-4 flex-1 rounded-[18px] border-2 border-line bg-bg px-4 py-3">
-        <span className="absolute -left-[9px] bottom-4 h-4 w-4 rotate-45 border-b-2 border-l-2 border-line bg-bg" aria-hidden="true" />
-        <p className="text-[16px] font-extrabold leading-snug text-ink">{children}</p>
-      </div>
-    </div>
+    <NiriSays mood={mood} size={92} typing>
+      <p className="text-[16px] font-extrabold leading-snug text-ink">{children}</p>
+    </NiriSays>
   );
 }
 
@@ -618,7 +651,7 @@ const LEVEL_WHY = (
       <b>Doğrulandı:</b> GitHub hesabının ya da alan adının senin olduğunu makine kontrol etti. Ağırlığı {weight("S2")}.
     </p>
     <p>
-      <b>Kurum onaylı:</b> birlikte çalıştığın kurum bir aşamayı imzaladı. En güçlü kanıt ({weight("S3")}); pilot sonrası oluşur.
+      <b>Kurum onaylı:</b> birlikte çalıştığın kurum bir aşamayı imzaladı. En güçlü kanıt ({weight("S3")}); deneme projesinden sonra oluşur.
     </p>
   </div>
 );

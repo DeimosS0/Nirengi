@@ -1,0 +1,57 @@
+---
+// The landing's body: the feature sections, with Niri narrating them. On wide screens
+// (with JS) the narrator is a sticky column beside the sections; everywhere else each
+// section carries its own inline bubble, which is also what shows without JS.
+import Narrator from './Narrator';
+import type { Line } from './Say';
+
+interface Props {
+  lines: Line[];
+}
+const { lines } = Astro.props;
+---
+
+<div class="story">
+  <aside class="story-aside" aria-hidden="true">
+    <Narrator client:load lines={lines} />
+  </aside>
+  <div class="story-main">
+    <slot />
+  </div>
+</div>
+
+<style is:global>
+  .story-aside {
+    display: none;
+  }
+  /* The inline copy, for assistive tech only, once the sticky narrator takes over. */
+  .say-sr {
+    display: none;
+  }
+  @media (min-width: 1280px) {
+    .js .story {
+      display: grid;
+      grid-template-columns: clamp(336px, 25vw, 372px) minmax(0, 1fr);
+      column-gap: 24px;
+      max-width: 1400px;
+      margin-inline: auto;
+      padding-inline: 24px;
+    }
+    .js .story-aside {
+      display: block;
+    }
+    .js .say-inline {
+      display: none;
+    }
+    .js .say-sr {
+      display: block;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  }
+</style>

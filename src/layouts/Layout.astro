@@ -1,7 +1,7 @@
 ---
 // Public shell: a plain top bar, the page, the footer. The app itself lives in
 // App.astro; this one carries the landing, the 404 and the public pilot card.
-import '@fontsource-variable/nunito';
+import '@fontsource-variable/bricolage-grotesque/opsz.css';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
@@ -61,13 +61,15 @@ const fullTitle = title.startsWith('nirengi') ? title : `${title} · nirengi`;
       }
       @media (prefers-reduced-motion: reduce) {
         .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+        /* Entrance animations land at once; their delays must not hide anything. */
+        .pop, .rise { animation-delay: 0s !important; }
       }
     </style>
   </head>
   <body class="flex min-h-dvh flex-col">
     <a href="#icerik" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[90] focus:rounded-[12px] focus:bg-indigo focus:px-4 focus:py-2 focus:text-white">İçeriğe geç</a>
 
-    <header class="sticky top-0 z-40 border-b-2 border-line bg-bg/95 backdrop-blur">
+    <header class="sticky top-0 z-40 border-b-2 border-line bg-bg">
       <div class="mx-auto flex h-16 max-w-[1120px] items-center gap-2 px-4 sm:px-6">
         <a href="/" class="flex items-center gap-2" aria-label="nirengi ana sayfa">
           <Mark size={32} />

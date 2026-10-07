@@ -1,16 +1,34 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Niri from '../components/ui/Niri';
+import { Contours, Tri } from '../components/ui/pafta';
 ---
 
 <Layout title="Sayfa bulunamadı" description="Aradığın sayfa bu haritada yok.">
-  <section class="mx-auto flex max-w-[560px] flex-col items-center px-4 py-16 text-center sm:py-24">
-    <Niri mood="think" size={170} />
-    <h1 class="h-hero mt-6 !text-[clamp(30px,6vw,44px)]">Bu sayfa haritada yok</h1>
-    <p class="lead mt-3 max-w-[40ch]">Adres taşınmış ya da yanlış yazılmış olabilir. Demo verisini sıfırladıysan bağlantılar da boşa düşer.</p>
-    <div class="mt-8 flex w-full max-w-[340px] flex-col gap-3">
-      <a href="/" class="btn-primary btn-lg btn-block">Ana sayfaya dön</a>
-      <a href="/bugun" class="btn-line btn-lg btn-block">Bugün’e git</a>
+  <section class="relative overflow-hidden">
+    <Contours seed={4} x={0.5} y={0.5} rings={9} step={30} opacity={0.45} />
+    <div class="relative mx-auto flex max-w-[560px] flex-col items-center px-4 py-14 text-center sm:py-20">
+      <!-- A trail that runs out: Niri looks at an empty survey point. -->
+      <div class="relative h-[190px] w-[320px] max-w-full" role="img" aria-label="Niri, izin bittiği yerdeki boş bir nirengi noktasına bakıyor">
+        <svg viewBox="0 0 320 190" class="absolute inset-0 h-full w-full" aria-hidden="true">
+          <path d="M6 176C60 182 98 158 138 164S226 150 258 122" fill="none" stroke="rgb(var(--ink-4))" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round"></path>
+          <ellipse class="ping-soft" cx="258" cy="150" rx="22" ry="7" fill="none" stroke="rgb(var(--ink-4) / 0.6)" stroke-width="2"></ellipse>
+        </svg>
+        <div class="absolute left-[44px] top-[34px]">
+          <Niri client:visible mood="think" size={130} />
+        </div>
+        <div class="pop absolute left-[226px] top-[56px]" style="animation-delay:0.3s">
+          <Tri size={64} state="waiting">
+            <span class="text-[22px] font-black leading-none text-ink-3">?</span>
+          </Tri>
+        </div>
+      </div>
+      <h1 class="h-hero mt-4 !text-[clamp(30px,6vw,44px)]">Bu sayfa haritada yok</h1>
+      <p class="lead mt-3 max-w-[40ch]">Adres taşınmış ya da yanlış yazılmış olabilir. Demo verisini sıfırladıysan bağlantılar da boşa düşer.</p>
+      <div class="mt-8 flex w-full max-w-[340px] flex-col gap-3">
+        <a href="/" class="btn-primary btn-lg btn-block">Ana sayfaya dön</a>
+        <a href="/bugun" class="btn-line btn-lg btn-block">Bugün’e git</a>
+      </div>
     </div>
   </section>
 </Layout>

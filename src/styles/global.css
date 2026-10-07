@@ -3,9 +3,10 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /*
- * NİRENGİ — simple on the surface, deep one tap below.
- * White ground, 2px soft seams, pressable keys with a 4px lip, rounded
- * Nunito, and the Zemin360 family as full-palette roles:
+ * NİRENGİ "Pafta" — a survey map you draw yourself; simple on the surface,
+ * deep one tap below. White ground, 2px soft seams, triangles as the
+ * primitive, keys with a 3px lip, Bricolage Grotesque in sentence case, and
+ * the Zemin360 family as full-palette roles:
  *   indigo = act · orange = seri · cyan = doğrulandı · purple = lig
  *   gold = XP · green = tamam · red = hata.
  * Each colour carries a darker lip (the pressed edge) and a soft tint.
@@ -93,8 +94,13 @@
 }
 
 @theme inline {
-  --font-sans: "Nunito Variable", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
-  --font-display: "Nunito Variable", ui-rounded, system-ui, sans-serif;
+  --font-sans: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  /* Bricolage is darker than a rounded face at the same weight: every step sits a notch lighter. */
+  --font-weight-semibold: 560;
+  --font-weight-bold: 620;
+  --font-weight-extrabold: 700;
+  --font-weight-black: 780;
   --font-mono: "JetBrains Mono Variable", ui-monospace, "Cascadia Mono", monospace;
 
   --color-bg: rgb(var(--bg));
@@ -144,18 +150,19 @@
     @apply bg-bg text-ink-2 font-sans;
     font-size: 16px;
     line-height: 1.55;
-    font-weight: 550;
+    font-weight: 450;
+    font-optical-sizing: auto;
   }
   h1, h2, h3, h4 {
     @apply text-ink;
-    font-weight: 850;
-    letter-spacing: -0.015em;
-    line-height: 1.15;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
     text-wrap: balance;
   }
   strong, b {
     @apply text-ink;
-    font-weight: 800;
+    font-weight: 700;
   }
   ::selection {
     background: rgb(var(--indigo) / 0.22);
@@ -212,28 +219,29 @@
 }
 
 /*
- * Keys. A face and a 4px lip below it; pressing sinks the face onto the lip.
+ * Keys. A face and a 3px lip below it; pressing sinks the face onto the lip.
+ * Sentence case: the label is a sentence, not a shout.
  * --key / --key-lip / --key-ink pick the colour; variants only set those.
  */
 @utility btn {
   --key: var(--indigo);
   --key-lip: var(--indigo-lip);
   --key-ink: 255 255 255;
-  @apply relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-[14px] px-5 text-[15px] uppercase
+  @apply relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-[12px] px-5 text-[16px]
     transition-[transform,box-shadow,filter,background-color] duration-100 ease-out
     disabled:cursor-not-allowed;
   min-height: 48px;
-  font-weight: 850;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: -0.005em;
   color: rgb(var(--key-ink));
   background: rgb(var(--key));
-  box-shadow: 0 4px 0 rgb(var(--key-lip));
+  box-shadow: 0 3px 0 rgb(var(--key-lip));
   transform: translateY(0);
   &:hover:not(:disabled) {
     filter: brightness(1.06) saturate(1.04);
   }
   &:active:not(:disabled) {
-    transform: translateY(4px);
+    transform: translateY(3px);
     box-shadow: 0 0 0 rgb(var(--key-lip));
   }
   &:disabled {
@@ -277,8 +285,8 @@
   }
   .btn-quiet:hover:not(:disabled) { filter: none; background: rgb(var(--indigo) / 0.08); }
   .btn-quiet:active:not(:disabled) { transform: none; }
-  .btn-sm { min-height: 38px; @apply rounded-[12px] px-3.5 text-[13px]; }
-  .btn-lg { min-height: 54px; @apply px-7 text-[16px]; }
+  .btn-sm { min-height: 38px; @apply rounded-[10px] px-3.5 text-[14px]; }
+  .btn-lg { min-height: 54px; @apply px-7 text-[17px]; }
   .btn-block { @apply w-full; }
 
   .wrap { @apply mx-auto w-full max-w-[1120px] px-4 sm:px-6; }
@@ -290,46 +298,46 @@
   /* A card you can press: it carries the key lip. */
   .card-press {
     @apply cursor-pointer rounded-[18px] border-2 border-line bg-bg transition-[transform,box-shadow,border-color,background-color] duration-100;
-    box-shadow: 0 4px 0 rgb(var(--line));
+    box-shadow: 0 3px 0 rgb(var(--line));
   }
   .card-press:hover { background: rgb(var(--bg-2)); }
-  .card-press:active { transform: translateY(4px); box-shadow: 0 0 0 rgb(var(--line)); }
+  .card-press:active { transform: translateY(3px); box-shadow: 0 0 0 rgb(var(--line)); }
   .card-hover { @apply transition-colors duration-150 hover:bg-bg-2; }
 
   /* Type */
-  .h-hero { @apply text-ink; font-size: clamp(34px, 5vw, 56px); font-weight: 900; line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance; }
-  .h-page { @apply text-[28px] text-ink md:text-[32px]; font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; }
-  .h-sec { @apply text-[20px] text-ink; font-weight: 850; line-height: 1.2; }
-  .lead { @apply text-[17px] leading-relaxed text-ink-3; font-weight: 600; }
-  .cap { @apply text-[13px] uppercase text-ink-3; font-weight: 850; letter-spacing: 0.07em; }
+  .h-hero { @apply text-ink; font-size: clamp(36px, 5.4vw, 64px); font-weight: 800; line-height: 1; letter-spacing: -0.035em; text-wrap: balance; }
+  .h-page { @apply text-[30px] text-ink md:text-[34px]; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; }
+  .h-sec { @apply text-[21px] text-ink; font-weight: 750; line-height: 1.15; letter-spacing: -0.02em; }
+  .lead { @apply text-[17px] leading-relaxed text-ink-3; font-weight: 450; }
+  .cap { @apply text-[13px] text-ink-3; font-weight: 650; }
   .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
   .mono { @apply font-mono; font-variant-numeric: tabular-nums; }
 
   /* Chips and pills */
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-full border-2 border-line bg-bg px-2.5 py-0.5 text-[13px] text-ink-2;
-    font-weight: 750;
+    font-weight: 600;
   }
   .pill {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px];
-    font-weight: 850;
+    font-weight: 650;
   }
 
   /* Fields */
   .field {
     @apply w-full rounded-[14px] border-2 border-line bg-bg-2 px-4 py-3 text-[16px] text-ink placeholder:text-ink-4
       transition-[border-color,background-color,box-shadow] duration-150 focus:border-indigo focus:bg-bg focus:outline-none;
-    font-weight: 650;
+    font-weight: 500;
   }
   .field:focus { box-shadow: 0 0 0 4px rgb(var(--indigo) / 0.14); }
-  .label { @apply mb-2 block text-[15px] text-ink; font-weight: 850; }
-  .hint { @apply mt-2 text-[14px] leading-snug text-ink-3; font-weight: 600; }
+  .label { @apply mb-2 block text-[15px] text-ink; font-weight: 700; }
+  .hint { @apply mt-2 text-[14px] leading-snug text-ink-3; font-weight: 450; }
 
   /* Segmented control */
   .seg { @apply inline-flex rounded-[14px] border-2 border-line bg-bg-2 p-1; }
   .seg > button, .seg > a {
     @apply rounded-[10px] px-3.5 py-1.5 text-[14px] text-ink-3 transition-colors duration-150 hover:text-ink;
-    font-weight: 850;
+    font-weight: 650;
   }
   .seg > [aria-pressed="true"], .seg > [aria-current="page"] {
     @apply bg-bg text-indigo;
@@ -358,11 +366,12 @@
   75% { transform: rotate(8deg); }
 }
 
+/* The streak beacon breathes like a signal light. */
 @keyframes flicker {
-  0%, 100% { transform: scale(1) rotate(0); }
-  50% { transform: scale(1.06, 0.96) rotate(-2deg); }
+  0%, 100% { transform: scale(1); filter: none; }
+  50% { transform: scale(1.06); filter: brightness(1.08); }
 }
-.flame-live { animation: flicker 1.6s ease-in-out infinite; transform-origin: 50% 90%; }
+.flame-live { animation: flicker 2s ease-in-out infinite; transform-origin: 50% 85%; }
 
 @keyframes shine {
   from { transform: translateX(-120%) skewX(-20deg); }

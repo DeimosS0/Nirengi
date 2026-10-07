@@ -10,13 +10,14 @@ import { actions, byId, currentMe, setView, useAppState, useView } from '../../l
 import { assessCanvas, isCheckable, PUBLISH_THRESHOLD } from '../../lib/engine/canvas.ts';
 import { composeTeam, findConflicts, rankCandidates, scoreMatch, similarNeeds, WEIGHTS, type Match } from '../../lib/engine/match.ts';
 import { progress, type WeekState } from '../../lib/engine/progress.ts';
-import { CONSTRAINT, NEED_STATUS, PILOT_STATUS, SCALE, SECTOR } from '../../lib/labels.ts';
+import { CONSTRAINT, PILOT_STATUS, SCALE, SECTOR } from '../../lib/labels.ts';
 import { fmtDate } from '../../lib/format.ts';
 import { skillLabel } from '../../lib/skills.ts';
-import Niri from '../ui/Niri';
+import NiriSays from '../ui/NiriSays';
 import { Bar, celebrate, EmptyState, feedback, Head, Ring, Sheet, Why } from '../ui/kit';
 import { CheckCircle, Clipboard } from '../ui/icons';
 import { LevelBadge, OrgMark, StatusIcon, useIdentity } from '../ui/primitives.tsx';
+import { NEED_LABEL } from '../kurum/NeedBits';
 import { calmTone, Consistency, EvidenceChips, IdName, PartBars, Who, WeekStrip } from './matchbits.tsx';
 
 const STATUS_PILL: Record<NeedStatus, string> = {
@@ -96,16 +97,16 @@ function Detail({ need }: { need: Need }) {
       setView({ revealed: [...new Set([...revealed, m.person.id])] });
       feedback({
         tone: 'good',
-        title: hidden ? 'Kimlik açıldı' : 'Pilot başladı',
-        text: hidden ? `${m.person.name} ile ilk temas kuruldu.` : `${m.person.name} ile pilot defteri açıldı.`,
+        title: hidden ? 'İsim açıldı' : 'Deneme projesi başladı',
+        text: hidden ? `${m.person.name} ile ilk temas kuruldu.` : `${m.person.name} ile kayıt defteri açıldı.`,
       });
     }, reduce ? 100 : 600);
     window.setTimeout(() => {
       setOpenId(null);
       celebrate({
-        title: 'Pilot başladı',
-        sub: `${m.person.name} ile ${need.canvas.criteria.filter((c) => c.text.trim()).length} kilometre taşı açıldı. Her taş iki tarafın onayıyla tamamlanır.`,
-        cta: 'Pilota git',
+        title: 'Deneme projesi başladı',
+        sub: `${m.person.name} ile ${need.canvas.criteria.filter((c) => c.text.trim()).length} aşama açıldı. Her aşama iki tarafın onayıyla tamamlanır.`,
+        cta: 'Projeye git',
         href: `/pilotlar/${pilotId}`,
       });
       window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
@@ -125,12 +126,12 @@ function Detail({ need }: { need: Need }) {
       <Header need={need} org={org} a={a} calm={isOrg} />
 
       {need.status === 'draft' && isOrg && (
-        <div className="mt-4 rounded-[18px] bg-bg-2 p-4 md:p-5">
+        <div data-coach="need-taslak" className="mt-4 rounded-[18px] bg-bg-2 p-4 md:p-5">
           <p className="text-[17px] font-black text-ink">Bu ihtiyaç taslakta</p>
           <p className="mt-1 text-[15px] font-bold text-ink-2">
             {a.canPublish
-              ? 'Kanvas yayına hazır. Yayımlayınca adaylar gerekçesiyle sıralanır.'
-              : `Yayımlanmadan önce ${a.blockers.length + a.checks.filter((c) => !c.ok && !c.blocking).length} eksik kapanmalı. Eksiklerin listesi, çözülebilirlik puanının yanındaki Neden? düğmesinde.`}
+              ? 'İhtiyaç kartı yayına hazır. Yayımlayınca uyan adaylar gerekçesiyle sıralanır.'
+              : `Yayımlanmadan önce ${a.blockers.length + a.checks.filter((c) => !c.ok && !c.blocking).length} eksik kapanmalı. Eksiklerin listesi, netlik puanının yanındaki Neden? düğmesinde.`}
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <a href={`/ihtiyaclar/yeni?id=${need.id}`} className="btn-line btn-sm">
@@ -141,7 +142,7 @@ function Detail({ need }: { need: Need }) {
               disabled={!a.canPublish}
               onClick={() => {
                 actions.publishNeed(need.id);
-                celebrate({ title: 'İhtiyaç yayında', sub: 'Kanvasın yayın eşiğini geçti. Adaylar artık gerekçesiyle sıralanıyor.' });
+                celebrate({ title: 'İhtiyaç yayında', sub: 'İhtiyaç kartı yayın eşiğini geçti. Uyan adaylar artık gerekçesiyle sıralanıyor.' });
               }}
             >
               Yayımla
@@ -152,7 +153,7 @@ function Detail({ need }: { need: Need }) {
 
       {pilot && (isOrg || myPilot) && <PilotBanner pilot={pilot} mine={!!myPilot} />}
 
-      <button type="button" onClick={() => setCardOpen(true)} className="card-press mt-4 flex w-full items-center gap-4 p-4 text-left">
+      <button type="button" data-coach="need-kart" onClick={() => setCardOpen(true)} className="card-press mt-4 flex w-full items-center gap-4 p-4 text-left">
         <Clipboard size={36} />
         <span className="min-w-0 flex-1">
           <span className="block text-[17px] font-black text-ink">İhtiyaç kartı</span>
@@ -180,30 +181,31 @@ function Detail({ need }: { need: Need }) {
           <Head
             title="Uyan adaylar"
             action={
-              <Why title="Uyum nasıl hesaplanıyor?" label="Skor nasıl?">
-                <p className="text-[15px] font-bold text-ink-2">Skor hiçbir yerde elle yazılmaz; her adayın kanıtından bu sayfa açılırken hesaplanır. Dört parçası var:</p>
+              <Why title="Uyum nasıl hesaplanıyor?" label="Puan nasıl?">
+                <p className="text-[15px] font-bold text-ink-2">Puan hiçbir yerde elle yazılmaz; her adayın doğrulanmış işlerinden bu sayfa açılırken hesaplanır. Dört parçası var:</p>
                 <ul className="mt-4 space-y-3 text-[15px] font-bold text-ink-2">
                   <li>
-                    <b className="num text-indigo">{WEIGHTS.evidence * 100} puan</b> Kanıt yakınlığı: aranan yetkinliklerde doğrulanmış iş. Beyan düşük, doğrulanmış yüksek ağırlık taşır.
+                    <b className="num text-indigo">{WEIGHTS.evidence * 100} puan</b> Yaptığı işin uyumu: aranan yetkinliklerde doğrulanmış iş. Beyan düşük, doğrulanmış yüksek ağırlık taşır.
                   </li>
                   <li>
-                    <b className="num text-indigo">{WEIGHTS.context * 100} puan</b> Bağlam: aynı sektörde ya da benzer ölçekte doğrulanmış iş.
+                    <b className="num text-indigo">{WEIGHTS.context * 100} puan</b> Sektör ve ölçek uyumu: aynı sektörde ya da benzer ölçekte doğrulanmış iş.
                   </li>
                   <li>
-                    <b className="num text-indigo">{WEIGHTS.capacity * 100} puan</b> Kapasite: pilota ne kadar vakit ayırabildiği.
+                    <b className="num text-indigo">{WEIGHTS.capacity * 100} puan</b> Ayırabileceği zaman: deneme projesine ne kadar vakit ayırabildiği.
                   </li>
                   <li>
-                    <b className="num text-indigo">{WEIGHTS.history * 100} puan</b> İş birliği geçmişi: başarıyla kapanan pilotlar ve çift onaylı kilometre taşları.
+                    <b className="num text-indigo">{WEIGHTS.history * 100} puan</b> Birlikte çalışma geçmişi: başarıyla kapanan deneme projeleri ve iki tarafça onaylanmış aşamalar.
                   </li>
                 </ul>
-                <p className="mt-4 text-[14px] font-bold text-ink-3">Bağlam ve geçmişte kimse sıfırdan başlamaz; yeni biri bu yüzden cezalandırılmaz.</p>
+                <p className="mt-4 text-[14px] font-bold text-ink-3">Sektör uyumunda ve çalışma geçmişinde kimse sıfırdan başlamaz; yeni biri bu yüzden cezalandırılmaz.</p>
                 <a href="/yontem" className="btn-line btn-block mt-5">
                   Yöntemi oku
                 </a>
               </Why>
             }
           />
-          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] font-bold text-ink-3">
+          <p className="mt-2 text-[15px] font-bold text-ink-2">Bu ihtiyaca doğrulanmış işiyle uyan gençler; en uyumlu olan en üstte.</p>
+          <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] font-bold text-ink-3">
             Aranan yetkinlikler:
             {need.skills.map((k) => (
               <span key={k} className="chip">
@@ -214,32 +216,28 @@ function Detail({ need }: { need: Need }) {
 
           {ranked.length > 0 ? (
             <>
-              <div className="mt-5 flex items-end gap-3">
-                <Niri mood="think" size={72} />
-                <p className="relative mb-3 flex-1 rounded-[16px] border-2 border-line bg-bg px-4 py-2.5 text-[15px] font-bold text-ink-2">
-                  <span className="absolute -left-[8px] bottom-4 h-3.5 w-3.5 rotate-45 border-b-2 border-l-2 border-line bg-bg" aria-hidden="true" />
-                  Bir adaya dokun: skorun nereden geldiğini, kanıtı ve eksiklerini gör.
-                </p>
-              </div>
-              <ol className="mt-4 space-y-3">
+              <NiriSays mood="point" point="down" size={72} className="mt-5">
+                <p className="text-[15px] font-bold text-ink-2">Bir adaya dokun: puanın nereden geldiğini, yaptığı işi ve eksiklerini gör.</p>
+              </NiriSays>
+              <ol data-coach="need-adaylar" className="mt-4 space-y-3">
                 {ranked.map((m, i) => (
-                  <li key={m.person.id} className="rise" style={{ animationDelay: `${i * 40}ms` }}>
+                  <li key={m.person.id} data-coach={i === 0 ? 'need-aday' : undefined} className="rise" style={{ animationDelay: `${i * 40}ms` }}>
                     <CandidateCard m={m} rank={i + 1} hist={weeks.get(m.person.id)!} inPilot={pilot?.personId === m.person.id} onOpen={() => openCandidate(m)} />
                   </li>
                 ))}
               </ol>
             </>
           ) : (
-            <div className="mt-5">
+            <div data-coach="need-adaylar" className="mt-5">
               <EmptyState
                 title="Henüz uyan aday yok"
                 action={
                   <a href={`/ihtiyaclar/yeni?id=${need.id}`} className="btn-line">
-                    Kanvası düzenle
+                    İhtiyaç kartını düzenle
                   </a>
                 }
               >
-                Aranan {need.skills.length} yetkinliğin hiçbirinde kanıtı olan kimse çıkmadı. Kanvasta yetkinlik yüzeyini daraltmak ya da pilot kapsamını küçültmek aday sayısını artırır.
+                Aranan {need.skills.length} yetkinliğin hiçbirinde doğrulanmış işi olan kimse çıkmadı. İhtiyaç kartında yetkinlikleri azaltmak ya da deneme projesinin kapsamını küçültmek aday sayısını artırır.
               </EmptyState>
             </div>
           )}
@@ -311,7 +309,7 @@ function Detail({ need }: { need: Need }) {
               <a href={x.pilot ? `/pilotlar/${x.pilot.id}` : `/ihtiyaclar/${x.need.id}`} className="card-press block p-4">
                 <span className="block text-[16px] font-black leading-snug text-ink">{x.need.title}</span>
                 <span className="mt-1 block text-[14px] font-bold text-ink-3">
-                  {x.org.name} · {x.pilot ? PILOT_STATUS[x.pilot.status] : NEED_STATUS[x.need.status]} · ortak: {x.overlap.map(skillLabel).join(', ')}
+                  {x.org.name} · {x.pilot ? PILOT_STATUS[x.pilot.status] : NEED_LABEL[x.need.status]} · ortak: {x.overlap.map(skillLabel).join(', ')}
                 </span>
                 {x.pilot?.closure && <span className="mt-2 block text-[14px] font-bold text-ink-2">{x.pilot.closure.summary}</span>}
               </a>
@@ -320,7 +318,7 @@ function Detail({ need }: { need: Need }) {
         </ul>
       </Sheet>
 
-      <Sheet open={!!current} onClose={() => setOpenId(null)} title={step === 'done' ? 'Pilot başladı' : step === 'confirm' ? 'Pilotu başlat' : 'Neden bu uyum?'}>
+      <Sheet open={!!current} onClose={() => setOpenId(null)} title={step === 'done' ? 'Deneme projesi başladı' : step === 'confirm' ? 'Deneme projesini başlat' : 'Neden bu uyum?'}>
         {shown && (
           <CandidateSheet
             m={shown}
@@ -344,7 +342,7 @@ function Detail({ need }: { need: Need }) {
 
 function Header({ need, org, a, calm }: { need: Need; org: Org; a: ReturnType<typeof assessCanvas>; calm: boolean }) {
   return (
-    <section className="card mt-3 p-5 md:p-6">
+    <section data-coach="need-baslik" className="card mt-3 p-5 md:p-6">
       <div className="flex items-center gap-3">
         <OrgMark name={org.name} size={44} />
         <div className="min-w-0 flex-1">
@@ -353,20 +351,20 @@ function Header({ need, org, a, calm }: { need: Need; org: Org; a: ReturnType<ty
             {SECTOR[org.sector]} · {SCALE[org.scale]} · {org.city}
           </p>
         </div>
-        <span className={`pill shrink-0 ${STATUS_PILL[need.status]}`}>{NEED_STATUS[need.status]}</span>
+        <span className={`pill shrink-0 ${STATUS_PILL[need.status]}`}>{NEED_LABEL[need.status]}</span>
       </div>
       <h1 className="h-page mt-5">{need.title}</h1>
       <p className="lead mt-2">{need.canvas.pain}</p>
       <div className="mt-5 flex items-center gap-4 rounded-[16px] bg-bg-2 p-4">
-        <Ring value={a.score} size={64} label="çözülebilirlik" tone={calm ? calmTone(a.score) : undefined} />
+        <Ring value={a.score} size={64} label="netlik puanı" tone={calm ? calmTone(a.score) : undefined} />
         <div className="min-w-0 flex-1">
-          <p className="text-[16px] font-black text-ink">Çözülebilirlik</p>
+          <p className="text-[16px] font-black text-ink">Netlik puanı</p>
           <p className="text-[14px] font-bold text-ink-3">
-            {a.canPublish ? 'Yayın eşiğini geçiyor' : 'Yayın eşiğinin altında'}
+            {a.canPublish ? 'Yayımlanabilir' : 'Yayımlamak için daha net yazılmalı'}
             <span className="ml-1">
-              <Why title="Çözülebilirlik nasıl hesaplandı?">
+              <Why title="Netlik puanı nasıl hesaplandı?">
                 <p className="text-[15px] font-bold text-ink-2">
-                  Kanvas on denetimden geçer, her birinin puanı var. {PUBLISH_THRESHOLD} ve üstü, engeli olmayan ihtiyaç yayımlanabilir. Şu an <b className="num">{a.score}</b>.
+                  Netlik puanı, ihtiyacın ne kadar net ve çözülebilir yazıldığını gösterir. İhtiyaç kartı on denetimden geçer, her birinin puanı var. {PUBLISH_THRESHOLD} ve üstü, engeli olmayan ihtiyaç yayımlanabilir. Şu an <b className="num">{a.score}</b>.
                 </p>
                 <ul className="mt-4 space-y-3">
                   {a.checks.map((c) => (
@@ -396,7 +394,7 @@ function PilotBanner({ pilot, mine }: { pilot: Pilot; mine: boolean }) {
   return (
     <a href={`/pilotlar/${pilot.id}`} className="card-press mt-4 flex items-center gap-4 p-4">
       <span className="min-w-0 flex-1">
-        <span className="block text-[17px] font-black text-ink">{mine ? 'Bu projede çalışıyorsun' : 'Pilot açık'}</span>
+        <span className="block text-[17px] font-black text-ink">{mine ? 'Bu projede çalışıyorsun' : 'Deneme projesi açık'}</span>
         <span className="block truncate text-[14px] font-bold text-ink-3">
           {pilot.title} · {PILOT_STATUS[pilot.status]}
         </span>
@@ -421,13 +419,13 @@ function NeedCard({ open, onClose, need }: { open: boolean; onClose: () => void;
       <div className="space-y-4">
         {field('Mevcut durum', c.current)}
         {field(
-          'Acı noktası',
+          'Sorun',
           <>
             {c.pain}
             {c.painMetric && <span className="mono mt-2 block text-[13px] text-ink">{c.painMetric}</span>}
           </>,
         )}
-        {field('Hedef çıktı', c.outcome)}
+        {field('Beklenen sonuç', c.outcome)}
         {field(
           'Başarı kriterleri',
           <ol className="space-y-2">
@@ -455,10 +453,10 @@ function NeedCard({ open, onClose, need }: { open: boolean; onClose: () => void;
           ) : null,
         )}
         {field('Karar verici', c.decisionMaker)}
-        {field('Pilot kapsamı', c.scope)}
+        {field('Deneme projesinin kapsamı', c.scope)}
       </div>
       <p className="mt-6 text-[13px] font-bold text-ink-3">
-        {need.status !== 'draft' && 'Pilot açıldığında her kriter bir kilometre taşına dönüşür ve sonradan değiştirilemez. '}
+        {need.status !== 'draft' && 'Deneme projesi başlayınca her kriter bir aşamaya dönüşür ve sonradan değiştirilemez. '}
         Yayın: {need.publishedAt ? fmtDate(need.publishedAt) : '—'} · Oluşturma: {fmtDate(need.createdAt)}
       </p>
     </Sheet>
@@ -478,7 +476,7 @@ function CandidateCard({ m, rank, hist, inPilot, onOpen }: { m: Match; rank: num
           <span className="block truncate text-[17px] font-black text-ink">{id.name}</span>
           <span className="block truncate text-[14px] font-bold text-ink-3">{m.person.headline}</span>
           {(rank === 1 || inPilot) && (
-            <span className={`pill mt-1.5 !py-0.5 ${inPilot ? 'bg-indigo-tint text-indigo' : 'bg-green-tint text-green-lip'}`}>{inPilot ? 'Pilotta' : 'En uyumlu'}</span>
+            <span className={`pill mt-1.5 !py-0.5 ${inPilot ? 'bg-indigo-tint text-indigo' : 'bg-green-tint text-green-lip'}`}>{inPilot ? 'Denemede' : 'En uyumlu'}</span>
           )}
         </span>
         <Ring value={m.score} size={60} tone={calmTone(m.score)} />
@@ -529,7 +527,7 @@ function CandidateSheet({
         <Who person={m.person} size={96} />
         <p className="mt-4 text-[22px] font-black text-ink">{id.name}</p>
         <p className="mt-1 text-[15px] font-bold text-ink-3">
-          {wasHidden && id.hidden ? 'Pilot defteri açıldı. Kimlik birazdan açılıyor…' : wasHidden ? 'Kimlik açıldı. Pilot defteri başladı.' : 'Pilot defteri başladı.'}
+          {wasHidden && id.hidden ? 'Kayıt defteri açıldı. İsim birazdan görünecek…' : wasHidden ? 'İsim açıldı. Kayıt defteri başladı.' : 'Kayıt defteri başladı.'}
         </p>
       </div>
     );
@@ -538,7 +536,7 @@ function CandidateSheet({
     return (
       <div>
         <p className="text-[15px] font-bold text-ink-2">
-          <b>{id.name}</b> ile pilot açılacak. Kanvastaki {criteria.length} başarı kriteri olduğu gibi kilometre taşına dönüşür. Hedef sonradan değiştirilemez; her taş iki tarafın onayıyla tamamlanır.
+          <b>{id.name}</b> ile deneme projesi açılacak. İhtiyaç kartındaki {criteria.length} başarı kriteri olduğu gibi aşamaya dönüşür. Hedef sonradan değiştirilemez; her aşama iki tarafın onayıyla tamamlanır.
         </p>
         <ol className="mt-4 space-y-2">
           {criteria.map((c, i) => (
@@ -548,13 +546,13 @@ function CandidateSheet({
             </li>
           ))}
         </ol>
-        {id.hidden && <p className="mt-4 rounded-[14px] bg-indigo-tint px-4 py-3 text-[14px] font-bold text-ink-2">Kimlik şimdiye kadar gizliydi. Pilot açılınca ilk temas kurulur ve ad görünür olur.</p>}
+        {id.hidden && <p className="mt-4 rounded-[14px] bg-indigo-tint px-4 py-3 text-[14px] font-bold text-ink-2">İsim şimdiye kadar gizliydi. Proje açılınca ilk temas kurulur ve ad görünür olur.</p>}
         <div className="mt-6 flex gap-3">
           <button type="button" className="btn-quiet" onClick={() => onStep('why')}>
             Geri
           </button>
           <button type="button" className="btn-primary flex-1" onClick={() => onStart(m, id.hidden)}>
-            Pilotu başlat
+            Deneme projesini başlat
           </button>
         </div>
       </div>
@@ -583,11 +581,11 @@ function CandidateSheet({
           <div className="mt-2">
             <WeekStrip hist={hist} />
           </div>
-          <p className="mt-2 text-[13px] font-bold text-ink-3">Skora girmez; üretimin ne kadar düzenli sürdüğünü gösterir. Sayılan şey commit değil, üretim yapılan haftadır.</p>
+          <p className="mt-2 text-[13px] font-bold text-ink-3">Puana girmez; üretimin ne kadar düzenli sürdüğünü gösterir. Sayılan şey commit değil, üretim yapılan haftadır.</p>
         </>
       )}
 
-      <h3 className="mt-7 text-[17px] font-black text-ink">Arkasındaki kanıt</h3>
+      <h3 className="mt-7 text-[17px] font-black text-ink">Arkasındaki işler</h3>
       <ul className="mt-3 space-y-3">
         {m.coverage.map((c) => (
           <li key={c.skill} className="flex items-start gap-3">
@@ -625,7 +623,7 @@ function CandidateSheet({
       <div className="sticky bottom-0 -mx-6 -mb-6 mt-6 space-y-2.5 border-t-2 border-line bg-bg px-6 pb-5 pt-4">
         {canPilot && (
           <button type="button" className="btn-primary btn-block" onClick={() => onStep('confirm')}>
-            Pilot teklif et
+            Projeye davet et
           </button>
         )}
         {pilot && (

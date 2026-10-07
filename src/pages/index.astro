@@ -1,59 +1,78 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/landing/Hero.astro';
+import Story from '../components/landing/Story.astro';
 import Feature from '../components/landing/Feature.astro';
 import Stairs from '../components/landing/Stairs.astro';
 import Community from '../components/landing/Community.astro';
 import FinalCta from '../components/landing/FinalCta.astro';
 import LiveWeek from '../components/landing/LiveWeek';
 import LiveMatch from '../components/landing/LiveMatch';
+import type { Line } from '../components/landing/Say';
 
 export const prerender = true;
+
+// What Niri says in each section: one source for the inline bubbles and the sticky narrator.
+const say: Record<string, Omit<Line, 'key'>> = {
+  hafta: {
+    mood: 'point',
+    text: '*Hedefi sen seçersin:* haftada 1, 3 ya da 5 gün. Sayılan commit değil, üretim yaptığın gün. Hedefi tutturdukça serin büyür; mola haftası serini bozmaz.',
+  },
+  dogrulama: {
+    mood: 'think',
+    text: 'İşin üç basamaktan birinde durur. *Beyan* senin sözün; GitHub hesabın ya da alan adın senin çıkarsa *Doğrulandı*; birlikte çalıştığın kurum imzalarsa *Kurum onaylı*.',
+  },
+  eslesme: {
+    mood: 'point',
+    text: 'Kurum sorununu yazar, ben işi olan adayları gösteririm. Her puanın bir “Neden?” ekranı var; *isim ilk temasa kadar gizli*. Deneme projesinde her aşama iki onayla kayıt defterine yazılır.',
+  },
+  topluluk: {
+    mood: 'happy',
+    text: 'Takıldığın yeri toplulukta sor, bildiğini paylaş; *işe yarayan cevabın XP kazandırır*. Açık kaynakta görev alırsan PR’ın birleşince işin doğrulanır.',
+  },
+};
+const lines: Line[] = Object.entries(say).map(([key, v]) => ({ key, ...v }));
 ---
 
 <Layout title="nirengi · Yaptığın işle fark edil" description="Gençlerin yaptığı doğrulanmış işi, kurumların yazdığı ihtiyaçlarla buluşturan açık kaynak web hizmeti. Özgeçmiş yok, iş var.">
   <Hero />
 
-  <Feature
-    id="hafta"
-    tone="orange"
-    heading="Her gün değil, *her hafta* üret."
-    body="Haftada 1, 3 ya da 5 gün hedef seç. Üretim yaptığın gün sayılır, commit sayısı değil. Hedefi tutturdukça serin hafta hafta büyür; mola haftası serini bozmaz."
-    more={{ href: '/yontem#ilerleme', label: 'İlerleme nasıl sayılıyor?' }}
-  >
-    <LiveWeek client:only="react"><div slot="fallback" class="card h-[300px]"></div></LiveWeek>
-  </Feature>
+  <Story lines={lines}>
+    <Feature
+      id="hafta"
+      tone="orange"
+      heading="Her gün değil, *her hafta* üret."
+      say={say.hafta}
+      more={{ href: '/yontem#ilerleme', label: 'İlerleme nasıl sayılıyor?' }}
+    >
+      <LiveWeek client:only="react"><div slot="fallback" class="h-[300px]"></div></LiveWeek>
+    </Feature>
 
-  <Feature
-    id="dogrulama"
-    tone="cyan"
-    reverse
-    heading="Söyleneni değil, *doğrulananı* göster."
-    body="Her iş üç basamaktan birinde durur: Beyan, Doğrulandı, Kurum onaylı. GitHub hesabın ya da alan adın senin olduğunda iş doğrulanır; birlikte çalıştığın kurum onayladığında en üste çıkar."
-    more={{ href: '/yontem#merdiven', label: 'Ağırlıklar nasıl işliyor?' }}
-  >
-    <Stairs />
-  </Feature>
+    <Feature
+      id="dogrulama"
+      tone="cyan"
+      reverse
+      heading="Söyleneni değil, *doğrulananı* göster."
+      say={say.dogrulama}
+      more={{ href: '/yontem#merdiven', label: 'Ağırlıklar nasıl işliyor?' }}
+    >
+      <Stairs />
+    </Feature>
 
-  <Feature
-    id="eslesme"
-    tone="indigo"
-    heading="İhtiyaç yazılır, eşleşme *gerekçesiyle* gelir."
-    body="Kurum çözmek istediği sorunu yazar. Adaylar dört nedenle puanlanır ve her puanın bir “Neden?” ekranı vardır. Pilot açılınca her aşama iki tarafın onayıyla deftere yazılır."
-    more={{ href: '/yontem#eslesme', label: 'Puan nasıl hesaplanıyor?' }}
-  >
-    <LiveMatch client:only="react"><div slot="fallback" class="card h-[330px]"></div></LiveMatch>
-  </Feature>
+    <Feature
+      id="eslesme"
+      tone="indigo"
+      heading="İhtiyaç yazılır, eşleşme *gerekçesiyle* gelir."
+      say={say.eslesme}
+      more={{ href: '/yontem#eslesme', label: 'Puan nasıl hesaplanıyor?' }}
+    >
+      <LiveMatch client:only="react"><div slot="fallback" class="h-[430px]"></div></LiveMatch>
+    </Feature>
 
-  <Feature
-    id="topluluk"
-    tone="purple"
-    reverse
-    heading="Yalnız değilsin, birbirinize *destek* olun."
-    body="Takıldığın yeri toplulukta sor, bildiğini paylaş; işe yarayan cevabın XP kazandırır. Açık kaynakta görev al, PR’ın birleşince işin doğrulanır."
-  >
-    <Community />
-  </Feature>
+    <Feature id="topluluk" tone="purple" reverse heading="Yalnız değilsin, birbirinize *destek* olun." say={say.topluluk}>
+      <Community />
+    </Feature>
+  </Story>
 
   <FinalCta />
 </Layout>

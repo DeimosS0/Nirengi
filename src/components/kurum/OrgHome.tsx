@@ -179,7 +179,7 @@ export default function OrgHome() {
               {greeting()}, {org.name}
             </h1>
             <p className="mt-1 text-[15px] font-bold text-ink-3">
-              {queue.length ? `Seni bekleyen ${queue.length} iş var.` : 'Şu an seni bekleyen bir iş yok.'}
+              {queue.length ? `Seni bekleyen ${queue.length} iş var.` : 'Şu an seni bekleyen bir iş yok.'} Bekleyen işler, ihtiyaçlar ve süren projeler burada tek yerde.
             </p>
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function OrgHome() {
         </button>
       </header>
 
-      <section className="card mt-6 p-4 sm:p-5 !border-indigo/35" style={{ boxShadow: '0 4px 0 rgb(var(--indigo) / 0.3)' }} aria-labelledby="sirada">
+      <section data-coach="sira" className="card mt-6 p-4 sm:p-5 !border-indigo/35" aria-labelledby="sirada">
         <div className="flex items-center justify-between gap-3">
           <h2 id="sirada" className="h-sec">
             Sırada ne var
@@ -199,7 +199,7 @@ export default function OrgHome() {
             <ol className="mt-3 list-decimal space-y-2 pl-5 text-[15px] font-semibold text-ink-3">
               <li>Teslim edilmiş ama onayını beklediğin aşamalar. Karşı taraf seni bekliyor.</li>
               <li>Yayındaki ihtiyaçlarına yeni gelen, uyumu %{FIT_MIN} ve üstü adaylar. Baktığın ihtiyaç listeden düşer.</li>
-              <li>Yayın kapısının ({PUBLISH_THRESHOLD} puan) altında kalan taslaklar.</li>
+              <li>Netlik puanı {PUBLISH_THRESHOLD}’in altında kaldığı için yayımlanamayan taslaklar.</li>
               <li>{SILENCE_DAYS} gün ve daha uzun süredir güncelleme gelmeyen projeler.</li>
             </ol>
           </Why>
@@ -209,7 +209,7 @@ export default function OrgHome() {
           <div className="flex flex-col items-center px-2 py-8 text-center">
             <Niri mood="happy" size={96} />
             <p className="mt-4 text-[20px] font-black text-ink">Her şey yolunda</p>
-            <p className="mt-1 max-w-sm text-[15px] font-bold text-ink-3">Onay bekleyen, yanıt bekleyen ya da yarım kalmış bir iş yok. Yeni bir problem yazarak başlayabilirsin.</p>
+            <p className="mt-1 max-w-sm text-[15px] font-bold text-ink-3">Onay bekleyen, yanıt bekleyen ya da yarım kalmış bir iş yok. Çözmek istediğin yeni bir problemi yazarak başlayabilirsin.</p>
             <a href="/ihtiyaclar/yeni" className="btn-primary mt-5">
               Yeni ihtiyaç yaz
             </a>
@@ -248,9 +248,9 @@ export default function OrgHome() {
             </h2>
             <span className="flex items-center gap-1">
               <Why title="Bu sayılar ne anlatıyor?">
-                <p className="text-[16px] font-bold text-ink-2">Halkadaki sayı çözülebilirlik puanıdır: ihtiyacın ne kadar net yazıldığını 100 üzerinden ölçer. Yayın kapısı {PUBLISH_THRESHOLD}.</p>
+                <p className="text-[16px] font-bold text-ink-2">Halkadaki sayı netlik puanıdır: ihtiyacın ne kadar net ve çözülebilir yazıldığını 100 üzerinden gösterir. {PUBLISH_THRESHOLD} ve üstü olunca ihtiyacı yayımlayabilirsin.</p>
                 <p className="mt-3 text-[15px] font-semibold text-ink-3">
-                  Uygun aday, uyum puanı %{FIT_MIN} ve üstü olan kişidir. Puan, kişilerin doğrulanmış işlerinin ihtiyacın istediği yetkinliklerle örtüşmesinden hesaplanır. Adayların kimliği ilk temasa kadar gizli kalır.
+                  Uygun aday, uyum puanı %{FIT_MIN} ve üstü olan gençtir. Puan, gencin doğrulanmış işlerinin ihtiyacın istediği yetkinliklerle örtüşmesinden hesaplanır. Adaylar isimsiz görünür; isimleri ilk temasa kadar gizli kalır.
                 </p>
               </Why>
               <a href="/ihtiyaclar" className="btn-quiet btn-sm">
@@ -261,20 +261,20 @@ export default function OrgHome() {
           {open.length === 0 ? (
             <div className="card mt-3 flex flex-wrap items-center justify-between gap-3 p-4">
               <p className="text-[15px] font-extrabold text-ink-2">Açık ihtiyacın yok</p>
-              <a href="/ihtiyaclar/yeni" className="btn-line btn-sm">
+              <a href="/ihtiyaclar/yeni" data-coach="ihtiyaclar-bos" className="btn-line btn-sm">
                 Yeni ihtiyaç yaz
               </a>
             </div>
           ) : (
-            <ul className="mt-3 space-y-3">
+            <ul data-coach="ihtiyaclar-satir" className="mt-3 space-y-3">
               {open.slice(0, 4).map((r) => {
                 const note = r.n.status === 'draft' ? gateNote(r.a) : null;
                 return (
                   <li key={r.n.id}>
                     <a href={`/ihtiyaclar/${r.n.id}`} className="card-press flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
                       <div className="flex w-[84px] shrink-0 flex-col items-center gap-1.5">
-                        <Ring value={r.a.score} size={48} label="çözülebilirlik" tone={r.a.canPublish ? 'green' : 'indigo'} />
-                        <span className="whitespace-nowrap text-[12px] font-extrabold leading-none text-ink-3">çözülebilirlik</span>
+                        <Ring value={r.a.score} size={48} label="netlik puanı" tone={r.a.canPublish ? 'green' : 'indigo'} />
+                        <span className="whitespace-nowrap text-[12px] font-extrabold leading-none text-ink-3">netlik puanı</span>
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="line-clamp-2 text-[16px] font-extrabold leading-snug text-ink">{r.n.title}</p>
@@ -302,7 +302,7 @@ export default function OrgHome() {
           )}
         </section>
         <div className="space-y-8">
-          <section aria-labelledby="projeler">
+          <section data-coach="projeler" aria-labelledby="projeler">
             <div className="flex items-end justify-between gap-3">
               <h2 id="projeler" className="h-sec">
                 Süren projeler
@@ -312,7 +312,7 @@ export default function OrgHome() {
               </a>
             </div>
             {pilots.length === 0 ? (
-              <p className="card mt-3 p-4 text-[15px] font-bold text-ink-3">Henüz süren bir projen yok. Bir ihtiyacın adaylarından birini seçince burada görünür.</p>
+              <p className="card mt-3 p-4 text-[15px] font-bold text-ink-3">Henüz süren bir deneme projen yok. Bir ihtiyacın adaylarından birini projeye davet edince burada görünür.</p>
             ) : (
               <ul className="mt-3 space-y-3">
                 {pilots.map((p) => {
@@ -355,28 +355,28 @@ export default function OrgHome() {
           <section className="card p-5" aria-labelledby="ag">
             <div className="flex items-center justify-between gap-3">
               <h2 id="ag" className="h-sec">
-                Bu hafta ağda
+                Bu hafta yeni gelenler
               </h2>
               <Why title="Bu sayı nasıl hesaplandı?">
                 <p className="text-[16px] font-bold text-ink-2">
-                  Son 7 günde “Doğrulandı” ya da “Kurum onaylı” seviyesine çıkan kanıtlar sayılır. Yalnız yayındaki ya da pilottaki ihtiyaçlarının istediği yetkinliklerdeki kanıtlar dahildir.
+                  Son 7 günde “Doğrulandı” ya da “Kurum onaylı” düzeyine çıkan işler sayılır. Yalnız yayındaki ya da deneme projesindeki ihtiyaçlarının istediği yetkinliklerdeki işler dahildir.
                 </p>
                 <p className="mt-3 text-[15px] font-semibold text-ink-3">
-                  Kişinin kendi beyanı sayılmaz. Kendi pilotlarından doğan kanıtlar da sayılmaz, çünkü onları zaten sen onayladın. Kimlikler ilk temasa kadar gizli kalır; burada yalnız sayı görürsün.
+                  Gencin yalnız kendi sözüyle yazdığı (Beyan) işler sayılmaz. Kendi deneme projelerinden doğan işler de sayılmaz, çünkü onları zaten sen onayladın. İsimler ilk temasa kadar gizli kalır; burada yalnız sayı görürsün.
                 </p>
               </Why>
             </div>
             {week.open === 0 ? (
-              <p className="mt-2 text-[15px] font-bold text-ink-3">Yayında ihtiyacın olunca ağdaki yeni doğrulanmış işler burada özetlenir.</p>
+              <p className="mt-2 text-[15px] font-bold text-ink-3">Yayında ihtiyacın olunca ihtiyacına uyan yeni doğrulanmış işler burada özetlenir.</p>
             ) : week.total === 0 ? (
               <p className="mt-2 text-[15px] font-bold text-ink-3">
-                Son 7 günde ihtiyaçlarının alanında yeni doğrulanmış kanıt yok.
+                Son 7 günde ihtiyaçlarının alanında yeni doğrulanmış iş yok.
                 {month.total > 0 && <> Son 30 günde {month.total} tane geldi.</>}
               </p>
             ) : (
               <>
                 <p className="mt-2 text-[15px] font-bold text-ink-2">
-                  Son 7 günde ihtiyaçlarının alanında <b className="num text-green-lip">{week.total}</b> yeni doğrulanmış kanıt geldi.
+                  Son 7 günde ihtiyaçlarının alanında <b className="num text-green-lip">{week.total}</b> yeni doğrulanmış iş geldi.
                 </p>
                 <ul className="mt-3 flex flex-wrap gap-2">
                   {week.bySkill.slice(0, 5).map((x) => (

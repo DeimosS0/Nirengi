@@ -1,27 +1,32 @@
 ---
-// Closing band: solid colour, a compass on a white stage (Niri already greets in the hero), the same two keys again.
-import { Compass } from '../ui/icons';
+// Closing band: solid indigo with faint contours, Niri cheering on a sheet laid
+// over it (Niri's indigo would vanish on the band), and the same two keys again.
+import { Contours } from '../ui/pafta';
+import Say from './Say';
 ---
 
-<section class="border-t-2 border-line bg-indigo" aria-labelledby="cta-title">
-  <div class="mx-auto flex max-w-[1040px] flex-col items-center gap-8 px-4 py-14 text-center sm:px-6 lg:flex-row lg:gap-16 lg:py-20 lg:text-left">
-    <div class="grid h-[190px] w-[190px] shrink-0 place-items-center rounded-full bg-white sm:h-[220px] sm:w-[220px]" style="box-shadow:0 6px 0 rgb(255 255 255 / 0.4)">
-      <Compass size={150} />
+<section data-narrate-end class="relative overflow-hidden border-t-2 border-line bg-indigo" aria-labelledby="cta-title">
+  <Contours color="white" opacity={0.16} x={0.22} y={0.5} seed={5} rings={11} step={32} />
+
+  <div class="relative mx-auto flex max-w-[1040px] flex-col items-center gap-6 px-4 py-14 text-center sm:px-6 lg:flex-row lg:gap-16 lg:py-20 lg:text-left">
+    <div class="w-full max-w-[420px] shrink-0 rounded-[20px] border-2 border-line bg-bg-2 px-4 pb-1 pt-7 text-left lg:w-[400px]" style="box-shadow:0 5px 0 rgb(255 255 255 / 0.4)">
+      <Say client:visible mood="cheer" size={104} text="Hadi, ilk noktayı birlikte koyalım!" />
     </div>
     <div class="w-full">
       <h2 id="cta-title" class="text-[clamp(28px,3.6vw,40px)] font-black leading-[1.12] tracking-[-0.02em] !text-white">Küçük bir adımla başla.</h2>
-      <p class="mx-auto mt-3 max-w-[40ch] text-[17px] font-bold text-white/85 lg:mx-0">Kayıt yok. Kurgusal kurumlar ve kişilerle bütün döngüyü bir oturumda dene.</p>
-      <div class="mx-auto mt-7 flex max-w-[380px] flex-col gap-3 lg:mx-0 lg:max-w-none lg:flex-row">
+      <p class="mx-auto mt-3 max-w-[42ch] text-[18px] font-bold leading-snug text-white lg:mx-0">Öğrenme uygulamalarının alışkanlık mekaniği, işe alımın ciddiyetiyle.</p>
+      <p class="mx-auto mt-2 max-w-[42ch] text-[17px] font-semibold text-white/85 lg:mx-0">Kayıt yok. Kurgusal kurumlar ve kişilerle bütün döngüyü bir oturumda dene.</p>
+      <div class="mx-auto mt-7 flex max-w-[380px] flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center lg:mx-0 lg:justify-start">
         <a
           href="/bugun"
-          class="btn-lg inline-flex min-h-[54px] items-center justify-center rounded-[14px] bg-white px-7 text-[16px] font-black uppercase tracking-[0.06em] text-indigo transition-transform duration-100 active:translate-y-1"
-          style="box-shadow:0 4px 0 rgb(255 255 255 / 0.45)"
+          class="btn-lg inline-flex min-h-[54px] items-center justify-center rounded-[12px] bg-white px-7 text-[17px] font-bold text-indigo transition-transform duration-100 active:translate-y-[3px]"
+          style="box-shadow:0 3px 0 rgb(255 255 255 / 0.45)"
         >
           Genç olarak başla
         </a>
         <a
           href="/kurum"
-          class="inline-flex min-h-[54px] items-center justify-center rounded-[14px] border-2 border-white/60 px-7 text-[16px] font-black uppercase tracking-[0.06em] text-white transition-colors hover:bg-white/10"
+          class="inline-flex min-h-[54px] items-center justify-center rounded-[12px] border-2 border-white/60 px-7 text-[17px] font-bold text-white transition-colors hover:bg-white/10"
         >
           Kurum olarak ihtiyaç yaz
         </a>

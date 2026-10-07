@@ -5,6 +5,6 @@ import PilotDetail from '../../components/app/PilotDetail';
 const { id = '' } = Astro.params;
 ---
 
-<App title="Proje yolu" mode="auto" description="Projenin aşamaları, çift taraflı onayları ve zincirli defteri.">
+<App title="Proje yolu" mode="auto" description="Projenin aşamaları, çift taraflı onayları ve zincirli kayıt defteri.">
   <PilotDetail client:only="react" id={id} />
 </App>

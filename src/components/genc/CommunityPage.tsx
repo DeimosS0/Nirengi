@@ -11,6 +11,7 @@ import Niri from '../ui/Niri';
 import { feedback, Why, type Tone } from '../ui/kit';
 import { Hand } from '../ui/icons';
 import { Avatar, LevelBadge } from '../ui/primitives';
+import { TriMark } from '../ui/TriMark';
 
 type Kind = Post['kind'];
 type Filter = 'all' | 'soru' | 'gosteri' | 'tesekkur';
@@ -71,7 +72,7 @@ export default function CommunityPage() {
       <div className="mt-8 flex items-center justify-between gap-3">
         <h2 className="h-sec">Akış</h2>
       </div>
-      <div className="scrollbar-none -mx-4 mt-3 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <div data-coach="g-topluluk-akis" className="scrollbar-none -mx-4 mt-3 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <div className="seg" role="group" aria-label="Akışı filtrele">
           {FILTERS.map((f) => (
             <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => setFilter(f.key)} className="whitespace-nowrap">
@@ -156,21 +157,23 @@ function Composer({
     feedback({
       tone: 'good',
       title: 'Paylaştın',
-      text: firstToday ? `Günün ilk paylaşımı: +${XP.post} XP. Topluluk görecek.` : 'Topluluk görecek.',
+      text: firstToday ? 'Günün ilk paylaşımı. Topluluk görecek.' : 'Topluluk görecek.',
+      xp: firstToday ? XP.post : undefined,
     });
   };
 
   return (
-    <section className="card mt-6 p-5" aria-labelledby="yeni">
+    <section data-coach="g-topluluk-yaz" className="card mt-6 p-5" aria-labelledby="yeni">
       <div className="flex items-center gap-3">
         <Avatar person={me} size={40} />
         <h2 id="yeni" className="h-sec">
           Ne paylaşmak istersin?
         </h2>
       </div>
-      <div className="seg mt-4 !grid w-full grid-cols-2 sm:grid-cols-4" role="group" aria-label="Paylaşım türü">
+      <div data-coach="g-topluluk-tur" className="seg mt-4 !grid w-full grid-cols-2 sm:grid-cols-4" role="group" aria-label="Paylaşım türü">
         {KINDS.map((k) => (
-          <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)} className="!px-2 text-center !text-[13px] leading-tight">
+          <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)} className="inline-flex items-center justify-center gap-1.5 !px-2 text-center !text-[13px] leading-tight">
+            <TriMark size={12} color={KIND_TONE[k]} lip={false} variant={kind === k ? 'filled' : 'outline'} />
             {POST_KIND[k]}
           </button>
         ))}
@@ -299,6 +302,7 @@ function PostCard({ s, post, me, index, fresh }: { s: State; post: Post; me: Per
   const author = byId.person(s, post.personId);
   const [replying, setReplying] = useState(false);
   const [reply, setReply] = useState('');
+  const [ping, setPing] = useState(0);
   if (!author) return null;
 
   const mine = author.id === me.id;
@@ -309,6 +313,7 @@ function PostCard({ s, post, me, index, fresh }: { s: State; post: Post; me: Per
 
   const support = () => {
     actions.toggleSupport(post.id, me.id);
+    if (!supported) setPing((n) => n + 1);
     feedback(
       supported
         ? { tone: 'info', title: 'Desteğini geri aldın' }
@@ -350,6 +355,7 @@ function PostCard({ s, post, me, index, fresh }: { s: State; post: Post; me: Per
             </p>
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-bold text-ink-3">
               <span className="pill !px-2 !py-0.5" style={tint(tone)}>
+                <TriMark size={11} color={tone} lip={false} />
                 {POST_KIND[post.kind]}
               </span>
               <span>{relTime(post.at)}</span>
@@ -376,11 +382,23 @@ function PostCard({ s, post, me, index, fresh }: { s: State; post: Post; me: Per
             <button
               type="button"
               aria-pressed={supported}
+              data-coach="g-destek"
               onClick={support}
               className={`btn-line btn-sm ${supported ? '!border-purple hover:!bg-purple-tint' : ''}`}
               style={supported ? ({ '--key': 'var(--purple-tint)', '--key-lip': 'var(--purple)', '--key-ink': 'var(--purple-lip)' } as CSSProperties) : undefined}
             >
-              <motion.span className="grid" initial={false} animate={{ scale: supported ? [1, 1.45, 1] : 1, rotate: supported ? [0, -14, 0] : 0 }} transition={{ duration: 0.35 }}>
+              <motion.span className="relative grid" initial={false} animate={{ scale: supported ? [1, 1.45, 1] : 1, rotate: supported ? [0, -14, 0] : 0 }} transition={{ duration: 0.35 }}>
+                {supported && ping > 0 && !reduce && (
+                  <motion.span
+                    key={ping}
+                    className="absolute inset-0 rounded-full"
+                    style={{ background: 'rgb(var(--purple) / 0.35)' }}
+                    initial={{ scale: 0.6, opacity: 0.8 }}
+                    animate={{ scale: 2.4, opacity: 0 }}
+                    transition={{ duration: 0.55, ease: 'easeOut' }}
+                    aria-hidden="true"
+                  />
+                )}
                 <Hand size={22} on={supported} />
               </motion.span>
               Destek
@@ -519,8 +537,10 @@ function Rules({ showNiri }: { showNiri: boolean }) {
       <ol className="mt-3 space-y-4">
         {RULES.map((r, i) => (
           <li key={r.title} className="flex gap-3">
-            <span className="num grid h-8 w-8 shrink-0 place-items-center rounded-full text-[15px] font-black text-white" style={{ background: `rgb(var(--${r.tone}))`, boxShadow: `0 3px 0 rgb(var(--${r.tone}-lip))` }}>
-              {i + 1}
+            <span className="mt-0.5 shrink-0">
+              <TriMark size={34} color={r.tone}>
+                <span className="num text-[14px] font-black leading-none text-white">{i + 1}</span>
+              </TriMark>
             </span>
             <div className="min-w-0">
               <p className="text-[16px] font-black text-ink">{r.title}</p>

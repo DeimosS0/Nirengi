@@ -1,51 +1,161 @@
 ---
-// First screen: Niri, one friendly sentence, two stacked keys.
+// First screen: the hero sits on a map sheet. A survey trail climbs through
+// four triangle markers (the league elevations) to the summit where Niri waves.
 import Niri from '../ui/Niri';
-import { Building, CheckCircle, Flame, Shield } from '../ui/icons';
+import { Contours, Tri } from '../ui/pafta';
 
-const stickers = [
-  { label: 'Haftalık seri', pos: 'left-0 top-6', delay: '0s' },
-  { label: 'Doğrulandı', pos: 'right-0 top-[72px]', delay: '0.7s' },
-  { label: 'Lig', pos: 'left-3 bottom-10', delay: '1.3s' },
-  { label: 'Kurum onaylı', pos: 'right-0 bottom-3', delay: '0.4s' },
+type Pt = [number, number];
+const W = 500;
+const H = 420;
+
+// Trail waypoints, ground to summit; the first four carry a survey marker.
+const pts: Pt[] = [
+  [64, 352],
+  [214, 322],
+  [118, 246],
+  [252, 208],
+  [362, 184],
+];
+const summit = pts[4];
+
+function smooth(p: Pt[]) {
+  let d = `M${p[0][0]} ${p[0][1]}`;
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[Math.max(0, i - 1)];
+    const p1 = p[i];
+    const p2 = p[i + 1];
+    const p3 = p[Math.min(p.length - 1, i + 2)];
+    d += ` C${p1[0] + (p2[0] - p0[0]) / 6} ${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6} ${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]} ${p2[1]}`;
+  }
+  return d;
+}
+const trail = smooth(pts);
+
+const marks = [
+  { at: pts[0], size: 46, tone: 'indigo', state: 'waiting', label: 'Zemin', delay: 0.15 },
+  { at: pts[1], size: 54, tone: 'green', state: 'done', label: 'Tepe', delay: 0.6 },
+  { at: pts[2], size: 60, tone: 'cyan', state: 'done', label: 'Sırt', delay: 1.0 },
+  { at: pts[3], size: 66, tone: 'purple', state: 'done', label: 'Doruk', delay: 1.4 },
+] as const;
+
+const NIRI = 150;
+const rings = [
+  { rx: 34, ry: 11, o: 0.5 },
+  { rx: 68, ry: 22, o: 0.34 },
+  { rx: 102, ry: 33, o: 0.22 },
+  { rx: 136, ry: 44, o: 0.12 },
 ];
 ---
 
-<section class="mx-auto max-w-[1120px] px-4 pb-12 pt-6 sm:px-6 lg:pb-24 lg:pt-14" aria-labelledby="hero-title">
-  <div class="grid items-center gap-6 lg:grid-cols-2 lg:gap-16">
-    <div class="relative mx-auto h-[290px] w-full max-w-[420px] sm:h-[380px]">
-      <div class="absolute inset-x-8 bottom-3 top-5 rounded-[48%] bg-indigo-tint sm:inset-x-12"></div>
-      <div class="absolute inset-0 grid place-items-center pt-4">
-        <div class="rise">
-          <Niri mood="wave" size={240} className="!h-[190px] !w-[190px] sm:!h-[250px] sm:!w-[250px]" />
-        </div>
-      </div>
-      {
-        stickers.map((s) => (
-          <span
-            class={`niri-bob absolute flex items-center gap-2 rounded-full border-2 border-line bg-bg py-1.5 pl-2 pr-3.5 text-[14px] font-black text-ink shadow-[0_4px_0_rgb(var(--line))] ${s.pos}`}
-            style={`animation-delay:${s.delay}`}
-          >
-            {s.label === 'Haftalık seri' && <Flame size={24} />}
-            {s.label === 'Doğrulandı' && <CheckCircle size={24} />}
-            {s.label === 'Lig' && <Shield size={24} tier={2} />}
-            {s.label === 'Kurum onaylı' && <Building size={24} />}
-            {s.label}
-          </span>
-        ))
-      }
-    </div>
+<section class="relative overflow-hidden border-b-2 border-line" aria-labelledby="hero-title">
+  <Contours seed={2} x={0.7} y={0.52} rings={12} step={34} opacity={0.5} className="[mask-image:linear-gradient(to_right,transparent_8%,black_55%)] max-lg:[mask-image:linear-gradient(to_bottom,black_35%,transparent_60%)]" />
 
-    <div class="text-center lg:text-left">
-      <h1 id="hero-title" class="h-hero">Yaptığın işle <span class="text-indigo">fark edil.</span></h1>
-      <p class="lead mx-auto mt-4 max-w-[36ch] lg:mx-0">
+  <div class="relative mx-auto grid max-w-[1120px] items-center gap-4 px-4 pb-12 pt-5 sm:px-6 lg:grid-cols-[1fr_auto] lg:gap-10 lg:pb-20 lg:pt-10">
+    <div class="order-last text-center lg:order-none lg:text-left">
+      <h1 id="hero-title" class="h-hero rise">Yaptığın işle <span class="text-indigo">fark edil.</span></h1>
+      <p class="lead rise mx-auto mt-4 max-w-[38ch] lg:mx-0" style="animation-delay:80ms">
         Gençlerin yaptığı doğrulanmış işi, kurumların yazdığı ihtiyaçlarla buluşturuyoruz. Özgeçmiş yok, iş var.
       </p>
-      <div class="mx-auto mt-8 flex max-w-[380px] flex-col gap-3 lg:mx-0">
-        <a href="/bugun" class="btn-primary btn-lg btn-block">Genç olarak başla</a>
-        <a href="/kurum" class="btn-line btn-lg btn-block">Kurum olarak ihtiyaç yaz</a>
+      <div class="rise mx-auto mt-7 flex max-w-[380px] flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:justify-start" style="animation-delay:160ms">
+        <a href="/bugun" class="btn-primary btn-lg">Genç olarak başla</a>
+        <a href="/kurum" class="btn-line btn-lg">Kurum olarak ihtiyaç yaz</a>
       </div>
-      <p class="mt-4 text-[14px] font-bold text-ink-3">Kayıt gerekmez. Demo verisi bu tarayıcıda kalır.</p>
+      <p class="rise mt-4 text-[14px] font-semibold text-ink-3" style="animation-delay:220ms">Kayıt gerekmez. Demo verisi bu tarayıcıda kalır.</p>
+    </div>
+
+    <!-- The sheet is drawn at 500x420 and scaled down as one piece on small screens. -->
+    <div
+      data-narrate-hero
+      class="relative mx-auto h-[277px] w-[330px] sm:h-[336px] sm:w-[400px] lg:h-[370px] lg:w-[440px] xl:h-[441px] xl:w-[525px]"
+    >
+      <div
+        class="absolute inset-0"
+        role="img"
+        aria-label="Bir iz dört nirengi noktasından geçip zirvede el sallayan Niri’ye çıkıyor"
+      >
+      <div class="absolute left-0 top-0 origin-top-left scale-[0.66] sm:scale-[0.8] lg:scale-[0.88] xl:scale-[1.05]" style={`width:${W}px;height:${H}px`}>
+        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} class="absolute inset-0" aria-hidden="true">
+          {/* the summit: contour rings that also ping like a survey signal */}
+          <ellipse cx={summit[0]} cy={summit[1]} rx="102" ry="33" fill="rgb(var(--indigo) / 0.05)"></ellipse>
+          {rings.map((r) => <ellipse cx={summit[0]} cy={summit[1]} rx={r.rx} ry={r.ry} fill="none" stroke={`rgb(var(--indigo) / ${r.o})`} stroke-width="1.6"></ellipse>)}
+          <ellipse class="ping-soft" cx={summit[0]} cy={summit[1]} rx="34" ry="11" fill="none" stroke="rgb(var(--indigo) / 0.55)" stroke-width="2"></ellipse>
+          <ellipse class="ping-soft" style="animation-delay:1.1s" cx={summit[0]} cy={summit[1]} rx="34" ry="11" fill="none" stroke="rgb(var(--indigo) / 0.4)" stroke-width="2"></ellipse>
+
+          {/* the survey trail: dotted line, inked in as the markers appear */}
+          <path d={trail} fill="none" stroke="rgb(var(--ink-4))" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round"></path>
+          <path class="ink" d={trail} pathLength="1" fill="none" stroke="rgb(var(--indigo) / 0.55)" stroke-width="5" stroke-linecap="round"></path>
+
+          {/* north arrow */}
+          <g transform="translate(458 44)">
+            <path d="M0 -22 9 12 0 6Z" fill="rgb(var(--ink-3))"></path>
+            <path d="M0 -22-9 12 0 6Z" fill="rgb(var(--line-2))"></path>
+            <text x="0" y="32" text-anchor="middle" class="mono" font-size="11" fill="rgb(var(--ink-3))">K</text>
+          </g>
+        </svg>
+
+        {
+          marks.map((m) => (
+            <>
+              <div class="pop absolute" style={`left:${m.at[0] - m.size / 2}px;top:${m.at[1] - m.size * 0.55}px;animation-delay:${m.delay}s`}>
+                <Tri size={m.size} tone={m.tone} state={m.state}>
+                  {m.state === 'done' && <span class="block h-3 w-3 rounded-full bg-white"></span>}
+                </Tri>
+              </div>
+              <p
+                class="pop absolute -translate-x-1/2 whitespace-nowrap rounded-[8px] bg-bg px-1.5 text-[13px] font-semibold leading-snug text-ink-2"
+                style={`left:${m.at[0]}px;top:${m.at[1] + m.size * 0.37 + 9}px;animation-delay:${m.delay + 0.1}s`}
+              >
+                {m.label}
+              </p>
+            </>
+          ))
+        }
+
+        {/* a planted flag at the summit */}
+        <svg viewBox="0 0 30 60" width="30" height="60" class="pop absolute" style={`left:${summit[0] - 92}px;top:${summit[1] - 56}px;animation-delay:1.95s`} aria-hidden="true">
+          <path d="M5 4v54" stroke="rgb(var(--ink-3))" stroke-width="3" stroke-linecap="round"></path>
+          <path d="M7 5 26 12 7 20Z" fill="rgb(var(--orange))" stroke="rgb(var(--orange))" stroke-width="3" stroke-linejoin="round"></path>
+        </svg>
+
+        <div class="rise absolute" style={`left:${summit[0] - NIRI / 2}px;top:${summit[1] - NIRI * 0.94 + 6}px;animation-delay:1.7s`}>
+          <Niri client:visible mood="wave" size={NIRI} />
+        </div>
+
+        <p
+          class="pop absolute -translate-x-1/2 whitespace-nowrap rounded-[8px] bg-bg px-1.5 text-[13px] font-semibold leading-snug text-ink-2"
+          style={`left:${summit[0]}px;top:${summit[1] + 38}px;animation-delay:1.9s`}
+        >
+          Zirve
+        </p>
+      </div>
+      </div>
+
+      <!-- Niri's first words, drawn at reading size (outside the scaled sheet). -->
+      <p
+        class="pop absolute left-0 top-1 w-[46%] rounded-[16px] border-2 border-line bg-bg px-3 py-2 text-[14px] font-semibold leading-snug text-ink-2 sm:text-[15px]"
+        style="animation-delay:2s"
+      >
+        <span class="absolute -right-[9px] top-[44%] h-4 w-4 rotate-45 border-r-2 border-t-2 border-line bg-bg" aria-hidden="true"></span>
+        Merhaba, ben <b>Niri</b>! Bu sayfayı sana ben anlatacağım.
+      </p>
     </div>
   </div>
 </section>
+
+<style>
+  .ink {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: ink 1.7s cubic-bezier(0.45, 0, 0.25, 1) 0.25s both;
+  }
+  @keyframes ink {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ink {
+      animation-delay: 0s;
+    }
+  }
+</style>

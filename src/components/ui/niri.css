@@ -1,0 +1,397 @@
+/*
+ * Niri and the celebration set pieces.
+ *
+ * The static pose is always the base style; every animation here only decorates
+ * it, so removing them (reduced motion, the last rule) leaves a finished pose.
+ * Groups are nested so independent motions never fight over one transform:
+ *   n-pose  static lean/droop of the mood (transitions between moods)
+ *   n-loop  the mood's own loop (bounce, jump, rock, nod)
+ *   n-micro one-shot actions (hop, tilt, perk) set via data-act
+ *   n-breath always-on breathing
+ */
+
+.niri {
+  --lx: 1.2px; /* pupil offset, user units */
+  --ly: 0.8px;
+  --niri-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: visible;
+}
+.niri[data-mood='think'] { --lx: -2.2px; --ly: -2.6px; }
+.niri[data-mood='sad'] { --lx: 0px; --ly: 3px; }
+.niri[data-mood='talk'] { --lx: 0.8px; --ly: 0.4px; }
+.niri[data-mood='point'][data-point='left'] { --lx: -3.4px; --ly: 0.4px; }
+.niri[data-mood='point'][data-point='right'] { --lx: 3.4px; --ly: 0.4px; }
+.niri[data-mood='point'][data-point='up'] { --lx: 0.6px; --ly: -3.6px; }
+.niri[data-mood='point'][data-point='down'] { --lx: 0.6px; --ly: 3.4px; }
+.niri[data-mood][data-look='left'] { --lx: -3.4px; --ly: 0.6px; }
+.niri[data-mood][data-look='right'] { --lx: 3.4px; --ly: 0.6px; }
+.niri[data-mood][data-look='up'] { --lx: 0px; --ly: -3.6px; }
+.niri[data-mood][data-look='down'] { --lx: 0px; --ly: 3.4px; }
+
+.n-pose,
+.n-loop,
+.n-micro,
+.n-breath {
+  transform-origin: 60px 114px; /* the feet: every squash and tilt pivots here */
+}
+.n-pose { transition: transform 0.45s var(--niri-spring); }
+
+/* ---------------------------------------------------------------- static poses */
+
+.niri[data-mood='think'] .n-pose { transform: rotate(-5deg); }
+.niri[data-mood='sad'] .n-pose { transform: translateY(1.5px) scale(1.04, 0.93) rotate(-1.5deg); }
+.niri[data-mood='sleep'] .n-pose { transform: translateY(2px) scale(1.04, 0.95) rotate(3deg); }
+.niri[data-mood='point'][data-point='right'] .n-pose { transform: rotate(3.5deg); }
+.niri[data-mood='point'][data-point='left'] .n-pose { transform: rotate(-3.5deg); }
+.niri[data-mood='point'][data-point='up'] .n-pose { transform: scale(0.98, 1.03); }
+.niri[data-mood='point'][data-point='down'] .n-pose { transform: scale(1.02, 0.97); }
+
+/* ---------------------------------------------------------------- always-on */
+
+@keyframes n-breath {
+  0%, 100% { transform: scale(1.025, 0.955); }
+  50% { transform: scale(0.98, 1.04); }
+}
+.n-breath { animation: n-breath 3s ease-in-out infinite; }
+.niri[data-mood='sad'] .n-breath { animation-duration: 4.8s; }
+.niri[data-mood='sleep'] .n-breath { animation-name: n-breath-deep; animation-duration: 5s; }
+@keyframes n-breath-deep {
+  0%, 100% { transform: scale(1.03, 0.95); }
+  50% { transform: scale(0.99, 1.025); }
+}
+
+/* Eyes: JS drives the blink once the island is live, this is the static-page fallback. */
+.n-eye { transform-box: fill-box; transform-origin: center; transition: transform 70ms ease-in; }
+.niri[data-blink] .n-eye { transform: scaleY(0.08); }
+@keyframes n-blink {
+  0%, 22%, 30%, 100% { transform: scaleY(1); }
+  26% { transform: scaleY(0.08); }
+}
+.niri:not([data-live]) .n-eye { animation: n-blink 4.6s infinite; }
+.n-pupil { transform: translate(var(--lx), var(--ly)); transition: transform 0.16s ease-out; }
+
+/* ---------------------------------------------------------------- arms */
+
+.n-arm, .n-arm-fx { transform-origin: 0 0; }
+.n-arm { transition: transform 0.45s var(--niri-spring); }
+.n-arm-l { --s: 1; }
+.n-arm-r { --s: -1; }
+.n-arm-seg { transform-origin: 0 0; transform: scaleY(calc(var(--len) / 17)); transition: transform 0.45s var(--niri-spring); }
+.n-arm-tip { transform: translateY(calc((var(--len) - 17) * 1px)); transition: transform 0.45s var(--niri-spring); }
+
+/* ---------------------------------------------------------------- mood loops */
+
+/* idle: a slow weight shift */
+@keyframes n-sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+.niri[data-mood='idle'] .n-loop { animation: n-sway 5.2s ease-in-out infinite; }
+
+/* happy: two small bounces, then a rest */
+@keyframes n-happy {
+  0%    { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
+  6%    { transform: translateY(0) scale(1.05, 0.94); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  20%   { transform: translateY(-12px) scale(0.97, 1.05); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.6); }
+  34%   { transform: translateY(0) scale(1.05, 0.94); animation-timing-function: ease-out; }
+  42%   { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
+  48%   { transform: translateY(0) scale(1.04, 0.95); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  58%   { transform: translateY(-8px) scale(0.98, 1.04); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.6); }
+  68%   { transform: translateY(0) scale(1.04, 0.95); animation-timing-function: ease-out; }
+  76%, 100% { transform: translateY(0) scale(1, 1); }
+}
+.niri[data-mood='happy'] .n-loop { animation: n-happy 2.6s linear infinite; }
+
+/* cheer: crouch, jump with the arms thrown up, land squashed */
+@keyframes n-cheer {
+  0%    { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
+  8%    { transform: translateY(0) scale(1.08, 0.9); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  22%   { transform: translateY(-26px) scale(0.93, 1.1); animation-timing-function: ease-out; }
+  36%   { transform: translateY(-29px) scale(0.97, 1.05); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.6); }
+  50%   { transform: translateY(0) scale(1.1, 0.88); animation-timing-function: ease-out; }
+  60%   { transform: translateY(0) scale(0.97, 1.04); animation-timing-function: ease-in-out; }
+  68%, 100% { transform: translateY(0) scale(1, 1); }
+}
+.niri[data-mood='cheer'] .n-loop { animation: n-cheer 1.8s linear infinite; }
+@keyframes n-flap {
+  0%, 68%, 100% { transform: rotate(0); }
+  8% { transform: rotate(calc(var(--s) * -9deg)); }
+  22% { transform: rotate(calc(var(--s) * 13deg)); }
+  50% { transform: rotate(calc(var(--s) * -11deg)); }
+  60% { transform: rotate(calc(var(--s) * 4deg)); }
+}
+.niri[data-mood='cheer'] .n-arm-fx { animation: n-flap 1.8s ease-in-out infinite; }
+
+/* wave: the free arm waves in bursts, the body leans into it */
+@keyframes n-wave {
+  0%, 80%, 100% { transform: rotate(0); }
+  8% { transform: rotate(-30deg); }
+  22% { transform: rotate(18deg); }
+  36% { transform: rotate(-30deg); }
+  50% { transform: rotate(18deg); }
+  64% { transform: rotate(-22deg); }
+}
+.niri[data-mood='wave'] .n-arm-r .n-arm-fx { animation: n-wave 1.9s ease-in-out infinite; }
+@keyframes n-wave-body {
+  0%, 80%, 100% { transform: rotate(0) translateY(0); }
+  8%, 64% { transform: rotate(-3deg) translateY(-1.5px); }
+  36% { transform: rotate(-2deg) translateY(-3px); }
+}
+.niri[data-mood='wave'] .n-loop { animation: n-wave-body 1.9s ease-in-out infinite; }
+
+/* think: the head rocks slowly while the thought dots build up */
+@keyframes n-think {
+  0%, 100% { transform: rotate(0); }
+  45% { transform: rotate(-2deg); }
+  70% { transform: rotate(1.4deg); }
+}
+.niri[data-mood='think'] .n-loop { animation: n-think 4.6s ease-in-out infinite; }
+@keyframes n-dot {
+  0% { transform: scale(0); opacity: 0; }
+  12% { transform: scale(1.2); opacity: 1; }
+  20%, 72% { transform: scale(1); opacity: 1; }
+  92%, 100% { transform: scale(0.7); opacity: 0; }
+}
+.n-dot { transform-box: fill-box; transform-origin: center; animation: n-dot 2.8s ease-out infinite; animation-delay: calc(var(--i) * 0.24s); }
+
+/* talk: syllable bursts with a nod, the hands gesture */
+@keyframes n-talk {
+  0%, 62%, 100% { transform: scaleY(0.2); }
+  8% { transform: scaleY(1); }
+  18% { transform: scaleY(0.35); }
+  30% { transform: scaleY(0.9); }
+  42% { transform: scaleY(0.3); }
+  52% { transform: scaleY(0.75); }
+}
+.n-mouth-talk { transform-box: fill-box; transform-origin: 50% 0; animation: n-talk 1.5s ease-in-out infinite; }
+@keyframes n-nod {
+  0%, 62%, 100% { transform: translateY(0); }
+  8% { transform: translateY(-1.6px); }
+  18% { transform: translateY(0); }
+  30% { transform: translateY(-1.3px); }
+  42% { transform: translateY(0); }
+}
+.niri[data-mood='talk'] .n-loop { animation: n-nod 1.5s ease-in-out infinite; }
+@keyframes n-gesture {
+  0%, 62%, 100% { transform: rotate(0); }
+  15% { transform: rotate(calc(var(--s) * 12deg)); }
+  35% { transform: rotate(calc(var(--s) * 3deg)); }
+  50% { transform: rotate(calc(var(--s) * 10deg)); }
+}
+.niri[data-mood='talk'] .n-arm-r .n-arm-fx { animation: n-gesture 1.5s ease-in-out infinite; }
+.niri[data-mood='talk'] .n-arm-l .n-arm-fx { animation: n-gesture 1.5s ease-in-out 0.25s infinite; }
+
+/* sad: a slow sigh, and now and then a tear */
+@keyframes n-sigh {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  50% { transform: translateY(1.5px) scale(1.02, 0.97); }
+}
+.niri[data-mood='sad'] .n-loop { animation: n-sigh 4.8s ease-in-out infinite; }
+@keyframes n-tear {
+  0%, 10% { transform: translateY(0) scale(0.4); opacity: 0; }
+  24% { transform: translateY(0) scale(1); opacity: 1; }
+  80% { transform: translateY(13px) scale(1); opacity: 0.9; }
+  100% { transform: translateY(17px) scale(0.9); opacity: 0; }
+}
+.n-tear { transform-box: fill-box; transform-origin: 50% 0; animation: n-tear 3.4s ease-in infinite; }
+
+/* point: the arm jabs towards the thing, twice, then rests */
+@keyframes n-nudge {
+  0%, 40%, 100% { transform: translateY(0); }
+  10% { transform: translateY(6px); }
+  20% { transform: translateY(0); }
+  30% { transform: translateY(6px); }
+}
+.niri[data-mood='point'] .n-arm-p .n-arm-fx { animation: n-nudge 1.9s ease-in-out infinite; }
+@keyframes n-lean {
+  0%, 40%, 100% { transform: rotate(0); }
+  10%, 30% { transform: rotate(1.6deg); }
+  20% { transform: rotate(0.4deg); }
+}
+.niri[data-mood='point'] .n-loop { animation: n-lean 1.9s ease-in-out infinite; }
+
+/* sleep: z shapes drift up and fade out */
+@keyframes n-z {
+  0% { transform: translate(-2px, 5px) scale(0.6); opacity: 0; }
+  22% { opacity: 1; }
+  100% { transform: translate(7px, -12px) scale(1.1); opacity: 0; }
+}
+.n-z { transform-box: fill-box; transform-origin: center; animation: n-z 4.2s ease-out infinite; animation-delay: calc(var(--i) * 1.3s); }
+
+/* ---------------------------------------------------------------- one-shot actions */
+
+@keyframes n-hop {
+  0%   { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
+  14%  { transform: translateY(0) scale(1.07, 0.9); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  38%  { transform: translateY(-17px) scale(0.95, 1.07); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.6); }
+  58%  { transform: translateY(0) scale(1.08, 0.9); animation-timing-function: ease-out; }
+  76%  { transform: translateY(0) scale(0.98, 1.03); animation-timing-function: ease-in-out; }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+.niri[data-act='hop'] .n-micro { animation: n-hop 0.8s linear both; }
+
+@keyframes n-tilt {
+  0% { transform: rotate(0); }
+  22%, 72% { transform: rotate(-8deg); }
+  100% { transform: rotate(0); }
+}
+.niri[data-act='tilt'] .n-micro { animation: n-tilt 1.6s var(--niri-spring) both; }
+
+@keyframes n-perk {
+  0% { transform: translateY(0) scale(1, 1); }
+  18%, 80% { transform: translateY(-2px) scale(0.97, 1.06); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+.niri[data-act='perk'] .n-micro { animation: n-perk 1.2s var(--niri-spring) both; }
+
+/* The shadow shrinks while Niri is in the air. */
+.n-shadow { transform-box: fill-box; transform-origin: center; }
+@keyframes n-shadow-hop {
+  0%, 14%, 58%, 100% { transform: scale(1); opacity: 1; }
+  38% { transform: scale(0.72); opacity: 0.55; }
+  58% { transform: scale(1.06); }
+}
+.niri[data-act='hop'] .n-shadow { animation: n-shadow-hop 0.8s linear both; }
+@keyframes n-shadow-happy {
+  0%, 6%, 34%, 42%, 48%, 68%, 100% { transform: scale(1); opacity: 1; }
+  20% { transform: scale(0.84); opacity: 0.7; }
+  58% { transform: scale(0.9); opacity: 0.8; }
+}
+.niri[data-mood='happy'] .n-shadow { animation: n-shadow-happy 2.6s linear infinite; }
+@keyframes n-shadow-cheer {
+  0%, 8%, 50%, 68%, 100% { transform: scale(1); opacity: 1; }
+  22%, 36% { transform: scale(0.64); opacity: 0.45; }
+  50% { transform: scale(1.1); }
+}
+.niri[data-mood='cheer'] .n-shadow { animation: n-shadow-cheer 1.8s linear infinite; }
+
+/* A survey ping off the belly dot when Niri lands. */
+.n-ping { transform-box: fill-box; transform-origin: center; opacity: 0; }
+@keyframes n-ping {
+  0% { transform: scale(1); opacity: 0.85; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+.niri[data-act='hop'] .n-ping { animation: n-ping 0.7s ease-out 0.46s both; }
+@keyframes n-ping-loop {
+  0%, 49% { transform: scale(1); opacity: 0; }
+  50% { transform: scale(1); opacity: 0.85; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+.niri[data-mood='cheer'] .n-ping { animation: n-ping-loop 1.8s ease-out infinite; }
+
+/* Entrance (NiriSays mount / new message): a bigger hop and a ripple on the ground when it lands. */
+@keyframes n-enter {
+  0%   { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
+  13%  { transform: translateY(0) scale(1.1, 0.86); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  36%  { transform: translateY(-24px) scale(0.93, 1.1); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.6); }
+  62%  { transform: translateY(0) scale(1.12, 0.86); animation-timing-function: ease-out; }
+  80%  { transform: translateY(0) scale(0.97, 1.04); animation-timing-function: ease-in-out; }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+.niri[data-act='enter'] .n-micro { animation: n-enter 0.95s linear both; }
+@keyframes n-shadow-enter {
+  0%, 13%, 62%, 100% { transform: scale(1); opacity: 1; }
+  36% { transform: scale(0.64); opacity: 0.45; }
+  62% { transform: scale(1.1); }
+}
+.niri[data-act='enter'] .n-shadow { animation: n-shadow-enter 0.95s linear both; }
+.n-ground { transform-box: fill-box; transform-origin: center; vector-effect: non-scaling-stroke; opacity: 0; }
+@keyframes n-ground {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3, 2.4); opacity: 0; }
+}
+.niri[data-act='enter'] .n-ground { animation: n-ground 0.9s ease-out 0.58s both; }
+.niri[data-act='enter'] .n-ping { animation: n-ping 0.7s ease-out 0.58s both; }
+
+/* NiriSays bubble: grows out of its tail. */
+@keyframes n-bubble-in {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.n-bubble[data-in] { animation: n-bubble-in 0.26s cubic-bezier(0.2, 0.8, 0.3, 1) 0.1s both; }
+
+.niri[data-paused] * { animation-play-state: paused !important; }
+
+/* ---------------------------------------------------------------- celebration */
+
+/* Contour-like rings expanding from the survey point, once. */
+@keyframes c-ring {
+  0% { transform: scale(0.45); opacity: 0.9; }
+  100% { transform: scale(3.6); opacity: 0; }
+}
+.c-ring {
+  transform-origin: 60px 65px;
+  vector-effect: non-scaling-stroke;
+  animation: c-ring 1.8s cubic-bezier(0.16, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--i) * 0.2s + 0.1s);
+}
+
+/* The survey flag drops in, bounces once, then the cloth ripples. */
+@keyframes c-flag-drop {
+  0% { transform: translateY(-90px) rotate(10deg); opacity: 0; }
+  12% { opacity: 1; }
+  52% { transform: translateY(0) rotate(0); animation-timing-function: ease-out; }
+  66% { transform: translateY(-7px) rotate(-1.5deg); animation-timing-function: ease-in; }
+  80%, 100% { transform: translateY(0) rotate(0); }
+}
+.c-flag { transform-origin: 50% 100%; animation: c-flag-drop 1s cubic-bezier(0.5, 0, 0.9, 0.5) both; animation-delay: var(--d, 0s); }
+@keyframes c-cloth {
+  0%, 100% { transform: skewY(0) scaleX(1); }
+  50% { transform: skewY(-5deg) scaleX(0.93); }
+}
+.c-cloth { transform-box: fill-box; transform-origin: 0 50%; animation: c-cloth 2.2s ease-in-out infinite; animation-delay: calc(var(--d, 0s) + 1s); }
+@keyframes c-dust {
+  0% { transform: scale(0.3); opacity: 0; }
+  20% { opacity: 0.7; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.c-dust { transform-box: fill-box; transform-origin: center; opacity: 0; animation: c-dust 0.7s ease-out both; animation-delay: calc(var(--d, 0s) + 0.52s); }
+
+/* ---------------------------------------------------------------- feedback toast */
+
+/* The toast dock floats bottom-centre; on phones it clears the 66px tab bar of the app shell.
+   (App.astro adds the sidebar offset on desktop.) */
+.feedback-dock { bottom: calc(env(safe-area-inset-bottom) + 20px); }
+@media (max-width: 1023.98px) {
+  html[data-mode] .feedback-dock { bottom: calc(env(safe-area-inset-bottom) + 80px); }
+}
+
+@keyframes fb-bar {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.fb-bar { transform-origin: 0 50%; animation: fb-bar var(--ms, 4200ms) linear both; animation-play-state: var(--play, running); }
+
+/* The XP gem pops, then throws a few small triangles. */
+@keyframes fb-gem {
+  0% { transform: scale(0) rotate(-30deg); }
+  55% { transform: scale(1.4) rotate(10deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.fb-gem { animation: fb-gem 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) 0.4s both; }
+@keyframes fb-spark {
+  0% { transform: translate(0, 0) scale(0) rotate(0); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(140deg); opacity: 0; }
+}
+.fb-spark { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; opacity: 0; animation: fb-spark 0.75s ease-out both; animation-delay: calc(0.5s + var(--d, 0s)); }
+
+/* ---------------------------------------------------------------- reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .niri *,
+  .n-bubble,
+  .fb-bar,
+  .fb-gem,
+  .fb-spark,
+  .c-ring,
+  .c-flag,
+  .c-cloth,
+  .c-dust {
+    animation: none !important;
+    transition: none !important;
+  }
+  .c-ring, .fb-bar, .fb-spark { display: none; }
+  .c-dust { display: none; }
+}

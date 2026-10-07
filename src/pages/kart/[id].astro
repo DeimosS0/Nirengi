@@ -6,6 +6,6 @@ import { Loading } from '../../components/ui/primitives';
 const { id = '' } = Astro.params;
 ---
 
-<Layout title="Pilot özet kartı" description="Tarafların onayıyla yayımlanan proje sonucu: süre, karşılanan kriterler ve doğrulanabilir defter özeti.">
+<Layout title="Proje özet kartı" description="Tarafların onayıyla yayımlanan proje sonucu: süre, karşılanan kriterler ve doğrulanabilir kayıt defteri özeti.">
   <PublicCard client:only="react" id={id}><Loading slot="fallback" /></PublicCard>
 </Layout>

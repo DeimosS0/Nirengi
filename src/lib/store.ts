@@ -230,10 +230,10 @@ export const actions = {
         })),
         log: [],
       };
-      log(pilot, 'system', 'open', `Pilot açıldı. Kanvastaki ${criteria.length} başarı kriteri kilometre taşına dönüştü.`);
+      log(pilot, 'system', 'open', `Deneme projesi açıldı. İhtiyaç kartındaki ${criteria.length} başarı kriteri aşamaya dönüştü.`);
       s.pilots.unshift(pilot);
       need.status = 'piloting';
-      event(s, { kind: 'pilot_opened', text: `${org.name} × ${person.name} pilotu açıldı.`, orgId: org.id, personId, pilotId: id, needId });
+      event(s, { kind: 'pilot_opened', text: `${org.name} × ${person.name} deneme projesi açıldı.`, orgId: org.id, personId, pilotId: id, needId });
     });
     return id;
   },
@@ -310,7 +310,7 @@ export const actions = {
       s.needs.find((n) => n.id === p.needId)!.status = 'closed';
       event(s, {
         kind: 'pilot_closed',
-        text: `${org.name} × ${person.name} pilotu ${outcome === 'succeeded' ? 'başarıyla' : 'gerekçesiyle'} kapandı (${met}/${p.milestones.length} kriter).`,
+        text: `${org.name} × ${person.name} deneme projesi ${outcome === 'succeeded' ? 'başarıyla' : 'gerekçesiyle'} kapandı (${met}/${p.milestones.length} kriter).`,
         orgId: org.id,
         personId: person.id,
         pilotId,

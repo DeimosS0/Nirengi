@@ -61,7 +61,7 @@ export function assessCanvas(c: Canvas, skills: string[]) {
       ok: c.outcome.trim().length >= 25,
       points: 10,
       blocking: false,
-      fix: 'Pilot sonunda elinizde ne olacak? Bir ürün, servis, rapor…',
+      fix: 'Deneme projesi sonunda elinizde ne olacak? Bir ürün, servis, rapor…',
     },
     {
       id: 'criteriaCount',
@@ -70,7 +70,7 @@ export function assessCanvas(c: Canvas, skills: string[]) {
       ok: filled.length >= 2,
       points: 10,
       blocking: false,
-      fix: 'En az iki başarı kriteri ekleyin; her biri pilotta bir kilometre taşı olacak.',
+      fix: 'En az iki başarı kriteri ekleyin; her biri deneme projesinde bir aşama olacak.',
     },
     {
       id: 'criteriaMeasurable',
@@ -104,11 +104,11 @@ export function assessCanvas(c: Canvas, skills: string[]) {
     {
       id: 'scope',
       field: 'scope',
-      label: 'Pilot kapsamı sınırlı',
+      label: 'Deneme projesinin kapsamı sınırlı',
       ok: c.scope.trim().length >= 20,
       points: 5,
       blocking: false,
-      fix: 'Pilotu küçültün: tek depo, tek bölge, tek ürün grubu gibi.',
+      fix: 'Deneme projesini küçültün: tek depo, tek bölge, tek ürün grubu gibi.',
     },
     {
       id: 'skills',
@@ -187,9 +187,9 @@ export function draftFromText(text: string): Draft {
 
   const questions: Draft['questions'] = [];
   if (!painMetric) questions.push({ field: 'painMetric', q: 'Bu sorun bugün hangi sayıyla ölçülüyor? (süre, oran, maliyet)' });
-  questions.push({ field: 'criteria', q: 'Pilot başarılı sayılırsa hangi sayı nereye gelmiş olacak?' });
+  questions.push({ field: 'criteria', q: 'Deneme projesi başarılı sayılırsa hangi sayı nereye gelmiş olacak?' });
   questions.push({ field: 'decisionMaker', q: 'Kilometre taşlarını kurum adına kim onaylayacak?' });
-  questions.push({ field: 'scope', q: 'Pilotu en küçük hâliyle nerede deneyebiliriz? (tek bölge, tek müşteri…)' });
+  questions.push({ field: 'scope', q: 'Deneme projesini en küçük hâliyle nerede yapabiliriz? (tek bölge, tek müşteri…)' });
   if (!constraints.length) questions.push({ field: 'constraints', q: 'Bütçe, süre, veri ya da mevzuat kısıtınız var mı?' });
 
   const extracted = (Object.keys(canvas) as (keyof Canvas)[]).filter((k) => {

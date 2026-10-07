@@ -23,74 +23,73 @@ const svg = (size: number, className: string, children: ReactNode, label?: strin
   </svg>
 );
 
-/** Seri — the weekly streak. */
+/** Seri — the weekly streak: a lit survey beacon that keeps signalling. */
 export const Flame = ({ size = 28, className = '', dim = false }: P & { dim?: boolean }) =>
   svg(
     size,
     className,
     <>
-      <path
-        d="M16 2.5c1.6 4.6 8 7.6 8 15.2a8 8 0 0 1-16 0c0-4 2-6.4 4-8.1.3 2.2 1.3 3.5 2.6 4C14 9.6 14.3 5.6 16 2.5Z"
-        fill={dim ? c('line-2') : c('orange')}
-      />
-      <path
-        d="M16 14.5c1.3 2.3 4 3.6 4 7a4 4 0 0 1-8 0c0-2.1 1.3-3.4 2.4-4.3.2 1.1.7 1.7 1.3 2-.4-1.7-.2-3.2.3-4.7Z"
-        fill={dim ? c('bg-3') : c('gold')}
-      />
+      <path d="M16 11.5 25 28H7Z" fill={dim ? c('line-2') : c('orange')} stroke={dim ? c('line-2') : c('orange')} strokeWidth="3.4" strokeLinejoin="round" />
+      <path d="M16 18.5 21.6 28H10.4Z" fill={dim ? c('bg-3') : c('orange-lip')} stroke={dim ? c('bg-3') : c('orange-lip')} strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="16" cy="11.4" r="3.4" fill={dim ? c('bg-3') : c('gold')} />
+      <path d="M16 2.6v2.6M9.4 5.4l1.8 1.9M22.6 5.4l-1.8 1.9" stroke={dim ? c('line-2') : c('gold')} strokeWidth="2.4" strokeLinecap="round" />
     </>,
   );
 
-/** XP. */
+/** XP — a faceted gem: each verified piece of work cuts another facet. */
 export const Bolt = ({ size = 28, className = '' }: P) =>
   svg(
     size,
     className,
     <>
-      <path d="M19 2.5 6.5 18.2h8.2L12 29.5 26 12.8h-8.6L19 2.5Z" fill={c('gold')} />
-      <path d="M14.7 18.2 12 29.5 26 12.8h-3.4L14.7 22Z" fill={c('gold-lip')} />
+      <path d="M10.6 5.5h10.8l5.6 7.2L16 27.5 5 12.7Z" fill={c('gold')} stroke={c('gold')} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M16 27.5 21 12.7h6ZM21.4 5.5 27 12.7h-6Z" fill={c('gold-lip')} />
+      <path d="M10.6 5.5 13 12.7h-8Z" fill="#fff" opacity="0.45" />
+      <path d="M13 12.7h8L16 27.5Z" fill="#fff" opacity="0.18" />
     </>,
   );
 
-/** League shield with a ridge line: the tiers climb from ground to summit. */
+/** Lig — an elevation: a ridge in the tier's colour with a flag on its summit. */
 export const Shield = ({ size = 28, className = '', tier = 2 }: P & { tier?: number }) =>
   svg(
     size,
     className,
     <>
-      <path d="M16 2.5 4.5 6.8v8C4.5 22 9.5 27.4 16 29.6 22.5 27.4 27.5 22 27.5 14.8v-8L16 2.5Z" fill={c(`t${tier}`)} />
-      <path d="M16 2.5v27.1c6.5-2.2 11.5-7.6 11.5-14.8v-8L16 2.5Z" fill="rgb(0 0 0 / 0.12)" />
-      <path d="M8.5 20.5 13 14.5l3 3.4 2.6-3.6 4.9 6.2Z" fill="#fff" />
-      <circle cx="18.6" cy="11" r="1.6" fill="#fff" />
+      <path d="M2.5 27 11 14.5l3.6 4.6L20.5 8 29.5 27Z" fill={c(`t${tier}`)} stroke={c(`t${tier}`)} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M20.5 8 29.5 27h-6.2L18.6 15.6Z" fill="rgb(0 0 0 / 0.14)" />
+      <path d="M20.5 8 17.9 12.9l2.6-1 2.4 1.2Z" fill="#fff" opacity="0.9" />
+      <path d="M20.5 8.4V2.6" stroke={c('ink-3')} strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M21 2.6h5.4l-1.6 1.9 1.6 1.9H21Z" fill={c(`t${tier}`)} />
     </>,
   );
 
-/** Bugün — home. */
+/** Bugün — where you stand: a survey marker with its ping rings. */
 export const Home = ({ size = 28, className = '' }: P) =>
   svg(
     size,
     className,
     <>
-      <path d="M4 14.5 16 4l12 10.5V27a2 2 0 0 1-2 2h-6.5v-8h-7v8H6a2 2 0 0 1-2-2V14.5Z" fill={c('orange')} />
-      <path d="M2.8 15.2 16 3.6l13.2 11.6" fill="none" stroke={c('red')} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12.5 21h7v8h-7Z" fill={c('orange-lip')} />
+      <ellipse cx="16" cy="25.2" rx="13" ry="4.2" fill="none" stroke={c('cyan')} strokeWidth="2" opacity="0.55" />
+      <ellipse cx="16" cy="25.2" rx="7.6" ry="2.4" fill={c('cyan')} opacity="0.45" />
+      <path d="M16 4.5 25 21H7Z" transform="translate(0 2.2)" fill={c('indigo-lip')} stroke={c('indigo-lip')} strokeWidth="3.4" strokeLinejoin="round" />
+      <path d="M16 4.5 25 21H7Z" fill={c('indigo')} stroke={c('indigo')} strokeWidth="3.4" strokeLinejoin="round" />
+      <circle cx="16" cy="15" r="2.6" fill="#fff" />
     </>,
   );
 
-/** Görevler — a chest that opens when a quest is done. */
-export const Chest = ({ size = 28, className = '', open = false }: P & { open?: boolean }) =>
+/** Görevler — this week's route: a folded map with a dashed route and a flag on its waypoint. */
+export const Route = ({ size = 28, className = '' }: P) =>
   svg(
     size,
     className,
     <>
-      <path d="M4.5 14h23v12a2.5 2.5 0 0 1-2.5 2.5H7A2.5 2.5 0 0 1 4.5 26V14Z" fill={c('gold-lip')} />
-      {open ? (
-        <path d="M5.5 12.5 8 5.5a3 3 0 0 1 2.8-2h10.4a3 3 0 0 1 2.8 2l2.5 7Z" fill={c('gold')} transform="rotate(-8 16 13)" />
-      ) : (
-        <path d="M4.5 14v-3.5A5 5 0 0 1 9.5 5.5h13a5 5 0 0 1 5 5V14Z" fill={c('gold')} />
-      )}
-      <path d="M4.5 14h23v3h-23Z" fill="rgb(0 0 0 / 0.14)" />
-      <rect x="13.5" y="12.5" width="5" height="7" rx="1.5" fill={c('ink')} />
-      <circle cx="16" cy="16" r="1.1" fill={c('gold')} />
+      <path d="M4.5 9 11.5 6.5v19L4.5 28Z" fill={c('gold')} stroke={c('gold')} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M11.5 6.5 20.5 9v19l-9-2.5Z" fill={c('gold-lip')} stroke={c('gold-lip')} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M20.5 9 27.5 6.5v19L20.5 28Z" fill={c('gold')} stroke={c('gold')} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M7.6 23.4c2.4-.9 3.5-4 6-4.6s4.2.9 6.3-1.4 1.7-4 3.4-5" fill="none" stroke="#fff" strokeWidth="1.8" strokeDasharray="2.2 2.4" strokeLinecap="round" />
+      <circle cx="7.6" cy="23.4" r="1.7" fill="#fff" />
+      <path d="M23.4 12.6V3.4" stroke={c('indigo-lip')} strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M23.9 3.4h5l-1.5 1.9 1.5 1.9h-5Z" fill={c('indigo')} stroke={c('indigo')} strokeWidth="0.8" strokeLinejoin="round" />
     </>,
   );
 

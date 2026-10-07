@@ -66,7 +66,7 @@ function Card({ pilot: p }: { pilot: Pilot }) {
 
   return (
     <div className="mx-auto w-full max-w-[600px] px-4 py-10 sm:py-14">
-      <article className="card overflow-hidden" style={{ boxShadow: '0 6px 0 rgb(var(--line))' }}>
+      <article className="card overflow-hidden">
         <header className="flex items-center justify-between gap-3 px-6 pt-5">
           <span className="flex items-center gap-2">
             <Mark className="h-8 w-8" />
@@ -153,7 +153,7 @@ function Card({ pilot: p }: { pilot: Pilot }) {
 
         <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t-2 border-line bg-bg-2 px-6 py-4">
           <div className="min-w-0">
-            <p className="text-[15px] font-black text-ink">Defter</p>
+            <p className="text-[15px] font-black text-ink">Kayıt defteri</p>
             <p className="mono text-[12px] font-medium text-ink-3">
               {p.log.length} kayıt · son özet {shortHash(root)}
             </p>
@@ -164,7 +164,7 @@ function Card({ pilot: p }: { pilot: Pilot }) {
               {intact ? 'Zincir doğrulandı' : 'Zincir kırık'}
             </span>
             <Why title="Bu doğrulama nasıl yapıldı?">
-              <p className="text-[15px] font-bold text-ink-2">Defterdeki her kayıt, bir öncekinin SHA-256 özetini taşır. Bu sayfa açıldığında özetlerin hepsi yeniden hesaplandı ve kayıtlı olanlarla karşılaştırıldı.</p>
+              <p className="text-[15px] font-bold text-ink-2">Kayıt defterindeki her kayıt, bir öncekinin SHA-256 özetini taşır. Bu sayfa açıldığında özetlerin hepsi yeniden hesaplandı ve kayıtlı olanlarla karşılaştırıldı.</p>
               <p className="mt-3 text-[15px] font-bold text-ink-2">Tek bir kayıt sonradan değişseydi bu rozet kırmızıya dönerdi. Kurumlar ve kişiler kurgusal demo verisidir.</p>
             </Why>
           </div>
@@ -183,7 +183,7 @@ function Card({ pilot: p }: { pilot: Pilot }) {
       </div>
       <p className="no-print mt-5 text-center">
         <a href={`/pilotlar/${p.id}`} className="inline-flex items-center gap-1 text-[14px] font-extrabold text-indigo hover:underline">
-          Defteri incele
+          Kayıt defterini incele
           <ChevronRight className="h-4 w-4" strokeWidth={3} />
         </a>
       </p>

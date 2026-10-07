@@ -17,7 +17,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'all', label: 'Hepsi' },
   { key: 'draft', label: 'Taslak' },
   { key: 'published', label: 'Yayında' },
-  { key: 'piloting', label: 'Pilotta' },
+  { key: 'piloting', label: 'Denemede' },
 ];
 
 /** Kept for the need detail screen, which still tints its status pill with it. */
@@ -48,15 +48,15 @@ export default function NeedsPage() {
 
   return (
     <div className="mx-auto max-w-[760px]">
-      <PageHead title="İhtiyaçlar" lead={`${org.name} için yazılmış problemler. Net yazılan ihtiyaç, doğru adayı hızla bulur.`}>
-        <a href="/ihtiyaclar/yeni" className="btn-primary">
+      <PageHead title="İhtiyaçlar" lead={`${org.name} için çözmek istediğin problemleri burada yazar, yayımlar ve uyan gençleri görürsün.`}>
+        <a href="/ihtiyaclar/yeni" data-coach="ihtiyac-yeni" className="btn-primary">
           Yeni ihtiyaç
         </a>
       </PageHead>
 
       {rows.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <div className="seg w-full sm:w-auto" role="group" aria-label="Duruma göre süz">
+          <div data-coach="ihtiyac-filtre" className="seg w-full sm:w-auto" role="group" aria-label="Duruma göre süz">
             {TABS.map((t) => (
               <button key={t.key} type="button" aria-pressed={tab === t.key} onClick={() => setTab(t.key)} className="flex-1 !px-2.5 sm:flex-none sm:!px-3.5">
                 {t.label} <span className="num font-black opacity-70">{count(t.key)}</span>
@@ -64,11 +64,11 @@ export default function NeedsPage() {
             ))}
           </div>
           <span className="text-[14px] font-bold text-ink-3">
-            Halkadaki sayı çözülebilirlik.{' '}
-            <Why title="Çözülebilirlik nedir?">
-              <p className="text-[16px] font-bold text-ink-2">İhtiyacın ne kadar net yazıldığının 100 üzerinden puanıdır. Sorun, sayı, başarı kriteri ve karar verici gibi on maddeden toplanır.</p>
+            Halkadaki sayı netlik puanı.{' '}
+            <Why title="Netlik puanı nedir?">
+              <p className="text-[16px] font-bold text-ink-2">İhtiyacın ne kadar net ve çözülebilir yazıldığının 100 üzerinden puanıdır. Sorun, sayı, başarı kriteri ve karar verici gibi on maddeden toplanır.</p>
               <p className="mt-3 text-[15px] font-semibold text-ink-3">
-                Yayın kapısı {PUBLISH_THRESHOLD} puandır ve ölçüsü, kriteri ya da karar vericisi olmayan ihtiyaç puanı yetse bile yayına çıkmaz. Uygun aday, uyum puanı %{FIT_MIN} ve üstü olan kişidir; kimlikler ilk temasa kadar gizli kalır.
+                Yayımlamak için en az {PUBLISH_THRESHOLD} puan gerekir. Sorunun ölçüsü, başarı kriteri ya da karar vericisi yazılmamış bir ihtiyaç, puanı yetse bile yayımlanamaz. Uygun aday, uyum puanı %{FIT_MIN} ve üstü olan gençtir; adaylar isimsiz görünür, isimleri ilk temasa kadar gizli kalır.
               </p>
             </Why>
           </span>
@@ -76,7 +76,7 @@ export default function NeedsPage() {
       )}
 
       {list.length === 0 ? (
-        <div className="mt-6">
+        <div className="mt-6" data-coach={rows.length === 0 ? 'ihtiyac-bos' : undefined}>
           {rows.length === 0 ? (
             <EmptyState
               title="Henüz bir ihtiyacın yok"
@@ -86,7 +86,7 @@ export default function NeedsPage() {
                 </a>
               }
             >
-              İhtiyaç, kurumunun çözmek istediği tek bir problemdir: sayıyla ölçülür ve küçük bir pilotla denenir.
+              İhtiyaç, kurumunun çözmek istediği tek bir problemdir: sayıyla ölçülür ve küçük bir deneme projesiyle denenir.
             </EmptyState>
           ) : (
             <EmptyState title="Bu durumda ihtiyaç yok" mood="idle">
@@ -100,12 +100,12 @@ export default function NeedsPage() {
             const note = r.n.status === 'draft' ? gateNote(r.a) : null;
             const ok = r.pilot?.milestones.filter((m) => m.state === 'approved').length ?? 0;
             return (
-              <li key={r.n.id} className="rise" style={{ animationDelay: `${Math.min(i, 5) * 50}ms` }}>
+              <li key={r.n.id} data-coach={i === 0 ? 'ihtiyac-satir' : undefined} className="rise" style={{ animationDelay: `${Math.min(i, 5) * 50}ms` }}>
                 <a href={`/ihtiyaclar/${r.n.id}`} className="card-press flex items-center gap-4 p-4">
                   {(r.n.status === 'draft' || r.n.status === 'published') && (
                     <div className="flex w-[84px] shrink-0 flex-col items-center gap-1.5">
-                      <Ring value={r.a.score} size={60} label="çözülebilirlik" tone={r.a.canPublish ? 'green' : 'indigo'} />
-                      <span className="whitespace-nowrap text-[12px] font-extrabold leading-none text-ink-3">çözülebilirlik</span>
+                      <Ring value={r.a.score} size={60} label="netlik puanı" tone={r.a.canPublish ? 'green' : 'indigo'} />
+                      <span className="whitespace-nowrap text-[12px] font-extrabold leading-none text-ink-3">netlik puanı</span>
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
