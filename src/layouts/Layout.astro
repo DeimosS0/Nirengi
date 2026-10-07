@@ -1,0 +1,51 @@
+---
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import DemoTour from '../components/app/DemoTour';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Yetkinliği beyana değil, doğrulanabilir kanıta bağlayan açık kaynak kurum–yetenek eşleşme ve iş birliği altyapısı.' } = Astro.props;
+const fullTitle = title === 'NİRENGİ' ? 'NİRENGİ — Beyan değil, kanıt.' : `${title} · NİRENGİ`;
+---
+
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="tr_TR" />
+    <meta name="theme-color" content="#e2e4e8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17191d" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (() => {
+        let t;
+        try { t = localStorage.getItem('nirengi:theme'); } catch {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+        document.documentElement.classList.add('js');
+      })();
+    </script>
+  </head>
+  <body class="flex min-h-dvh flex-col">
+    <a href="#icerik" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:rounded-[4px] focus:bg-ink focus:px-3 focus:py-2 focus:text-paper">İçeriğe geç</a>
+    <Nav />
+    <main id="icerik" class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+    <DemoTour client:only="react" />
+  </body>
+</html>

@@ -1,0 +1,37 @@
+---
+import Logo from './Logo.astro';
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-24 border-t border-line bg-raised">
+  <div class="wrap grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
+    <div>
+      <a href="/" class="flex items-center gap-2.5">
+        <Logo class="h-8 w-8" />
+        <span class="font-display text-[16px] font-extrabold tracking-[0.04em]">NİRENGİ</span>
+      </a>
+      <p class="mt-4 max-w-sm text-sm leading-relaxed text-ink-2">
+        Nirengi noktası: haritacılıkta üzerine güvenle ölçüm yapılan sabit referans. Ekosistemin kanıt katmanı için aynı fikri öneriyoruz.
+      </p>
+      <p class="num mt-5 text-xs text-ink-3">41°01′K 28°58′D · Zemin360 Hackathon {year}</p>
+    </div>
+    <div>
+      <p class="plabel">Ürün</p>
+      <ul class="mt-3 space-y-2 text-sm">
+        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/kanit-bagla">Kanıt Kartı</a></li>
+        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/ihtiyaclar/yeni">İhtiyaç Kanvası</a></li>
+        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/pilotlar">Pilot Defteri</a></li>
+        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/nabiz">Ağ Nabzı</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="plabel">Açıklık</p>
+      <ul class="mt-3 space-y-2 text-sm">
+        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/yontem">Skor nasıl hesaplanıyor?</a></li>
+        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/yontem#veri">Gerçek olan, demo olan</a></li>
+        <li><a class="text-ink-2 hover:text-ink hover:underline" href="https://github.com/Finetiontr/Nirengi" target="_blank" rel="noreferrer">Açık kaynak · GitHub</a></li>
+      </ul>
+      <p class="mt-6 text-xs leading-relaxed text-ink-3">Bu demodaki kurum ve kişiler kurgusaldır. Doğrulama akışları (GitHub, DNS) gerçektir.</p>
+    </div>
+  </div>
+</footer>

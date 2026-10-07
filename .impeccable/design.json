@@ -1,0 +1,735 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-05T13:38:11+00:00",
+  "title": "Design System: NİRENGİ",
+  "extensions": {
+    "colorMeta": {
+      "enclosure-grey": {
+        "role": "neutral",
+        "displayName": "Enclosure Grey",
+        "canonical": "rgb(226 228 232)",
+        "tonalRamp": [
+          "oklch(15% 0.006 264.5)",
+          "oklch(26% 0.006 264.5)",
+          "oklch(38% 0.006 264.5)",
+          "oklch(49% 0.006 264.5)",
+          "oklch(61% 0.006 264.5)",
+          "oklch(72% 0.006 264.5)",
+          "oklch(84% 0.006 264.5)",
+          "oklch(95% 0.006 264.5)"
+        ]
+      },
+      "panel-face": {
+        "role": "neutral",
+        "displayName": "Panel Face",
+        "canonical": "rgb(243 244 246)",
+        "tonalRamp": [
+          "oklch(15% 0.003 264.5)",
+          "oklch(26% 0.003 264.5)",
+          "oklch(38% 0.003 264.5)",
+          "oklch(49% 0.003 264.5)",
+          "oklch(61% 0.003 264.5)",
+          "oklch(72% 0.003 264.5)",
+          "oklch(84% 0.003 264.5)",
+          "oklch(95% 0.003 264.5)"
+        ]
+      },
+      "recess-grey": {
+        "role": "neutral",
+        "displayName": "Recess Grey",
+        "canonical": "rgb(213 216 221)",
+        "tonalRamp": [
+          "oklch(15% 0.008 260.7)",
+          "oklch(26% 0.008 260.7)",
+          "oklch(38% 0.008 260.7)",
+          "oklch(49% 0.008 260.7)",
+          "oklch(61% 0.008 260.7)",
+          "oklch(72% 0.008 260.7)",
+          "oklch(84% 0.008 260.7)",
+          "oklch(95% 0.008 260.7)"
+        ]
+      },
+      "print-ink": {
+        "role": "neutral",
+        "displayName": "Print Ink",
+        "canonical": "rgb(19 21 26)",
+        "tonalRamp": [
+          "oklch(15% 0.011 268.1)",
+          "oklch(26% 0.011 268.1)",
+          "oklch(38% 0.011 268.1)",
+          "oklch(49% 0.011 268.1)",
+          "oklch(61% 0.011 268.1)",
+          "oklch(72% 0.011 268.1)",
+          "oklch(84% 0.011 268.1)",
+          "oklch(95% 0.011 268.1)"
+        ]
+      },
+      "print-ink-2": {
+        "role": "neutral",
+        "displayName": "Print Ink 2",
+        "canonical": "rgb(58 62 72)",
+        "tonalRamp": [
+          "oklch(15% 0.018 268.2)",
+          "oklch(26% 0.018 268.2)",
+          "oklch(38% 0.018 268.2)",
+          "oklch(49% 0.018 268.2)",
+          "oklch(61% 0.018 268.2)",
+          "oklch(72% 0.018 268.2)",
+          "oklch(84% 0.018 268.2)",
+          "oklch(95% 0.018 268.2)"
+        ]
+      },
+      "print-ink-3": {
+        "role": "neutral",
+        "displayName": "Print Ink 3",
+        "canonical": "rgb(92 97 108)",
+        "tonalRamp": [
+          "oklch(15% 0.019 266.1)",
+          "oklch(26% 0.019 266.1)",
+          "oklch(38% 0.019 266.1)",
+          "oklch(49% 0.019 266.1)",
+          "oklch(61% 0.019 266.1)",
+          "oklch(72% 0.019 266.1)",
+          "oklch(84% 0.019 266.1)",
+          "oklch(95% 0.019 266.1)"
+        ]
+      },
+      "seam": {
+        "role": "neutral",
+        "displayName": "Seam",
+        "canonical": "rgb(196 200 207)",
+        "tonalRamp": [
+          "oklch(15% 0.011 261.8)",
+          "oklch(26% 0.011 261.8)",
+          "oklch(38% 0.011 261.8)",
+          "oklch(49% 0.011 261.8)",
+          "oklch(61% 0.011 261.8)",
+          "oklch(72% 0.011 261.8)",
+          "oklch(84% 0.011 261.8)",
+          "oklch(95% 0.011 261.8)"
+        ]
+      },
+      "seam-strong": {
+        "role": "neutral",
+        "displayName": "Seam Strong",
+        "canonical": "rgb(165 170 179)",
+        "tonalRamp": [
+          "oklch(15% 0.014 262.4)",
+          "oklch(26% 0.014 262.4)",
+          "oklch(38% 0.014 262.4)",
+          "oklch(49% 0.014 262.4)",
+          "oklch(61% 0.014 262.4)",
+          "oklch(72% 0.014 262.4)",
+          "oklch(84% 0.014 262.4)",
+          "oklch(95% 0.014 262.4)"
+        ]
+      },
+      "signal-orange": {
+        "role": "primary",
+        "displayName": "Signal Orange",
+        "canonical": "rgb(249 148 0)",
+        "tonalRamp": [
+          "oklch(15% 0.171 63.9)",
+          "oklch(26% 0.171 63.9)",
+          "oklch(38% 0.171 63.9)",
+          "oklch(49% 0.171 63.9)",
+          "oklch(61% 0.171 63.9)",
+          "oklch(72% 0.171 63.9)",
+          "oklch(84% 0.171 63.9)",
+          "oklch(95% 0.171 63.9)"
+        ]
+      },
+      "zemin-indigo": {
+        "role": "secondary",
+        "displayName": "Zemin Indigo",
+        "canonical": "rgb(100 81 231)",
+        "tonalRamp": [
+          "oklch(15% 0.217 282.2)",
+          "oklch(26% 0.217 282.2)",
+          "oklch(38% 0.217 282.2)",
+          "oklch(49% 0.217 282.2)",
+          "oklch(61% 0.217 282.2)",
+          "oklch(72% 0.217 282.2)",
+          "oklch(84% 0.217 282.2)",
+          "oklch(95% 0.217 282.2)"
+        ]
+      },
+      "zemin-purple": {
+        "role": "tertiary",
+        "displayName": "Zemin Purple",
+        "canonical": "rgb(155 4 218)",
+        "tonalRamp": [
+          "oklch(15% 0.266 310.4)",
+          "oklch(26% 0.266 310.4)",
+          "oklch(38% 0.266 310.4)",
+          "oklch(49% 0.266 310.4)",
+          "oklch(61% 0.266 310.4)",
+          "oklch(72% 0.266 310.4)",
+          "oklch(84% 0.266 310.4)",
+          "oklch(95% 0.266 310.4)"
+        ]
+      },
+      "zemin-cyan": {
+        "role": "secondary",
+        "displayName": "Zemin Cyan",
+        "canonical": "rgb(0 180 216)",
+        "tonalRamp": [
+          "oklch(15% 0.129 219.0)",
+          "oklch(26% 0.129 219.0)",
+          "oklch(38% 0.129 219.0)",
+          "oklch(49% 0.129 219.0)",
+          "oklch(61% 0.129 219.0)",
+          "oklch(72% 0.129 219.0)",
+          "oklch(84% 0.129 219.0)",
+          "oklch(95% 0.129 219.0)"
+        ]
+      },
+      "level-s1-declared": {
+        "role": "status",
+        "displayName": "Declared Grey (S1)",
+        "canonical": "rgb(92 97 108)",
+        "tonalRamp": [
+          "oklch(15% 0.019 266.1)",
+          "oklch(26% 0.019 266.1)",
+          "oklch(38% 0.019 266.1)",
+          "oklch(49% 0.019 266.1)",
+          "oklch(61% 0.019 266.1)",
+          "oklch(72% 0.019 266.1)",
+          "oklch(84% 0.019 266.1)",
+          "oklch(95% 0.019 266.1)"
+        ]
+      },
+      "level-s2-machine": {
+        "role": "status",
+        "displayName": "Machine Cyan (S2, pass)",
+        "canonical": "rgb(0 120 160)",
+        "tonalRamp": [
+          "oklch(15% 0.107 230.5)",
+          "oklch(26% 0.107 230.5)",
+          "oklch(38% 0.107 230.5)",
+          "oklch(49% 0.107 230.5)",
+          "oklch(61% 0.107 230.5)",
+          "oklch(72% 0.107 230.5)",
+          "oklch(84% 0.107 230.5)",
+          "oklch(95% 0.107 230.5)"
+        ]
+      },
+      "level-s3-certified": {
+        "role": "status",
+        "displayName": "Certified Violet (S3)",
+        "canonical": "rgb(84 64 214)",
+        "tonalRamp": [
+          "oklch(15% 0.217 280.9)",
+          "oklch(26% 0.217 280.9)",
+          "oklch(38% 0.217 280.9)",
+          "oklch(49% 0.217 280.9)",
+          "oklch(61% 0.217 280.9)",
+          "oklch(72% 0.217 280.9)",
+          "oklch(84% 0.217 280.9)",
+          "oklch(95% 0.217 280.9)"
+        ]
+      },
+      "warn-amber": {
+        "role": "status",
+        "displayName": "Warn Amber",
+        "canonical": "rgb(176 96 0)",
+        "tonalRamp": [
+          "oklch(15% 0.135 59.1)",
+          "oklch(26% 0.135 59.1)",
+          "oklch(38% 0.135 59.1)",
+          "oklch(49% 0.135 59.1)",
+          "oklch(61% 0.135 59.1)",
+          "oklch(72% 0.135 59.1)",
+          "oklch(84% 0.135 59.1)",
+          "oklch(95% 0.135 59.1)"
+        ]
+      },
+      "danger-red": {
+        "role": "status",
+        "displayName": "Danger Red",
+        "canonical": "rgb(200 40 60)",
+        "tonalRamp": [
+          "oklch(15% 0.194 20.6)",
+          "oklch(26% 0.194 20.6)",
+          "oklch(38% 0.194 20.6)",
+          "oklch(49% 0.194 20.6)",
+          "oklch(61% 0.194 20.6)",
+          "oklch(72% 0.194 20.6)",
+          "oklch(84% 0.194 20.6)",
+          "oklch(95% 0.194 20.6)"
+        ]
+      },
+      "screen-glass": {
+        "role": "neutral",
+        "displayName": "Screen Glass",
+        "canonical": "rgb(13 16 21)",
+        "tonalRamp": [
+          "oklch(15% 0.012 260.6)",
+          "oklch(26% 0.012 260.6)",
+          "oklch(38% 0.012 260.6)",
+          "oklch(49% 0.012 260.6)",
+          "oklch(61% 0.012 260.6)",
+          "oklch(72% 0.012 260.6)",
+          "oklch(84% 0.012 260.6)",
+          "oklch(95% 0.012 260.6)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      },
+      "screen-raised": {
+        "role": "neutral",
+        "displayName": "Screen Raised",
+        "canonical": "rgb(22 26 33)",
+        "tonalRamp": [
+          "oklch(15% 0.015 261.6)",
+          "oklch(26% 0.015 261.6)",
+          "oklch(38% 0.015 261.6)",
+          "oklch(49% 0.015 261.6)",
+          "oklch(61% 0.015 261.6)",
+          "oklch(72% 0.015 261.6)",
+          "oklch(84% 0.015 261.6)",
+          "oklch(95% 0.015 261.6)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      },
+      "screen-phosphor": {
+        "role": "neutral",
+        "displayName": "Screen Phosphor",
+        "canonical": "rgb(222 228 236)",
+        "tonalRamp": [
+          "oklch(15% 0.013 255.5)",
+          "oklch(26% 0.013 255.5)",
+          "oklch(38% 0.013 255.5)",
+          "oklch(49% 0.013 255.5)",
+          "oklch(61% 0.013 255.5)",
+          "oklch(72% 0.013 255.5)",
+          "oklch(84% 0.013 255.5)",
+          "oklch(95% 0.013 255.5)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      },
+      "screen-phosphor-3": {
+        "role": "neutral",
+        "displayName": "Screen Phosphor 3",
+        "canonical": "rgb(118 128 144)",
+        "tonalRamp": [
+          "oklch(15% 0.027 259.8)",
+          "oklch(26% 0.027 259.8)",
+          "oklch(38% 0.027 259.8)",
+          "oklch(49% 0.027 259.8)",
+          "oklch(61% 0.027 259.8)",
+          "oklch(72% 0.027 259.8)",
+          "oklch(84% 0.027 259.8)",
+          "oklch(95% 0.027 259.8)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      },
+      "screen-seam": {
+        "role": "neutral",
+        "displayName": "Screen Seam",
+        "canonical": "rgb(38 45 56)",
+        "tonalRamp": [
+          "oklch(15% 0.022 259.4)",
+          "oklch(26% 0.022 259.4)",
+          "oklch(38% 0.022 259.4)",
+          "oklch(49% 0.022 259.4)",
+          "oklch(61% 0.022 259.4)",
+          "oklch(72% 0.022 259.4)",
+          "oklch(84% 0.022 259.4)",
+          "oklch(95% 0.022 259.4)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      },
+      "screen-s2": {
+        "role": "status",
+        "displayName": "Screen Machine Cyan",
+        "canonical": "rgb(60 210 240)",
+        "tonalRamp": [
+          "oklch(15% 0.127 214.5)",
+          "oklch(26% 0.127 214.5)",
+          "oklch(38% 0.127 214.5)",
+          "oklch(49% 0.127 214.5)",
+          "oklch(61% 0.127 214.5)",
+          "oklch(72% 0.127 214.5)",
+          "oklch(84% 0.127 214.5)",
+          "oklch(95% 0.127 214.5)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      },
+      "screen-s3": {
+        "role": "status",
+        "displayName": "Screen Certified Violet",
+        "canonical": "rgb(170 156 255)",
+        "tonalRamp": [
+          "oklch(15% 0.141 289.0)",
+          "oklch(26% 0.141 289.0)",
+          "oklch(38% 0.141 289.0)",
+          "oklch(49% 0.141 289.0)",
+          "oklch(61% 0.141 289.0)",
+          "oklch(72% 0.141 289.0)",
+          "oklch(84% 0.141 289.0)",
+          "oklch(95% 0.141 289.0)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      },
+      "screen-ch3": {
+        "role": "tertiary",
+        "displayName": "Screen CH3 Purple",
+        "canonical": "rgb(196 92 255)",
+        "tonalRamp": [
+          "oklch(15% 0.239 310.9)",
+          "oklch(26% 0.239 310.9)",
+          "oklch(38% 0.239 310.9)",
+          "oklch(49% 0.239 310.9)",
+          "oklch(61% 0.239 310.9)",
+          "oklch(72% 0.239 310.9)",
+          "oklch(84% 0.239 310.9)",
+          "oklch(95% 0.239 310.9)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      },
+      "screen-ch4": {
+        "role": "secondary",
+        "displayName": "Screen CH4 Indigo",
+        "canonical": "rgb(140 124 255)",
+        "tonalRamp": [
+          "oklch(15% 0.188 285.7)",
+          "oklch(26% 0.188 285.7)",
+          "oklch(38% 0.188 285.7)",
+          "oklch(49% 0.188 285.7)",
+          "oklch(61% 0.188 285.7)",
+          "oklch(72% 0.188 285.7)",
+          "oklch(84% 0.188 285.7)",
+          "oklch(95% 0.188 285.7)"
+        ],
+        "context": "Inside .screen regions only (inset instrument glass)."
+      }
+    },
+    "darkTheme": {
+      "selector": "[data-theme=\"dark\"]",
+      "note": "Remaps the same RGB-channel custom properties; CH1-CH4 channel colours are unchanged.",
+      "values": {
+        "paper": "#17191d",
+        "raised": "#212429",
+        "sunken": "#101215",
+        "ink": "#e8eaee",
+        "ink-2": "#acb1bb",
+        "ink-3": "#868c98",
+        "line": "#30343b",
+        "line-2": "#464b54",
+        "signal": "#ffa31a",
+        "s1": "#8c929e",
+        "s2": "#28c8ee",
+        "s3": "#9688ff",
+        "warn": "#ffb03c",
+        "danger": "#ff6e80"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display (badge)",
+        "purpose": "Hero statement only; Archivo stretched to width 112."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "One per landing section; app page titles at 44px / 56px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Panel titles, problem names, candidate and need names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default reading text."
+      },
+      "body-lead": {
+        "displayName": "Lead",
+        "purpose": "Section leads, capped at 34-62ch."
+      },
+      "label": {
+        "displayName": "Panel print",
+        "purpose": "Condensed caps labels attached to a control, column, value or enclosure nameplate; never a kicker above a heading."
+      },
+      "readout": {
+        "displayName": "Readout",
+        "purpose": "Engine-computed and machine-identified values: scores, weights, blind codes, hashes, dates, routes."
+      }
+    },
+    "shadows": [
+      {
+        "name": "enclosure-lift",
+        "value": "0 1px 0 rgb(255 255 255 / 0.5) inset, 0 18px 40px -28px rgb(0 0 0 / 0.45)",
+        "purpose": "Landing instrument enclosures."
+      },
+      {
+        "name": "bezel-tray",
+        "value": "inset 0 1px 3px rgb(0 0 0 / 0.18)",
+        "purpose": "Recessed tray a screen sits in."
+      },
+      {
+        "name": "screen-recess",
+        "value": "inset 0 0 0 1px rgb(0 0 0 / 0.6), inset 0 2px 8px rgb(0 0 0 / 0.5)",
+        "purpose": "Every inset dark screen."
+      },
+      {
+        "name": "key-lip",
+        "value": "inset 0 -2px 0 rgb(0 0 0 / 0.16), 0 1px 2px rgb(0 0 0 / 0.14)",
+        "purpose": "Keys at rest."
+      },
+      {
+        "name": "key-pressed",
+        "value": "inset 0 1px 2px rgb(0 0 0 / 0.2)",
+        "purpose": "Keys while pressed, with translateY(1px)."
+      },
+      {
+        "name": "card-rest",
+        "value": "0 1px 2px rgb(var(--ink) / 0.06)",
+        "purpose": "App cards at rest."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 6px 16px -10px rgb(var(--ink) / 0.35)",
+        "purpose": "Interactive app cards on hover."
+      },
+      {
+        "name": "field-well",
+        "value": "inset 0 1px 2px rgb(var(--ink) / 0.08)",
+        "purpose": "Text inputs."
+      },
+      {
+        "name": "focus-ring",
+        "value": "outline: 2px solid rgb(var(--violet)); outline-offset: 2px",
+        "purpose": "Global :focus-visible."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-instrument",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Default ease-out for bars, meters, layout reorder, reveals and page enter."
+      },
+      {
+        "name": "ease-exit",
+        "value": "cubic-bezier(0.4, 0, 1, 1)",
+        "purpose": "Page view-transition exit (160ms; enter is 260ms ease-instrument)."
+      },
+      {
+        "name": "key-transition",
+        "value": "150ms",
+        "purpose": "Key, LED and field state changes."
+      },
+      {
+        "name": "card-transition",
+        "value": "200ms ease-out",
+        "purpose": "Card border and shadow on hover."
+      },
+      {
+        "name": "rise",
+        "value": "420ms ease-instrument, 8px translate",
+        "purpose": "Dialog and panel content entering."
+      },
+      {
+        "name": "bar-segment",
+        "value": "700ms ease-instrument, 60ms stagger",
+        "purpose": "Stacked channel bars on the bench."
+      },
+      {
+        "name": "rank-reorder",
+        "value": "450ms ease-instrument",
+        "purpose": "Candidate re-ranking when a channel is muted."
+      },
+      {
+        "name": "meter-fill",
+        "value": "600ms ease-instrument",
+        "purpose": "Meter fills."
+      },
+      {
+        "name": "count-up",
+        "value": "900ms quartic ease-out",
+        "purpose": "Score dial values; skipped under reduced motion."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "all durations 0.01ms",
+        "purpose": "prefers-reduced-motion: reduce is fully honoured."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "container",
+        "value": "1240px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Key",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one orange key per panel; the main call to action.",
+      "html": "<button class=\"ds-btn-primary\">Kanıtını bağla</button>",
+      "css": ".ds-btn-primary { font-family: 'Archivo Variable', ui-sans-serif, sans-serif; display: inline-flex; align-items: center; gap: 8px; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: 600; font-stretch: 96%; border: none; cursor: pointer; box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.16), 0 1px 2px rgb(0 0 0 / 0.14); transition: background-color 150ms, border-color 150ms, transform 150ms, box-shadow 150ms; background: rgb(var(--signal)); color: rgb(var(--signal-ink)); } .ds-btn-primary:hover { background: #ffa21f; } .ds-btn-primary:focus-visible { outline: 2px solid rgb(var(--violet)); outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(1px); box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2); }"
+    },
+    {
+      "name": "Ink Key",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "Secondary call to action and the active mode key.",
+      "html": "<button class=\"ds-btn-ink\">İhtiyaç Kanvasını aç</button>",
+      "css": ".ds-btn-ink { font-family: 'Archivo Variable', ui-sans-serif, sans-serif; display: inline-flex; align-items: center; gap: 8px; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: 600; font-stretch: 96%; border: none; cursor: pointer; box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.16), 0 1px 2px rgb(0 0 0 / 0.14); transition: background-color 150ms, border-color 150ms, transform 150ms, box-shadow 150ms; background: rgb(var(--ink)); color: rgb(var(--paper)); } .ds-btn-ink:hover { background: rgb(var(--ink) / 0.88); } .ds-btn-ink:focus-visible { outline: 2px solid rgb(var(--violet)); outline-offset: 2px; } .ds-btn-ink:active { transform: translateY(1px); box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2); }"
+    },
+    {
+      "name": "Line Key",
+      "kind": "button",
+      "refersTo": "button-line",
+      "description": "Alternative action, steppers and inactive mode keys.",
+      "html": "<button class=\"ds-btn-line\">İhtiyaç yaz</button>",
+      "css": ".ds-btn-line { font-family: 'Archivo Variable', ui-sans-serif, sans-serif; display: inline-flex; align-items: center; gap: 8px; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: 600; font-stretch: 96%; border: none; cursor: pointer; box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.16), 0 1px 2px rgb(0 0 0 / 0.14); transition: background-color 150ms, border-color 150ms, transform 150ms, box-shadow 150ms; background: rgb(var(--raised)); color: rgb(var(--ink)); border: 1px solid rgb(var(--line-2)); } .ds-btn-line:hover { border-color: rgb(var(--ink-3)); } .ds-btn-line:focus-visible { outline: 2px solid rgb(var(--violet)); outline-offset: 2px; } .ds-btn-line:active { transform: translateY(1px); box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2); }"
+    },
+    {
+      "name": "Quiet Key",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Faceless key for icons, theme toggle and dialog close.",
+      "html": "<button class=\"ds-btn-quiet\">Geri al</button>",
+      "css": ".ds-btn-quiet { font-family: 'Archivo Variable', ui-sans-serif, sans-serif; display: inline-flex; align-items: center; gap: 8px; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: 600; font-stretch: 96%; border: none; cursor: pointer; box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.16), 0 1px 2px rgb(0 0 0 / 0.14); transition: background-color 150ms, border-color 150ms, transform 150ms, box-shadow 150ms; background: transparent; color: rgb(var(--ink-2)); padding: 10px 12px; box-shadow: none; } .ds-btn-quiet:hover { background: rgb(var(--sunken)); color: rgb(var(--ink)); } .ds-btn-quiet:focus-visible { outline: 2px solid rgb(var(--violet)); outline-offset: 2px; } .ds-btn-quiet:active { transform: translateY(1px); box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2); }"
+    },
+    {
+      "name": "Channel Key",
+      "kind": "custom",
+      "refersTo": "button-line",
+      "description": "Mutes or restores a match component; the LED fills when pressed.",
+      "html": "<button class=\"ds-chkey\" aria-pressed=\"true\"><span class=\"ds-led\" style=\"--c: var(--ch1)\"></span><span class=\"ds-mono\">CH1</span><span>Kanıt</span><span class=\"ds-mono ds-w\">0,45</span></button>",
+      "css": ".ds-chkey { font-family: 'Archivo Variable', ui-sans-serif, sans-serif; display: inline-flex; align-items: center; gap: 8px; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: 600; font-stretch: 96%; border: none; cursor: pointer; box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.16), 0 1px 2px rgb(0 0 0 / 0.14); transition: background-color 150ms, border-color 150ms, transform 150ms, box-shadow 150ms; background: rgb(var(--raised)); color: rgb(var(--ink)); border: 1px solid rgb(var(--line-2)); border-radius: 4px; padding: 6px 10px; font-size: 13px; min-width: 190px; justify-content: flex-start; } .ds-chkey:hover { border-color: rgb(var(--ink-3)); } .ds-chkey:focus-visible { outline: 2px solid rgb(var(--violet)); outline-offset: 2px; } .ds-chkey:active { transform: translateY(1px); box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2); } .ds-led { display: inline-block; width: 7px; height: 7px; border-radius: 1px; background: rgb(var(--c) / 0.25); box-shadow: inset 0 0 0 1px rgb(var(--c) / 0.6); transition: background-color 150ms; } .ds-chkey[aria-pressed=\"true\"] .ds-led { background: rgb(var(--c)); } .ds-mono { font-family: 'JetBrains Mono Variable', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-size: 11px; color: rgb(var(--ink-3)); } .ds-w { margin-left: auto; }"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Text input with an inset well and indigo focus.",
+      "html": "<label class=\"ds-label\">Başlık</label><input class=\"ds-field\" placeholder=\"Sonuç odaklı başlık\" />",
+      "css": ".ds-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: rgb(var(--ink)); } .ds-field { width: 100%; border-radius: 4px; border: 1px solid rgb(var(--line-2)); background: rgb(var(--raised)); padding: 10px 12px; font-size: 15px; color: rgb(var(--ink)); caret-color: rgb(var(--violet)); box-shadow: inset 0 1px 2px rgb(var(--ink) / 0.08); transition: border-color 150ms, box-shadow 150ms; } .ds-field::placeholder { color: rgb(var(--ink-3) / 0.8); } .ds-field:focus { outline: none; border-color: rgb(var(--violet)); box-shadow: inset 0 1px 2px rgb(var(--ink) / 0.08), 0 0 0 3px rgb(var(--violet) / 0.2); }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Sticky panel-face strip; the active link carries an inset indigo underline.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-word\">NİRENGİ</span><a class=\"ds-link\" href=\"#\">Keşfet</a><a class=\"ds-link\" aria-current=\"page\" href=\"#\">İhtiyaçlar</a><a class=\"ds-link\" href=\"#\">Pilot Defteri</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: stretch; height: 56px; padding: 0 16px; background: rgb(var(--raised) / 0.95); border-bottom: 1px solid rgb(var(--line)); } .ds-word { align-self: center; margin-right: 16px; font-weight: 800; font-size: 15px; letter-spacing: 0.04em; color: rgb(var(--ink)); } .ds-link { display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: 600; color: rgb(var(--ink-2)); text-decoration: none; transition: color 150ms; } .ds-link:hover { color: rgb(var(--ink)); } .ds-link[aria-current=\"page\"] { color: rgb(var(--ink)); box-shadow: inset 0 -2px 0 rgb(var(--violet)); } .ds-link:focus-visible { outline: 2px solid rgb(var(--violet)); outline-offset: -2px; }"
+    },
+    {
+      "name": "Level Badge",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Verification level chip; the glyph follows the line-weight rule.",
+      "html": "<span class=\"ds-lv ds-s1\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\"><path d=\"M8 2.2 14.2 13.3H1.8Z\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"round\" fill=\"none\" stroke-dasharray=\"2.2 1.8\"/></svg>S1</span> <span class=\"ds-lv ds-s2\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\"><path d=\"M8 2.2 14.2 13.3H1.8Z\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"round\" fill=\"none\"/><circle cx=\"8\" cy=\"9.6\" r=\"1.5\" fill=\"currentColor\"/></svg>S2</span> <span class=\"ds-lv ds-s3\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\"><path d=\"M8 2.2 14.2 13.3H1.8Z\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"round\" fill=\"currentColor\"/></svg>S3</span>",
+      "css": ".ds-lv { display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; border: 1px solid; padding: 2px 6px; font-family: 'JetBrains Mono Variable', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-size: 11px; font-weight: 500; } .ds-s1 { color: rgb(var(--s1)); border-color: rgb(var(--s1) / 0.35); background: rgb(var(--s1) / 0.08); } .ds-s2 { color: rgb(var(--s2)); border-color: rgb(var(--s2) / 0.35); background: rgb(var(--s2) / 0.08); } .ds-s3 { color: rgb(var(--s3)); border-color: rgb(var(--s3) / 0.4); background: rgb(var(--s3) / 0.1); }"
+    },
+    {
+      "name": "Data Panel",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Ruled panel with a recess-grey header strip of panel print.",
+      "html": "<article class=\"ds-panel\"><div class=\"ds-head\"><span class=\"ds-plabel\">Bileşen</span><span class=\"ds-plabel\">Lisans</span></div><a class=\"ds-row\" href=\"#\"><b>Astro</b><span class=\"ds-num\">MIT</span></a><a class=\"ds-row\" href=\"#\"><b>React</b><span class=\"ds-num\">MIT</span></a></article>",
+      "css": ".ds-panel { overflow: hidden; border-radius: 6px; border: 1px solid rgb(var(--line-2)); background: rgb(var(--raised)); color: rgb(var(--ink)); font-size: 14px; } .ds-head { display: flex; justify-content: space-between; padding: 8px 16px; background: rgb(var(--sunken)); border-bottom: 1px solid rgb(var(--line-2)); } .ds-plabel { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-stretch: 78%; color: rgb(var(--ink-3)); } .ds-row { display: flex; justify-content: space-between; padding: 8px 16px; border-top: 1px solid rgb(var(--line)); color: inherit; text-decoration: none; transition: background-color 150ms; } .ds-row:hover { background: rgb(var(--paper)); } .ds-row:focus-visible { outline: 2px solid rgb(var(--violet)); outline-offset: -2px; } .ds-num { font-family: 'JetBrains Mono Variable', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-size: 12.5px; color: rgb(var(--ink-3)); }"
+    },
+    {
+      "name": "Instrument Screen",
+      "kind": "custom",
+      "refersTo": "screen",
+      "description": "Inset dark glass with graticule, header strip, stacked channel bar and readout row.",
+      "html": "<div class=\"ds-screen\"><div class=\"ds-sh\"><span class=\"ds-mode\">Eşleşme</span><span class=\"ds-ctx\">Kuzey Lojistik · rota süresi</span></div><div class=\"ds-plot\"><span class=\"ds-bar\"><i style=\"height:40%;background:rgb(var(--ch1))\"></i><i style=\"height:20%;background:rgb(var(--ch2))\"></i><i style=\"height:15%;background:rgb(196 92 255)\"></i><i style=\"height:11%;background:rgb(140 124 255)\"></i></span></div><div class=\"ds-ro\"><span><em style=\"color:rgb(var(--ch1))\">CH1</em>0,93</span><span><em style=\"color:rgb(var(--ch2))\">CH2</em>1,00</span><span><em>Σ skor</em>0,86</span></div></div>",
+      "css": ".ds-screen { --paper: 13 16 21; --ink: 222 228 236; --ink-2: 160 170 184; --ink-3: 118 128 144; --line: 38 45 56; max-width: 420px; border-radius: 4px; overflow: hidden; background: rgb(var(--paper)); color: rgb(var(--ink)); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.6), inset 0 2px 8px rgb(0 0 0 / 0.5); } .ds-sh { display: flex; gap: 12px; padding: 8px 16px; border-bottom: 1px solid rgb(var(--line)); font-size: 13px; } .ds-mode { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-stretch: 78%; color: rgb(var(--ch1)); } .ds-ctx { color: rgb(var(--ink-2)); } .ds-plot { height: 160px; margin: 16px; padding-left: 24px; display: flex; align-items: flex-end; background-image: linear-gradient(90deg, rgb(255 255 255 / 0.07) 1px, transparent 1px), linear-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px); background-size: 10% 25%; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14); } .ds-bar { width: 22%; height: 100%; display: flex; flex-direction: column-reverse; } .ds-bar i { display: block; } .ds-ro { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgb(var(--line)); text-align: center; font-family: 'JetBrains Mono Variable', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-size: 13px; } .ds-ro span { padding: 8px 4px; border-right: 1px solid rgb(var(--line)); } .ds-ro em { display: block; font-style: normal; font-family: 'Archivo Variable', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-stretch: 78%; color: rgb(var(--ink-3)); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Measurement Bench",
+    "overview": "NİRENGİ is drawn as a piece of lab equipment, not a brochure. The page is a light instrument enclosure: cool grey panels with printed condensed-caps labels, seams instead of decorations, physical keys that travel a pixel when pressed. Wherever the engine computes something, the enclosure opens onto an inset dark screen with a real graticule, and the numbers on that screen are the numbers the engine produced a moment ago. The four match components are four channels in the Zemin360 colours, and that colour code is the spine of the whole system.\n\nDensity is that of a datasheet: rows, columns, readouts and units, with generous section spacing between instruments but tight, ruled spacing inside them. Display type is wide and heavy (Archivo stretched), labels are narrow and silk-screened (Archivo condensed), and figures are monospaced. Ornament is limited to what an instrument would actually carry: graticules, LEDs, channel colours, line weights that encode verification level.\n\nThe confirmed rejections from the brand owner: no AI-template look (gradient hero, feature-card grid, logo strip), no career-platform look, and no return to the earlier paper-and-ink \"pafta\" map aesthetic.",
+    "keyCharacteristics": [
+      "Light grey enclosure panels; dark inset screens for anything computed.",
+      "Four fixed channel colours (CH1 orange, CH2 cyan, CH3 purple, CH4 indigo) carry the match components everywhere.",
+      "Verification level is written as line weight and dash, not as a badge colour alone.",
+      "Wide heavy display, condensed caps panel print, monospaced readouts.",
+      "Square-ish corners (1 to 10px), seams and inset shadows rather than floating cards."
+    ],
+    "rules": [
+      {
+        "name": "The Four Channels Rule",
+        "body": "Orange, cyan, purple and indigo are CH1 to CH4, in that order, everywhere. Where they appear as data on a screen they mean a channel, and the four always appear together in that order.",
+        "section": "colors"
+      },
+      {
+        "name": "The Signal Key Rule",
+        "body": "Orange as a fill belongs to the primary key and to CH1 data. One primary key per panel; the alternative action is a line or ink key.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pass Is Machine Cyan Rule",
+        "body": "A passing state uses the S2 machine colour, because passing a check is machine verification. Green is not part of the system.",
+        "section": "colors"
+      },
+      {
+        "name": "The Panel Print Rule",
+        "body": "Condensed caps labels name a control, a column, a value or an enclosure; they sit on the thing they label. They are never a prefix stacked above a heading.",
+        "section": "typography"
+      },
+      {
+        "name": "The Readout Rule",
+        "body": "If the engine computed it or a machine identifies it, it is set in JetBrains Mono with tabular figures. Prose and headings never use the mono.",
+        "section": "typography"
+      },
+      {
+        "name": "The Accent Word Rule",
+        "body": "A display headline may set one phrase in an accent colour (indigo on panels, orange on screens) without italics; one per headline at most.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fixed Regions Rule",
+        "body": "On an instrument, regions never move. Mode keys swap the contents of the screen; the screen, its header strip, its channel readout row and its front-panel keys keep their position and size.",
+        "section": "layout"
+      },
+      {
+        "name": "The Enclosure and Screen Rule",
+        "body": "Light panels lift; screens sink. Nothing computed floats on a raised card; it is shown on glass inside the panel.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Verification Weight Rule",
+        "body": "Line weight encodes verification level on every surface: S1 a thin dashed grey line, S2 a solid medium cyan line, S3 a heavy violet line (ratio roughly 1 : 2 : 4). A level glyph follows the same logic: dashed outline triangle, outline triangle with a dot, filled triangle.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** show anything the engine computes on an inset screen with a graticule, using the screen palette.",
+      "**Do** keep CH1 to CH4 in orange, cyan, purple, indigo order and use those colours only for channel data, the primary key and the documented accents.",
+      "**Do** encode verification level as line weight and dash (S1 thin dashed grey, S2 solid cyan, S3 heavy violet), with colour as reinforcement.",
+      "**Do** use S2 machine cyan for every pass state (published, chain intact, check passed).",
+      "**Do** set scores, weights, codes, hashes, dates and routes in JetBrains Mono with tabular figures.",
+      "**Do** attach condensed caps labels to the control, column or value they name.",
+      "**Do** keep corners between 1px and 10px, stepping with the size of the part.",
+      "**Do** label fictional organisations and people as demo data wherever they appear."
+    ],
+    "donts": [
+      "**Don't** use Unicode glyphs (check marks, crosses, bullets, triangles) for status; use the drawn status icon.",
+      "**Don't** stack an uppercase label or a numbered \"01 ·\" prefix above a heading as a kicker.",
+      "**Don't** use green for status, decorative gradients or coloured glows; pass is S2 cyan and depth is black or ink shadow.",
+      "**Don't** put the graticule on surfaces that do not measure anything.",
+      "**Don't** float computed numbers on raised cards; screens sink, panels lift.",
+      "**Don't** move instrument regions between modes; swap their contents.",
+      "**Don't** use the SaaS arrangement of gradient hero, feature-card grid and logo strip, or a career-platform profile look.",
+      "**Don't** return to the paper-and-ink map (\"pafta\") texture."
+    ]
+  }
+}

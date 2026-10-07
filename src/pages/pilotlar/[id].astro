@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PilotDetail from '../../components/app/PilotDetail';
+import { Loading } from '../../components/ui/primitives';
+
+const { id = '' } = Astro.params;
+---
+
+<Layout title="Pilot Defteri">
+  <PilotDetail client:only="react" id={id}><Loading slot="fallback" /></PilotDetail>
+</Layout>

@@ -1,0 +1,82 @@
+---
+import PersonaSwitch from './app/PersonaSwitch';
+import Logo from './Logo.astro';
+
+const links = [
+  { href: '/kesfet', label: 'Keşfet' },
+  { href: '/ihtiyaclar', label: 'İhtiyaçlar' },
+  { href: '/pilotlar', label: 'Pilot Defteri' },
+  { href: '/nabiz', label: 'Ağ Nabzı' },
+  { href: '/yontem', label: 'Yöntem' },
+];
+const path = Astro.url.pathname;
+const active = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<nav data-nav class="sticky top-0 z-40 w-full border-b border-line bg-raised/95 backdrop-blur-md" aria-label="Ana menü">
+  <div class="wrap flex h-14 items-center gap-5">
+    <a href="/" class="flex items-center gap-2.5 text-ink" aria-label="NİRENGİ ana sayfa">
+      <Logo class="h-7 w-7" />
+      <span class="font-display text-[15px] font-extrabold tracking-[0.04em]">NİRENGİ</span>
+    </a>
+
+    <ul class="hidden h-full items-stretch lg:flex">
+      {links.map((l) => (
+        <li class="flex">
+          <a
+            href={l.href}
+            aria-current={active(l.href) ? 'page' : undefined}
+            class:list={[
+              'relative flex items-center px-3 text-[14px] font-semibold transition-colors',
+              active(l.href) ? 'text-ink shadow-[inset_0_-2px_0_rgb(var(--violet))]' : 'text-ink-2 hover:text-ink',
+            ]}
+          >
+            {l.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="ml-auto flex items-center gap-2">
+      <div class="hidden h-9 min-w-[188px] sm:block">
+        <PersonaSwitch client:only="react" />
+      </div>
+      <button id="theme-toggle" type="button" class="btn-quiet btn-sm h-9 w-9 !px-0" aria-label="Aydınlık / karanlık tema">
+        <svg viewBox="0 0 20 20" class="h-4 w-4" aria-hidden="true">
+          <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+          <path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"></path>
+        </svg>
+      </button>
+      <a href="/kanit-bagla" class="btn-primary btn-sm hidden h-9 md:inline-flex">Kanıtını bağla</a>
+
+      <details class="relative lg:hidden">
+        <summary class="btn-line btn-sm h-9 cursor-pointer list-none [&::-webkit-details-marker]:hidden" aria-label="Menü">Menü</summary>
+        <div class="card absolute right-0 top-11 z-50 w-64 p-2 shadow-xl">
+          {links.map((l) => (
+            <a href={l.href} class:list={['block rounded-[4px] px-3 py-2 text-[15px] font-semibold', active(l.href) ? 'bg-sunken text-ink' : 'text-ink-2']}>
+              {l.label}
+            </a>
+          ))}
+          <div class="rule my-2"></div>
+          <div class="px-1 pb-1 sm:hidden"><PersonaSwitch client:only="react" /></div>
+          <button type="button" data-tour-open class="block w-full rounded-[4px] px-3 py-2 text-left text-[15px] font-semibold text-ink-2 sm:hidden">Demo turu</button>
+          <a href="/kanit-bagla" class="btn-primary btn-sm mt-1 w-full">Kanıtını bağla</a>
+        </div>
+      </details>
+    </div>
+  </div>
+</nav>
+
+<script>
+  document.querySelector('[data-tour-open]')?.addEventListener('click', (e) => {
+    (e.currentTarget as HTMLElement).closest('details')?.removeAttribute('open');
+    window.dispatchEvent(new Event('nirengi:tour'));
+  });
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('nirengi:theme', next);
+    } catch {}
+  });
+</script>

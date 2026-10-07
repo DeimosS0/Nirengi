@@ -1,0 +1,9 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PilotsPage from '../../components/app/PilotsPage';
+import { Loading } from '../../components/ui/primitives';
+---
+
+<Layout title="Pilot Defteri" description="Çift taraflı onay, hash zincirli defter, sessizlik göstergesi ve adil kapanış.">
+  <PilotsPage client:only="react"><Loading slot="fallback" /></PilotsPage>
+</Layout>

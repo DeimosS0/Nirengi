@@ -1,0 +1,55 @@
+---
+import { LEVELS } from '../../lib/labels.ts';
+
+// Line weight encodes verification level everywhere on the site: dashed hairline, line, heavy line.
+const rows = [
+  { level: LEVELS.S1, c: 'var(--s1)', w: 1.5, dash: '4 4', who: 'Kişinin kendisi', examples: '“React biliyorum” · kişisel proje beyanı · doğrulanmamış bağlantı' },
+  { level: LEVELS.S2, c: 'var(--s2)', w: 3, dash: undefined, who: 'Makine, insan yorumu olmadan', examples: 'GitHub hesap sahipliği · alan adı DNS TXT · npm, mağaza, DOI' },
+  { level: LEVELS.S3, c: 'var(--s3)', w: 6, dash: undefined, who: 'Birlikte çalışılan kurum', examples: 'Pilotta çift onaylı kilometre taşı · zaman damgalı, geri alınabilir' },
+];
+const f1 = (n: number) => n.toLocaleString('tr-TR', { minimumFractionDigits: 1 });
+---
+
+<section class="wrap pt-24 md:pt-32" id="merdiven" aria-labelledby="ladder-title">
+  <div class="grid gap-8 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.6fr)]">
+  <div>
+    <h2 id="ladder-title" class="display text-[clamp(34px,4vw,54px)]">Kişiyi değil, <em>iddiayı</em> doğrula.</h2>
+    <p class="mt-5 max-w-[46ch] text-[15.5px] leading-relaxed text-ink-2">
+      Kimseye tek bir güven puanı verilmez. Her iddia üç seviyeden birini taşır; seviye, iddianın eşleşmedeki ağırlığını belirler. Sitedeki her çizginin kalınlığı bu seviyeyi gösterir.
+    </p>
+  </div>
+
+  <div class="self-start overflow-hidden rounded-[6px] border border-line-2 bg-raised">
+    {rows.map((r) => (
+      <div class="grid items-center gap-x-6 gap-y-3 border-b border-line px-4 py-5 last:border-b-0 md:grid-cols-[12rem_1fr_14rem]">
+        <div class="flex items-center gap-3">
+          <svg width="44" height="14" aria-hidden="true" class="shrink-0">
+            <line x1="0" x2="44" y1="7" y2="7" stroke={`rgb(${r.c})`} stroke-width={r.w} stroke-dasharray={r.dash}></line>
+          </svg>
+          <div>
+            <p class="num text-[12px]" style={`color:rgb(${r.c})`}>{r.level.code}</p>
+            <p class="text-[17px] font-bold leading-tight">{r.level.name}</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-[14.5px] font-semibold">{r.who}</p>
+          <p class="mt-0.5 text-[14px] text-ink-2">{r.examples}</p>
+        </div>
+        <div>
+          <div class="flex items-baseline justify-between">
+            <span class="plabel">Eşleşme ağırlığı</span>
+            <span class="num text-[20px] font-semibold">{f1(r.level.weight)}</span>
+          </div>
+          <div class="mt-1.5 h-2 rounded-[1px] bg-sunken">
+            <div class="h-full rounded-[1px]" style={`width:${r.level.weight * 100}%;background:rgb(${r.c})`}></div>
+          </div>
+        </div>
+      </div>
+    ))}
+    <div class="flex flex-wrap gap-x-8 gap-y-2 border-t border-line-2 bg-sunken px-4 py-3 text-[13.5px] text-ink-2">
+      <span><b class="text-ink">Kopya eser</b> · aynı eseri iki kişi sahiplenirse doğrulanabilir sahip kalır, diğerinin ağırlığı <span class="num">0</span></span>
+      <span><b class="text-ink">İtiraz</b> · süren itirazda ağırlık yarıya iner, itiraz kaydı herkese açıktır</span>
+    </div>
+  </div>
+  </div>
+</section>

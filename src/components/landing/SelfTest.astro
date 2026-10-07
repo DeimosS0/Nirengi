@@ -1,0 +1,79 @@
+---
+// Two canvas self-test readouts computed at build time by the same engine the app uses,
+// plus the criterion → milestone wiring of a running pilot.
+import { buildSeed } from '../../lib/seed.ts';
+import { assessCanvas, PUBLISH_THRESHOLD } from '../../lib/engine/canvas.ts';
+
+const s = buildSeed();
+const reports = ['n-erisim', 'n-otopark'].map((id) => {
+  const need = s.needs.find((n) => n.id === id)!;
+  const org = s.orgs.find((o) => o.id === need.orgId)!;
+  return { need, org, ...assessCanvas(need.canvas, need.skills) };
+});
+const pilot = s.pilots.find((p) => p.id === 'pl-rota')!;
+const pilotNeed = s.needs.find((n) => n.id === pilot.needId)!;
+const STATE = { open: 'Açık', submitted: 'Teslim edildi', approved: 'Çift onaylı' } as const;
+const PASS = 'var(--s2)';
+---
+
+<section class="wrap pt-24 md:pt-32" aria-labelledby="selftest-title">
+  <div class="overflow-hidden rounded-[10px] border border-line-2 bg-raised shadow-[0_18px_40px_-28px_rgb(0_0_0/0.45)]">
+    <div class="p-5 md:p-8">
+      <h2 id="selftest-title" class="display max-w-[16ch] text-[clamp(32px,4vw,54px)]">Muğlak ihtiyaç yayına çıkamaz.</h2>
+      <p class="mt-4 max-w-[62ch] text-[15.5px] leading-relaxed text-ink-2">
+        Kanvas her değişiklikte kendini sınar. Ölçülemeyen başarı kriteri ya da atanmamış karar verici yayını kilitler. Aşağıdaki iki rapor bu sayfa derlenirken motor tarafından üretildi.
+      </p>
+    </div>
+
+    <div class="grid gap-2.5 px-2.5 md:grid-cols-2 md:gap-3 md:px-3">
+      {reports.map((r) => (
+        <article class="screen overflow-hidden rounded-[4px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.6),inset_0_2px_8px_rgb(0_0_0/0.5)]">
+          <header class="flex items-start justify-between gap-4 border-b border-line px-4 py-3.5">
+            <div class="min-w-0">
+              <h3 class="text-[15.5px] font-bold leading-snug">{r.need.title}</h3>
+              <p class="mt-1 text-[12.5px] text-ink-3">{r.org.name} · kurgusal kurum</p>
+            </div>
+            <div class="shrink-0 text-right">
+              <p class="num text-[34px] font-semibold leading-none" style={`color:rgb(${r.canPublish ? PASS : 'var(--danger)'})`}>
+                {r.score}<span class="text-[14px] text-ink-3">/100</span>
+              </p>
+              <p class="plabel mt-1.5 flex items-center justify-end gap-1.5">
+                <span class="led on" style={`--c:${r.canPublish ? PASS : 'var(--danger)'}`}></span>
+                {r.canPublish ? 'Yayına açık' : `Kilitli · eşik ${PUBLISH_THRESHOLD}`}
+              </p>
+            </div>
+          </header>
+          <ul class="px-4 py-2">
+            {r.checks.map((c) => (
+              <li class="grid grid-cols-[0.9rem_1fr_auto] items-baseline gap-2.5 py-1 text-[13px]">
+                <span class="led on" style={`--c:${c.ok ? PASS : c.blocking ? 'var(--danger)' : 'var(--warn)'}`}></span>
+                <span class:list={[c.ok ? 'text-ink-2' : 'text-ink']}>{c.ok ? c.label : c.fix}</span>
+                <span class="num text-[11.5px] text-ink-3">{c.ok ? `+${c.points}` : `0/${c.points}`}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+
+    <div class="mt-6 border-t border-line">
+      <div class="flex flex-wrap items-baseline justify-between gap-2 px-5 py-3 md:px-8">
+        <h3 class="text-[16px] font-bold">Kriter kilometre taşına dönüşür, hedef sonradan değişmez</h3>
+        <a href={`/pilotlar/${pilot.id}`} class="text-[13px] font-semibold text-ink-2 underline decoration-line-2 hover:text-ink">{pilot.title} defterini aç</a>
+      </div>
+      <ol class="divide-y divide-line border-t border-line">
+        {pilot.milestones.map((m, i) => {
+          const crit = pilotNeed.canvas.criteria.find((c) => c.id === m.criterionId);
+          return (
+            <li class="grid gap-x-4 gap-y-1 px-5 py-3 text-[14px] md:grid-cols-[1fr_1.5rem_1fr_8rem] md:items-baseline md:px-8">
+              <span class="text-ink-2"><span class="num mr-2 text-[12px] text-ink-3">K{i + 1}</span>{crit?.text ?? m.title}</span>
+              <svg class="hidden h-3 w-5 text-ink-3 md:block" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"></path></svg>
+              <span class="font-semibold">{m.title}</span>
+              <span class:list={['plabel', m.state === 'approved' ? '!text-[rgb(var(--s3))]' : '']}>{STATE[m.state]}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  </div>
+</section>

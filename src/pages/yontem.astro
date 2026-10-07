@@ -1,0 +1,140 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { LEVELS } from '../lib/labels.ts';
+import { WEIGHTS, NEUTRAL } from '../lib/engine/match.ts';
+import { assessCanvas, PUBLISH_THRESHOLD } from '../lib/engine/canvas.ts';
+
+const checks = assessCanvas({ current: '', pain: '', painMetric: '', outcome: '', criteria: [], constraints: [], decisionMaker: '', scope: '' }, []).checks;
+const f = (n: number) => n.toLocaleString('tr-TR');
+
+const parts = [
+  { k: 'Kanıt yakınlığı', w: WEIGHTS.evidence, d: 'İhtiyacın her yetkinliği için kişinin en güçlü kanıtının ağırlığı; aynı alanda her ek doğrulanmış üretim +0,1 (en fazla 1). Yetkinlikler üzerinden ortalama.' },
+  { k: 'Bağlam uyumu', w: WEIGHTS.context, d: `Nötr başlangıç ${f(NEUTRAL)}. Kurumun sektöründe doğrulanmış iş +0,35, aynı ölçekte doğrulanmış iş +0,25.` },
+  { k: 'Kapasite', w: WEIGHTS.capacity, d: 'Pilota açık 1; kısmi müsait 0,6; şu an kapalı 0,15.' },
+  { k: 'İş birliği geçmişi', w: WEIGHTS.history, d: `Nötr başlangıç ${f(NEUTRAL)}. Başarıyla kapanan her pilot +0,35, çift onaylı her kilometre taşı +0,15 (kalan aralık üzerinden).` },
+];
+
+const truth = [
+  ['GitHub hesap sahipliği', 'Gerçek', 'GitHub API; bio ya da gist’e eklenen tek kullanımlık kod.'],
+  ['Alan adı sahipliği', 'Gerçek', 'DNS TXT kaydı; Google ve Cloudflare DoH üzerinden.'],
+  ['Eşleşme, kanvas skoru, takım önerisi', 'Gerçek', 'Bu sayfadaki formüllerle, her görüntülemede yeniden hesaplanır.'],
+  ['Pilot defteri bütünlüğü', 'Gerçek', 'SHA-256 hash zinciri; “Zinciri doğrula” her kaydı yeniden hesaplar.'],
+  ['Taslak motoru', 'Kural tabanlı', 'Çevrim dışı çalışır; üretimde aynı arayüzün arkasına dil modeli konabilir.'],
+  ['Kurumlar, kişiler, S3 tasdikleri', 'Kurgusal', 'Demo ekosistemi; ödül sürecinde gerçek kurum hesaplarıyla değişecek.'],
+  ['Kalıcılık', 'Tarayıcı', 'Demo verisi localStorage’da; üretimde Cloudflare D1.'],
+];
+---
+
+<Layout title="Yöntem" description="NİRENGİ skorları nasıl hesaplar: doğrulama ağırlıkları, eşleşme formülü, çözülebilirlik denetimi ve defter bütünlüğü.">
+  <header class="border-b border-line bg-raised/60">
+    <div class="wrap py-10 md:py-14">
+      <p class="eyebrow">Açıklık</p>
+      <h1 class="display mt-3 text-[44px] md:text-[60px]">Her sayının <em>formülü</em> burada.</h1>
+      <p class="mt-4 max-w-2xl text-[16px] leading-relaxed text-ink-2">
+        Kara kutu eşleşme kurumsal güven üretmez. NİRENGİ’de ekranda gördüğün her skor, aşağıdaki kurallarla kanıt grafiğinden hesaplanır. Kod açık; kurallar tartışmaya açık.
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap grid gap-16 py-12 lg:grid-cols-[220px_1fr]">
+    <nav class="hidden lg:block" aria-label="Bölümler">
+      <ul class="sticky top-24 space-y-2 text-sm">
+        <li><a class="text-ink-2 hover:text-ink" href="#merdiven">Doğrulama ağırlıkları</a></li>
+        <li><a class="text-ink-2 hover:text-ink" href="#eslesme">Eşleşme skoru</a></li>
+        <li><a class="text-ink-2 hover:text-ink" href="#kanvas">Çözülebilirlik</a></li>
+        <li><a class="text-ink-2 hover:text-ink" href="#defter">Defter bütünlüğü</a></li>
+        <li><a class="text-ink-2 hover:text-ink" href="#adalet">Adalet ilkeleri</a></li>
+        <li><a class="text-ink-2 hover:text-ink" href="#veri">Gerçek olan / demo olan</a></li>
+      </ul>
+    </nav>
+
+    <div class="max-w-3xl space-y-16">
+      <section id="merdiven" class="scroll-mt-24">
+        <h2 class="text-2xl font-semibold">Doğrulama ağırlıkları</h2>
+        <p class="mt-3 text-ink-2">Her kanıt üç seviyeden birini taşır. Seviye, kanıtın eşleşmeye katabileceği en yüksek ağırlığı belirler.</p>
+        <table class="mt-5 w-full text-left text-sm">
+          <thead class="border-b border-line-2 text-ink-3"><tr><th class="py-2 font-medium">Seviye</th><th class="py-2 font-medium">Ne demek</th><th class="py-2 text-right font-medium">Ağırlık</th></tr></thead>
+          <tbody class="divide-y divide-line">
+            {Object.values(LEVELS).map((l) => (
+              <tr><td class="py-3 font-mono">{l.code}</td><td class="py-3 pr-4"><strong class="font-semibold">{l.name}.</strong> {l.blurb}</td><td class="num py-3 text-right">{f(l.weight)}</td></tr>
+            ))}
+            <tr><td class="py-3 font-mono">—</td><td class="py-3 pr-4"><strong class="font-semibold">Kopya eser.</strong> Aynı eseri daha güçlü doğrulamayla sahiplenen biri varsa iddia işaretlenir.</td><td class="num py-3 text-right">0</td></tr>
+            <tr><td class="py-3 font-mono">—</td><td class="py-3 pr-4"><strong class="font-semibold">İtiraz altında.</strong> Gerekçeli itiraz kayda geçer; inceleme sürerken ağırlık yarıya iner.</td><td class="num py-3 text-right">÷ 2</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="eslesme" class="scroll-mt-24">
+        <h2 class="text-2xl font-semibold">Eşleşme skoru</h2>
+        <p class="mt-3 font-mono text-[15px]">skor = 100 × ({f(WEIGHTS.evidence)}·K + {f(WEIGHTS.context)}·B + {f(WEIGHTS.capacity)}·Ka + {f(WEIGHTS.history)}·G)</p>
+        <dl class="mt-5 divide-y divide-line border-y border-line">
+          {parts.map((p) => (
+            <div class="grid gap-1 py-4 sm:grid-cols-[200px_1fr]">
+              <dt class="font-semibold">{p.k} <span class="num font-normal text-ink-3">× {f(p.w)}</span></dt>
+              <dd class="text-sm leading-relaxed text-ink-2">{p.d}</dd>
+            </div>
+          ))}
+        </dl>
+        <p class="mt-4 text-sm text-ink-2">
+          <strong class="font-semibold text-ink">Eksik kanıt geri bildirimi:</strong> doğrulanmış kanıtı olmayan her yetkinlik için “buraya bir S2 üretim eklenseydi skor kaç olurdu” yeniden
+          hesaplanır ve adaya kazanç olarak gösterilir. <strong class="font-semibold text-ink">Takım önerisi:</strong> yetkinlik yüzeyinde en çok açığı kapatan kişiyi ekleyen açgözlü küme
+          örtüsü (en fazla 3 kişi). <strong class="font-semibold text-ink">Yükselen sinyal:</strong> son 90 gündeki ağırlıklı kanıt, önceki 9 ayın çeyreklik ortalamasının en az 1,5 katıysa.
+        </p>
+      </section>
+
+      <section id="kanvas" class="scroll-mt-24">
+        <h2 class="text-2xl font-semibold">Çözülebilirlik denetimi</h2>
+        <p class="mt-3 text-ink-2">Kanvas 100 puan üzerinden kendini puanlar. Yayın için en az <span class="num">{PUBLISH_THRESHOLD}</span> puan ve sıfır engel gerekir.</p>
+        <table class="mt-5 w-full text-left text-sm">
+          <tbody class="divide-y divide-line border-y border-line">
+            {checks.map((c) => (
+              <tr>
+                <td class="py-2.5">{c.label}</td>
+                <td class="py-2.5 text-ink-3">{c.blocking ? 'engel' : ''}</td>
+                <td class="num py-2.5 text-right">{c.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="mt-3 text-sm text-ink-3">Ölçülebilir kriter: bir eşik değeri (sayı, yüzde) ya da somut bir teslim (“teslim edilir”, “belgelenir”) içerir.</p>
+      </section>
+
+      <section id="defter" class="scroll-mt-24">
+        <h2 class="text-2xl font-semibold">Defter bütünlüğü</h2>
+        <p class="mt-3 text-ink-2">
+          Her kayıt <span class="font-mono text-[14px]">SHA-256(önceki özet | zaman | taraf | tür | metin)</span> ile mühürlenir. Kayıtlar düzenlenemez, yalnız eklenir. Geçmişte tek harf
+          değişirse o kayıttan sonraki bütün özetler tutmaz. Kilometre taşı iki taraf onaylamadan tamamlanmaz; onaylanan taş kişinin profiline S3 kanıt olarak işlenir. Belirli süre (<span class="num">7</span> gün)
+          güncelleme gelmezse sessizlik göstergesi iki tarafa uyarı düşer.
+        </p>
+      </section>
+
+      <section id="adalet" class="scroll-mt-24">
+        <h2 class="text-2xl font-semibold">Adalet ilkeleri</h2>
+        <ul class="mt-4 space-y-3 text-ink-2">
+          <li><strong class="font-semibold text-ink">Yaş, okul, takipçi skora girmez.</strong> Bu alanlar eşleşme motoruna hiç verilmez.</li>
+          <li><strong class="font-semibold text-ink">Kör keşif varsayılandır.</strong> Kurum ilk temasa kadar isim, yaş, okul ve şehir görmez.</li>
+          <li><strong class="font-semibold text-ink">Geçmişi olmayan cezalandırılmaz.</strong> Bağlam ve geçmiş bileşenleri sıfırdan değil nötr değerden başlar.</li>
+          <li><strong class="font-semibold text-ink">Tek güven puanı yok.</strong> Kişiler değil, iddialar doğrulanır.</li>
+          <li><strong class="font-semibold text-ink">Başarısızlık da kayıttır.</strong> Gerekçesiyle kapanan pilotun onaylı taşları kanıt olarak kalır.</li>
+        </ul>
+      </section>
+
+      <section id="veri" class="scroll-mt-24">
+        <h2 class="text-2xl font-semibold">Gerçek olan, demo olan</h2>
+        <p class="mt-3 text-ink-2">Jüriye ve kullanıcıya karşı dürüst olmak için: bu sürümde neyin gerçekten çalıştığı, neyin temsilî olduğu.</p>
+        <table class="mt-5 w-full text-left text-sm">
+          <tbody class="divide-y divide-line border-y border-line">
+            {truth.map(([k, v, d]) => (
+              <tr>
+                <td class="py-3 pr-3 font-semibold">{k}</td>
+                <td class="py-3 pr-3"><span class:list={['rounded px-1.5 py-0.5 font-mono text-[11px]', v === 'Gerçek' ? 'bg-s3/10 text-s3' : 'bg-sunken text-ink-2']}>{v}</span></td>
+                <td class="py-3 text-ink-2">{d}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="mt-4 text-sm text-ink-3">KVKK: demo hiçbir kişisel veriyi sunucuya göndermez. GitHub ve DNS sorguları doğrudan tarayıcından ilgili servislere gider.</p>
+      </section>
+    </div>
+  </div>
+</Layout>

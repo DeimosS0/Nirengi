@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/landing/Hero.astro';
+import Spec from '../components/landing/Spec.astro';
+import Ladder from '../components/landing/Ladder.astro';
+import Loop from '../components/landing/Loop.astro';
+import SelfTest from '../components/landing/SelfTest.astro';
+import Bom from '../components/landing/Bom.astro';
+import FinalCta from '../components/landing/FinalCta.astro';
+
+export const prerender = true;
+---
+
+<Layout title="NİRENGİ">
+  <Hero />
+  <Spec />
+  <Ladder />
+  <Loop />
+  <SelfTest />
+  <Bom />
+  <FinalCta />
+</Layout>
+
+<script>
+  import { initMotion } from '../lib/motion';
+  initMotion();
+</script>

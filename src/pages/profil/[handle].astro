@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProfilePage from '../../components/app/ProfilePage';
+import { Loading } from '../../components/ui/primitives';
+
+const { handle = '' } = Astro.params;
+---
+
+<Layout title="Kanıt Kartı" description="Doğrulama seviyesi görünen kanıtlar: beyan, makine doğrulaması, kurum tasdiki.">
+  <ProfilePage client:only="react" handle={handle}><Loading slot="fallback" /></ProfilePage>
+</Layout>

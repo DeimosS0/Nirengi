@@ -1,0 +1,51 @@
+---
+import Bench from './Bench';
+---
+
+<section class="wrap pt-5 md:pt-8" aria-labelledby="hero-title">
+  <div class="overflow-hidden rounded-[10px] border border-line-2 bg-raised shadow-[0_1px_0_rgb(255_255_255/0.5)_inset,0_18px_40px_-28px_rgb(0_0_0/0.45)]">
+    <div class="flex items-center justify-between gap-4 border-b border-line px-5 py-2.5">
+      <p class="plabel !text-ink">Kanıt ölçüm tezgâhı</p>
+      <p class="plabel hidden sm:block">Zemin360 Hackathon · 9–11 Ekim 2026 · İstanbul</p>
+    </div>
+
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-8 p-4 sm:p-5 md:p-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:grid-rows-[auto_1fr] lg:gap-x-10 lg:gap-y-0">
+      <div class="min-w-0">
+        <h1 id="hero-title" class="display text-[clamp(40px,6vw,86px)]">Beyan değil, kanıt.</h1>
+        <p class="mt-6 max-w-[34ch] text-[17px] leading-relaxed text-ink-2">
+          NİRENGİ yetkinliği beyana değil doğrulanabilir üretime bağlar. Kurumun ihtiyacını ölçülebilir kılar, adayları gerekçesiyle sıralar, iş birliğini iki tarafın onayıyla deftere yazar.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-2.5">
+          <a href="/kanit-bagla" class="btn-primary px-5 py-3 text-[15px]">Kanıtını bağla</a>
+          <a href="/ihtiyaclar/yeni" class="btn-line px-5 py-3 text-[15px]">İhtiyaç yaz</a>
+        </div>
+
+      </div>
+
+      <dl class="order-last grid gap-px self-end overflow-hidden lg:order-none rounded-[6px] border border-line bg-line text-[13.5px] lg:col-start-1 lg:row-start-2 lg:mt-10">
+          <div class="grid grid-cols-[5.5rem_1fr] gap-3 bg-raised px-3.5 py-2.5">
+            <dt class="plabel pt-0.5 !text-ink">Kanıt</dt>
+            <dd class="text-ink-2">Gencin doğrulanmış üretimi: kod, alan adı, pilot çıktısı.</dd>
+          </div>
+          <div class="grid grid-cols-[5.5rem_1fr] gap-3 bg-raised px-3.5 py-2.5">
+            <dt class="plabel pt-0.5 !text-ink">İhtiyaç</dt>
+            <dd class="text-ink-2">Kurumun ölçülebilir başarı kriteri olan problemi.</dd>
+          </div>
+          <div class="grid grid-cols-[5.5rem_1fr] gap-3 bg-raised px-3.5 py-2.5">
+            <dt class="plabel pt-0.5 !text-ink">Pilot</dt>
+            <dd class="text-ink-2">İkisini birleştiren, çift onayla ölçülen iş birliği.</dd>
+          </div>
+      </dl>
+
+      <div class="min-w-0 rounded-[8px] lg:col-start-2 lg:row-span-2 lg:row-start-1 bg-sunken p-2.5 shadow-[inset_0_1px_3px_rgb(0_0_0/0.18)] md:p-3">
+        <Bench client:only="react">
+          <div slot="fallback" class="screen min-h-[560px] rounded-[4px]"></div>
+        </Bench>
+      </div>
+    </div>
+
+    <p class="border-t border-line px-5 py-2.5 text-[12.5px] text-ink-3">
+      Ekrandaki her sayı şu anda tarayıcınızda eşleşme motoru tarafından hesaplanıyor. Kurum ve kişiler kurgusal demo verisidir; adaylar kör keşif kodlarıyla görünür.
+    </p>
+  </div>
+</section>

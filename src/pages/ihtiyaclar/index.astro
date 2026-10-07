@@ -1,0 +1,9 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import NeedsPage from '../../components/app/NeedsPage';
+import { Loading } from '../../components/ui/primitives';
+---
+
+<Layout title="İhtiyaçlar">
+  <NeedsPage client:only="react"><Loading slot="fallback" /></NeedsPage>
+</Layout>
