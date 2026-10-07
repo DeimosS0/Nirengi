@@ -1,9 +1,12 @@
 ---
-import '@fontsource-variable/archivo/wdth.css';
+// Public shell: a plain top bar, the page, the footer. The app itself lives in
+// App.astro; this one carries the landing, the 404 and the public pilot card.
+import '@fontsource-variable/nunito';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
-import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { Mark } from '../components/ui/icons';
+import { Overlays } from '../components/ui/kit';
 import DemoTour from '../components/app/DemoTour';
 
 interface Props {
@@ -11,41 +14,98 @@ interface Props {
   description?: string;
 }
 
-const { title, description = 'Yetkinliği beyana değil, doğrulanabilir kanıta bağlayan açık kaynak kurum–yetenek eşleşme ve iş birliği altyapısı.' } = Astro.props;
-const fullTitle = title === 'NİRENGİ' ? 'NİRENGİ — Beyan değil, kanıt.' : `${title} · NİRENGİ`;
+const { title, description = 'Gençlerin doğrulanmış işini kurumların ihtiyaçlarıyla buluşturan açık kaynak web hizmeti.' } = Astro.props;
+const fullTitle = title.startsWith('nirengi') ? title : `${title} · nirengi`;
 ---
 
 <!doctype html>
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="tr_TR" />
-    <meta name="theme-color" content="#e2e4e8" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#17191d" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161521" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script is:inline>
       (() => {
+        const d = document.documentElement;
         let t;
         try { t = localStorage.getItem('nirengi:theme'); } catch {}
         if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        document.documentElement.dataset.theme = t;
-        document.documentElement.classList.add('js');
+        d.dataset.theme = t;
+        d.classList.add('js');
       })();
     </script>
+    <style is:global>
+      /* Sections rise once as they scroll in; the failsafe keyframe shows them even if the script never runs. */
+      .js [data-reveal] {
+        opacity: 0;
+        transform: translateY(18px);
+        transition: opacity 520ms cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0ms), transform 520ms cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0ms);
+      }
+      .js [data-reveal][data-in] {
+        opacity: 1;
+        transform: none;
+      }
+      @keyframes reveal-failsafe {
+        to { opacity: 1; transform: none; }
+      }
+      .js [data-reveal]:not([data-in]) {
+        animation: reveal-failsafe 0s 2.5s forwards;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+      }
+    </style>
   </head>
   <body class="flex min-h-dvh flex-col">
-    <a href="#icerik" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:rounded-[4px] focus:bg-ink focus:px-3 focus:py-2 focus:text-paper">İçeriğe geç</a>
-    <Nav />
+    <a href="#icerik" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[90] focus:rounded-[12px] focus:bg-indigo focus:px-4 focus:py-2 focus:text-white">İçeriğe geç</a>
+
+    <header class="sticky top-0 z-40 border-b-2 border-line bg-bg/95 backdrop-blur">
+      <div class="mx-auto flex h-16 max-w-[1120px] items-center gap-2 px-4 sm:px-6">
+        <a href="/" class="flex items-center gap-2" aria-label="nirengi ana sayfa">
+          <Mark size={32} />
+          <span class="text-[26px] font-black tracking-[-0.03em] text-indigo">nirengi</span>
+        </a>
+        <nav class="ml-auto flex items-center gap-1" aria-label="Genel">
+          <a href="/yontem" class="btn-quiet btn-sm hidden !text-ink-3 sm:inline-flex">Yöntem</a>
+          <button type="button" data-tour-open class="btn-quiet btn-sm hidden !text-ink-3 md:inline-flex">Demo turu</button>
+          <button type="button" data-theme-toggle class="btn-quiet btn-sm !px-2.5 !text-ink-3" aria-label="Aydınlık / karanlık tema">
+            <svg viewBox="0 0 20 20" class="h-5 w-5" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"></path></svg>
+          </button>
+          <a href="/bugun" class="btn-primary btn-sm ml-1">Uygulamaya gir</a>
+        </nav>
+      </div>
+    </header>
+
     <main id="icerik" class="flex-1">
       <slot />
     </main>
     <Footer />
+
+    <Overlays client:only="react" />
     <DemoTour client:only="react" />
+
+    <script>
+      import { initReveal } from '../lib/motion';
+      initReveal();
+
+      for (const b of document.querySelectorAll('[data-theme-toggle]'))
+        b.addEventListener('click', () => {
+          const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+          document.documentElement.dataset.theme = next;
+          try {
+            localStorage.setItem('nirengi:theme', next);
+          } catch {}
+        });
+      for (const b of document.querySelectorAll('[data-tour-open]'))
+        b.addEventListener('click', () => window.dispatchEvent(new Event('nirengi:tour')));
+    </script>
   </body>
 </html>

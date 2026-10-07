@@ -1,12 +1,16 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Niri from '../components/ui/Niri';
 ---
 
-<Layout title="Sayfa bulunamadı">
-  <section class="wrap py-28 text-center">
-    <p class="eyebrow">404 · ölçüm noktası yok</p>
-    <h1 class="display mt-4 text-[56px]">Bu koordinatta <em>bir şey yok.</em></h1>
-    <p class="mt-4 text-ink-2">Aradığın sayfa taşınmış ya da demo verisi sıfırlanmış olabilir.</p>
-    <a href="/" class="btn-ink mt-8">Ana sayfaya dön</a>
+<Layout title="Sayfa bulunamadı" description="Aradığın sayfa bu haritada yok.">
+  <section class="mx-auto flex max-w-[560px] flex-col items-center px-4 py-16 text-center sm:py-24">
+    <Niri mood="think" size={170} />
+    <h1 class="h-hero mt-6 !text-[clamp(30px,6vw,44px)]">Bu sayfa haritada yok</h1>
+    <p class="lead mt-3 max-w-[40ch]">Adres taşınmış ya da yanlış yazılmış olabilir. Demo verisini sıfırladıysan bağlantılar da boşa düşer.</p>
+    <div class="mt-8 flex w-full max-w-[340px] flex-col gap-3">
+      <a href="/" class="btn-primary btn-lg btn-block">Ana sayfaya dön</a>
+      <a href="/bugun" class="btn-line btn-lg btn-block">Bugün’e git</a>
+    </div>
   </section>
 </Layout>

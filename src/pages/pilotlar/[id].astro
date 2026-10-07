@@ -1,11 +1,10 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import App from '../../layouts/App.astro';
 import PilotDetail from '../../components/app/PilotDetail';
-import { Loading } from '../../components/ui/primitives';
 
 const { id = '' } = Astro.params;
 ---
 
-<Layout title="Pilot Defteri">
-  <PilotDetail client:only="react" id={id}><Loading slot="fallback" /></PilotDetail>
-</Layout>
+<App title="Proje yolu" mode="auto" description="Projenin aşamaları, çift taraflı onayları ve zincirli defteri.">
+  <PilotDetail client:only="react" id={id} />
+</App>

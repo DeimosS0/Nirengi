@@ -1,0 +1,10 @@
+---
+import App from '../layouts/App.astro';
+import LeaguePage from '../components/genc/LeaguePage';
+import GencRail from '../components/shell/GencRail';
+---
+
+<App title="Lig" mode="genc" description="Benzer tempodaki kişilerle haftalık XP sıralaman, yükselme ve düşme bölgeleri.">
+  <LeaguePage client:only="react" />
+  <GencRail slot="rail" client:only="react" />
+</App>

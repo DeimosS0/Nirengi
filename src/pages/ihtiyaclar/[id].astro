@@ -1,11 +1,11 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import App from '../../layouts/App.astro';
 import NeedDetail from '../../components/app/NeedDetail';
 import { Loading } from '../../components/ui/primitives';
 
 const { id = '' } = Astro.params;
 ---
 
-<Layout title="İhtiyaç" description="İhtiyaç Kanvası, çözülebilirlik denetimi ve açıklanabilir aday eşleşmesi.">
+<App title="İhtiyaç" mode="auto" description="İhtiyaç kartı, çözülebilirlik puanı ve gerekçesiyle sıralanmış adaylar.">
   <NeedDetail client:only="react" id={id}><Loading slot="fallback" /></NeedDetail>
-</Layout>
+</App>

@@ -1,37 +1,77 @@
 ---
-import Logo from './Logo.astro';
-const year = new Date().getFullYear();
+import { Mark } from './ui/icons';
+
+const cols = [
+  {
+    title: 'Gençler için',
+    links: [
+      ['Bugün', '/bugun'],
+      ['Görevler', '/gorevler'],
+      ['Lig', '/lig'],
+      ['Topluluk', '/topluluk'],
+      ['Kanıtını bağla', '/kanit-bagla'],
+    ],
+  },
+  {
+    title: 'Kurumlar için',
+    links: [
+      ['Ana sayfa', '/kurum'],
+      ['İhtiyaç yaz', '/ihtiyaclar/yeni'],
+      ['Keşfet', '/kesfet'],
+      ['Projeler', '/pilotlar'],
+    ],
+  },
+  {
+    title: 'Açıklık',
+    links: [
+      ['Yöntem', '/yontem'],
+      ['Gerçek mi, demo mu?', '/yontem#veri'],
+      ['Açık kaynak · GitHub', 'https://github.com/Finetiontr/Nirengi'],
+    ],
+  },
+];
 ---
 
-<footer class="mt-24 border-t border-line bg-raised">
-  <div class="wrap grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
+<footer class="border-t-2 border-line bg-bg-2">
+  <div class="mx-auto grid max-w-[1120px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
     <div>
-      <a href="/" class="flex items-center gap-2.5">
-        <Logo class="h-8 w-8" />
-        <span class="font-display text-[16px] font-extrabold tracking-[0.04em]">NİRENGİ</span>
+      <a href="/" class="flex items-center gap-2" aria-label="nirengi ana sayfa">
+        <Mark size={30} />
+        <span class="text-[24px] font-black tracking-[-0.03em] text-indigo">nirengi</span>
       </a>
-      <p class="mt-4 max-w-sm text-sm leading-relaxed text-ink-2">
-        Nirengi noktası: haritacılıkta üzerine güvenle ölçüm yapılan sabit referans. Ekosistemin kanıt katmanı için aynı fikri öneriyoruz.
-      </p>
-      <p class="num mt-5 text-xs text-ink-3">41°01′K 28°58′D · Zemin360 Hackathon {year}</p>
+      <p class="mt-3 max-w-[32ch] text-[15px] font-bold text-ink-3">Gençlerin yaptığı doğrulanmış işi, kurumların yazdığı ihtiyaçlarla buluşturan açık kaynak web hizmeti.</p>
     </div>
-    <div>
-      <p class="plabel">Ürün</p>
-      <ul class="mt-3 space-y-2 text-sm">
-        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/kanit-bagla">Kanıt Kartı</a></li>
-        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/ihtiyaclar/yeni">İhtiyaç Kanvası</a></li>
-        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/pilotlar">Pilot Defteri</a></li>
-        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/nabiz">Ağ Nabzı</a></li>
-      </ul>
-    </div>
-    <div>
-      <p class="plabel">Açıklık</p>
-      <ul class="mt-3 space-y-2 text-sm">
-        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/yontem">Skor nasıl hesaplanıyor?</a></li>
-        <li><a class="text-ink-2 hover:text-ink hover:underline" href="/yontem#veri">Gerçek olan, demo olan</a></li>
-        <li><a class="text-ink-2 hover:text-ink hover:underline" href="https://github.com/Finetiontr/Nirengi" target="_blank" rel="noreferrer">Açık kaynak · GitHub</a></li>
-      </ul>
-      <p class="mt-6 text-xs leading-relaxed text-ink-3">Bu demodaki kurum ve kişiler kurgusaldır. Doğrulama akışları (GitHub, DNS) gerçektir.</p>
+    <div class="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 md:contents">
+    {
+      cols.map((c) => (
+        <nav aria-label={c.title}>
+          <p class="text-[16px] font-black text-ink">{c.title}</p>
+          <ul class="mt-3 space-y-2">
+            {c.links.map(([label, href]) => (
+              <li>
+                <a
+                  href={href}
+                  class="text-[15px] font-bold text-ink-3 transition-colors hover:text-indigo"
+                  {...(href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+            {c.title === 'Açıklık' && (
+              <li>
+                <button type="button" data-tour-open class="text-[15px] font-bold text-ink-3 transition-colors hover:text-indigo">
+                  Demo turu
+                </button>
+              </li>
+            )}
+          </ul>
+        </nav>
+      ))
+    }
     </div>
   </div>
+  <p class="mx-auto max-w-[1120px] border-t-2 border-line px-4 py-5 text-[13px] font-bold leading-relaxed text-ink-3 sm:px-6">
+    nirengi, Zemin360 Hackathon 2026 için geliştirilen bir prototiptir. Kurumlar ve kişiler kurgusaldır; GitHub ve alan adı doğrulaması gerçektir.
+  </p>
 </footer>

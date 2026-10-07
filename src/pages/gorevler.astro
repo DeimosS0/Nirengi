@@ -1,0 +1,10 @@
+---
+import App from '../layouts/App.astro';
+import QuestsPage from '../components/genc/QuestsPage';
+import GencRail from '../components/shell/GencRail';
+---
+
+<App title="Görevler" mode="genc" description="Haftanın görevleri, sana özel gelişim görevleri ve gerçek açık kaynak issue'ları.">
+  <QuestsPage client:only="react" />
+  <GencRail slot="rail" client:only="react" />
+</App>

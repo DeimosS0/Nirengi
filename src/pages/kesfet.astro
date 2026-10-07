@@ -1,9 +1,9 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import App from '../layouts/App.astro';
 import ExplorePage from '../components/app/ExplorePage';
 import { Loading } from '../components/ui/primitives';
 ---
 
-<Layout title="Keşfet" description="Problemle ara, kanıtla keşfet. Kör keşif modu ve yükselen sinyal.">
+<App title="Keşfet" mode="kurum" width="wide" description="Problemle ara, kanıtla keşfet. Kimlik ilk temasa kadar gizli.">
   <ExplorePage client:only="react"><Loading slot="fallback" /></ExplorePage>
-</Layout>
+</App>

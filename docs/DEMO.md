@@ -1,26 +1,26 @@
 # Sahne akışı — 5 dakika
 
-Sağ alttaki **Demo turu** paneli adımları gerçek durum değişikliklerinden işaretler; sunum sırasında ilerlemeyi gösterir. Başlamadan önce panelden **Sıfırla**.
+Kenardaki **Demo turu** paneli adımları gerçek durum değişikliklerinden işaretler; genç ve kurum için iki tur vardır. Başlamadan önce panelden **Sıfırla**.
 
 ## Hazırlık (sunumdan önce)
 
 - [ ] `npm run build && npm run preview` ile üretim derlemesini aç (dev sunucusu değil).
-- [ ] Sunumda bağlanacak GitHub hesabının bio’suna `/kanit-bagla` sayfasının verdiği kodu **önceden** ekle. Kod sayfa her açıldığında değişir; sayfayı açık bırak ya da gist yöntemini kullan. GitHub önbelleği ~1 dk gecikebilir.
-- [ ] İki tarayıcı penceresi: solda **Kurum**, sağda **Yetenek** rolü (rol sekme başınadır, veri anında senkronlanır).
-- [ ] İnternet yoksa: `/kanit-bagla` → “Çevrim dışı örnekle dene”.
+- [ ] Sunumda bağlanacak GitHub hesabının bio’suna `/kanit-bagla` akışının 4. adımında verilen kodu **önceden** ekle. Kod sekme açık kaldıkça aynı kalır (sessionStorage); gist yöntemi de çalışır. GitHub önbelleği ~1 dk gecikebilir.
+- [ ] İki tarayıcı penceresi: solda **Kurum**, sağda **Genç** (sol menüdeki Genç/Kurum seçimi sekme başınadır, veri anında senkronlanır).
+- [ ] İnternet ya da GitHub sorgu sınırı sorunu olursa: `/kanit-bagla` → **Örnek profille devam et** (örnek veri olarak etiketlenir).
 
 ## Akış
 
 | Süre | Ekran | Söylenecek |
 |------|-------|------------|
-| 0:00 | `/` | “Altı problemin tek kök nedeni var: kanıt katmanı yok.” Problemler listesi her maddeyi çalışan ekrana bağlıyor. |
-| 0:40 | `/kanit-bagla` | GitHub kullanıcı adını gir → depolar gelir (S1) → **Sahipliği doğrula** → S2. CV yok, eser var. |
-| 1:30 | `/ihtiyaclar/yeni` | **Örnek şikâyeti yükle** → **Kanvas taslağına dönüştür**. Skor düşük, yayın kapalı. İki ölçülebilir kriter, karar verici ve kapsam ekle → kapı açılır → **Yayımla**. |
-| 2:30 | `/ihtiyaclar/:id#adaylar` | Kör keşif açık: isim yok, kanıt var. Skorun dört bileşeni, “eşleşti çünkü”, adaya giden eksik kanıt geri bildirimi, takım önerisi. **Bu adayla pilot aç**. |
-| 3:20 | `/pilotlar/:id` | Kriterler kilometre taşına dönüştü. Sağ pencerede (Yetenek) **Teslim et**, sol pencerede (Kurum) **Onayla**. Mühür düşer. **Zinciri doğrula** → **Kurcalamayı dene** → zincir kırılır. |
-| 4:10 | `/profil/:kullanici` | “Döngü kapandı”: onay, profilde yeni S3 kanıt. |
-| 4:30 | `/nabiz`, `/yontem` | Olay akışı ve bağlantı sağlığı; her sayının formülü açık. 4 aylık plan. |
+| 0:00 | `/bugun` (Genç) | Haftalık hedef, haftalık seri, sıradaki adım ve yol. “Commit sayısı değil, üretim yaptığın gün sayılır.” |
+| 0:40 | `/kanit-bagla` | GitHub kullanıcı adı → “N eserin bulundu” → haftalık hedef → **Kontrol et** ile sahiplik → Doğrulandı + kutlama. |
+| 1:30 | `/kurum` → `/ihtiyaclar/yeni` (Kurum) | “Sırada ne var” kartı. Sihirbazda **Örnekle doldur** → **Taslağa dönüştür**; çözülebilirlik çubuğu 70 eşiğini geçince **Yayımla** açılır. |
+| 2:30 | `/ihtiyaclar/:id#adaylar` | Kör keşif: isim yok, iş var. Adaya dokun → “Neden bu uyum?” dört parça ve eksikler. **Pilot teklif et** → kimlik açılır. |
+| 3:20 | `/pilotlar/:id` | Kriterler aşamalara dönüştü. Genç pencerede **Teslim et**, kurum penceresinde **Onayla** → mühür. Defter: **Zinciri doğrula** → **Kurcalamayı dene** → zincir kırılır. |
+| 4:10 | `/profil/:kullanici` | Onaylanan aşama profilde Kurum onaylı kanıt olarak görünür; rozetler ve son 10 hafta. |
+| 4:30 | `/gorevler`, `/lig`, `/topluluk`, `/yontem` | Gerçek GitHub “good first issue” görevleri, benzer seviyedeki lig, “İşe yaradı” ile XP kazandıran topluluk. Her sayının kuralı `/yontem`’de. |
 
 ## Yedek senaryo
 
-Canlı akış takılırsa: `/pilotlar/pl-rota` hazır bekler — K2 kurum onayı bekliyor. Kurum rolünde **Onayla** → `/profil/canaksoy` yeni S3 kanıtı gösterir.
+Canlı akış takılırsa: `/pilotlar/pl-rota` hazır bekler; bir aşama kurum onayı bekliyor. Kurum rolünde **Onayla** → `/profil/canaksoy` yeni Kurum onaylı kanıtı gösterir.

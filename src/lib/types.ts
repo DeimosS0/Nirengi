@@ -64,6 +64,59 @@ export interface Person {
   evidence: Evidence[];
   links: { github?: string; domain?: string; web?: string };
   isDemoUser?: boolean;
+  /** Local days (YYYY-MM-DD) with public output read from GitHub events. */
+  activity?: string[];
+  weeklyGoal?: WeeklyGoal;
+  /** Monday keys (YYYY-MM-DD) of weeks announced as rest: the streak pauses, never breaks. */
+  restWeeks?: string[];
+  /** League tier index, see TIERS in engine/progress.ts. */
+  tier?: number;
+}
+
+export type WeeklyGoal = 1 | 3 | 5;
+
+/** League member who exists only to fill a demo league; never matched or shown elsewhere. */
+export interface Peer {
+  id: string;
+  name: string;
+  area: string;
+  tier: number;
+  /** Weekly XP, index 0 = the seeding week, 1 = the week before… */
+  weekly: number[];
+}
+
+export type QuestKind = 'oss' | 'gelisim' | 'haftalik';
+
+export interface QuestDone {
+  id: string;
+  questId: string;
+  personId: string;
+  kind: QuestKind;
+  title: string;
+  xp: number;
+  at: string;
+  proof?: string;
+}
+
+export type PostKind = 'calisiyorum' | 'soru' | 'gosteri' | 'tesekkur';
+
+export interface Reply {
+  id: string;
+  personId: string;
+  text: string;
+  at: string;
+  helpful?: boolean;
+}
+
+export interface Post {
+  id: string;
+  personId: string;
+  kind: PostKind;
+  text: string;
+  at: string;
+  evidenceId?: string;
+  supports: string[];
+  replies: Reply[];
 }
 
 export interface Org {
@@ -160,7 +213,8 @@ export type EventKind =
   | 'pilot_opened'
   | 'pilot_closed'
   | 'micro'
-  | 'person_joined';
+  | 'person_joined'
+  | 'quest_done';
 
 export interface NetEvent {
   id: string;
@@ -188,5 +242,8 @@ export interface State {
   needs: Need[];
   pilots: Pilot[];
   events: NetEvent[];
+  quests: QuestDone[];
+  posts: Post[];
+  peers: Peer[];
   demo: DemoFlags;
 }

@@ -1,9 +1,8 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import App from '../../layouts/App.astro';
 import PilotsPage from '../../components/app/PilotsPage';
-import { Loading } from '../../components/ui/primitives';
 ---
 
-<Layout title="Pilot Defteri" description="Çift taraflı onay, hash zincirli defter, sessizlik göstergesi ve adil kapanış.">
-  <PilotsPage client:only="react"><Loading slot="fallback" /></PilotsPage>
-</Layout>
+<App title="Projeler" mode="auto" description="Kurumlarla yürüyen projelerin: her adımın durumu, sıradaki iş ve sessizlik uyarısı.">
+  <PilotsPage client:only="react" />
+</App>

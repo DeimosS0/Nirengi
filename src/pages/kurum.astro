@@ -1,0 +1,9 @@
+---
+import App from '../layouts/App.astro';
+import OrgHome from '../components/kurum/OrgHome';
+import { Loading } from '../components/ui/primitives';
+---
+
+<App title="Kurum ana sayfası" mode="kurum" width="wide" description="Kurumunu bugün ne bekliyor: onay bekleyen aşamalar, yeni adaylar, yarım taslaklar ve süren projeler tek listede.">
+  <OrgHome client:only="react"><Loading slot="fallback" /></OrgHome>
+</App>

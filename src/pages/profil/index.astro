@@ -1,0 +1,10 @@
+---
+import App from '../../layouts/App.astro';
+import ProfilePage from '../../components/app/ProfilePage';
+import GencRail from '../../components/shell/GencRail';
+---
+
+<App title="Profilin" mode="genc" description="Serin, XP’in, rozetlerin ve doğrulanmış işlerin tek yerde.">
+  <ProfilePage client:only="react" />
+  <GencRail slot="rail" client:only="react" />
+</App>

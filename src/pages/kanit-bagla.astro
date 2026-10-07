@@ -1,9 +1,9 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import App from '../layouts/App.astro';
 import ConnectPage from '../components/app/ConnectPage';
 import { Loading } from '../components/ui/primitives';
 ---
 
-<Layout title="Kanıtını bağla" description="GitHub hesap sahipliği ve DNS TXT ile gerçek S2 doğrulaması; Kanıt Kartı otomatik oluşur.">
+<App title="Kanıt bağla" mode="genc" width="narrow" description="GitHub hesabını ve alan adını bağla; işlerin Beyan’dan Doğrulandı düzeyine çıksın, haftalık hedefin hazır olsun.">
   <ConnectPage client:only="react"><Loading slot="fallback" /></ConnectPage>
-</Layout>
+</App>

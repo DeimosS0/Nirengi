@@ -1,0 +1,20 @@
+---
+// One chapter of the method page: icon, heading, one lead line, then folds.
+interface Props {
+  id: string;
+  title: string;
+  lead?: string;
+}
+const { id, title, lead } = Astro.props;
+---
+
+<section id={id} class="mt-14 scroll-mt-24">
+  <div class="flex items-center gap-3">
+    <slot name="icon" />
+    <h2 class="text-[26px] font-black leading-tight text-ink md:text-[28px]">{title}</h2>
+  </div>
+  {lead && <p class="lead mt-2">{lead}</p>}
+  <div class="mt-5 space-y-3">
+    <slot />
+  </div>
+</section>

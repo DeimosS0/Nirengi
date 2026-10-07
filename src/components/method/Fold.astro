@@ -1,0 +1,20 @@
+---
+// "Why"-style expander for the method page: the answer one tap below.
+interface Props {
+  title: string;
+  aside?: string;
+  open?: boolean;
+}
+const { title, aside, open = false } = Astro.props;
+---
+
+<details class="group card px-4 py-3.5" open={open}>
+  <summary class="flex cursor-pointer list-none items-center gap-3 text-[16px] font-extrabold text-ink [&::-webkit-details-marker]:hidden">
+    <span class="min-w-0 flex-1">{title}</span>
+    {aside && <span class="num shrink-0 rounded-full bg-bg-2 px-2.5 py-0.5 text-[13px] font-extrabold text-ink-3">{aside}</span>}
+    <svg viewBox="0 0 20 20" class="h-5 w-5 shrink-0 text-ink-3 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 5 5 5-5"></path></svg>
+  </summary>
+  <div class="rise mt-3 space-y-2 text-[15px] font-semibold leading-relaxed text-ink-2">
+    <slot />
+  </div>
+</details>

@@ -1,0 +1,44 @@
+---
+// The three verification steps drawn as stairs: each column is as tall as its
+// weight in a match, so "doğrulanmış iş daha çok sayılır" is something you see.
+import { LEVELS } from '../../lib/labels.ts';
+import { LevelGlyph, LEVEL_NAME } from '../ui/primitives';
+
+const MAX = 190;
+const f = (n: number) => n.toLocaleString('tr-TR');
+const steps = [
+  { level: 'S1', face: 'bg-bg-3 border-2 border-dashed border-line-2', lip: 'rgb(var(--line-2))' },
+  { level: 'S2', face: 'bg-cyan', lip: 'rgb(var(--cyan-lip))' },
+  { level: 'S3', face: 'bg-indigo', lip: 'rgb(var(--indigo-lip))' },
+] as const;
+---
+
+<div class="card p-4 sm:p-6">
+  <div class="flex items-end gap-3 sm:gap-4" style={`height:${MAX}px`}>
+    {
+      steps.map((s) => (
+        <div class="flex flex-1 flex-col items-center justify-end">
+          <div
+            class={`relative flex w-full justify-center rounded-t-[20px] rounded-b-[8px] pt-3 ${s.face}`}
+            style={`height:${Math.round(LEVELS[s.level].weight * MAX)}px;box-shadow:0 5px 0 ${s.lip}`}
+          >
+            <span class="grid h-11 w-11 place-items-center rounded-full bg-bg">
+              <LevelGlyph level={s.level} size={28} />
+            </span>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <ol class="mt-5 grid grid-cols-3 gap-3 sm:gap-4">
+    {
+      steps.map((s) => (
+        <li class="text-center">
+          <p class="text-[15px] font-black text-ink">{LEVEL_NAME[s.level]}</p>
+          <p class="num text-[13px] font-extrabold text-ink-3">ağırlık {f(LEVELS[s.level].weight)}</p>
+          <p class="mt-1 text-[13px] font-bold leading-snug text-ink-3">{LEVELS[s.level].short}</p>
+        </li>
+      ))
+    }
+  </ol>
+</div>

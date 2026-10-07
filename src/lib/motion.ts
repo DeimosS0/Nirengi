@@ -1,22 +1,22 @@
-// Landing motion: one authored moment. The signal-path bus fills with scroll and
-// each block's LED lights as the pulse reaches it. Content is visible without JS.
+// Public pages: sections rise once as they scroll into view. Nothing loops;
+// content is visible without JS and with reduced motion.
 
-import { scroll } from 'framer-motion';
-
-export function initMotion() {
-  const path = document.querySelector<HTMLElement>('[data-path]');
-  if (!path) return;
-  const fill = path.querySelector<HTMLElement>('[data-path-fill]');
-  const leds = [...path.querySelectorAll<HTMLElement>('[data-path-node] .led')];
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    leds.forEach((led) => led.classList.add('on'));
+export function initReveal() {
+  const els = [...document.querySelectorAll<HTMLElement>('[data-reveal]')];
+  if (!els.length) return;
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    for (const el of els) el.dataset.in = '';
     return;
   }
-  scroll(
-    (p: number) => {
-      if (fill) fill.style.transform = `scaleX(${p})`;
-      leds.forEach((led, i) => led.classList.toggle('on', p >= i / (leds.length - 1) - 0.001));
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        (e.target as HTMLElement).dataset.in = '';
+        io.unobserve(e.target);
+      }
     },
-    { target: path, offset: ['start 75%', 'end 55%'] },
+    { rootMargin: '0px 0px -8% 0px', threshold: 0.1 },
   );
+  for (const el of els) io.observe(el);
 }

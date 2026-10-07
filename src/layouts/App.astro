@@ -1,0 +1,199 @@
+---
+// App shell: sidebar on desktop, top bar + tab bar on phones. Both faces
+// (genç / kurum) are rendered; html[data-mode] shows one, so the right nav
+// is there before any script runs.
+import '@fontsource-variable/nunito';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import { NAV, isActive, type Mode } from '../components/shell/nav';
+import NavIcon from '../components/shell/NavIcon';
+import ModeSwitch from '../components/shell/ModeSwitch';
+import MeStats from '../components/shell/MeStats';
+import { Mark } from '../components/ui/icons';
+import { Overlays } from '../components/ui/kit';
+import DemoTour from '../components/app/DemoTour';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** genc / kurum pin the face; auto keeps whatever this tab last used. */
+  mode?: Mode | 'auto';
+  /** Content column width: narrow for the young side, wide for kurum work. */
+  width?: 'narrow' | 'wide';
+}
+
+const {
+  title,
+  description = 'Yetkinliği beyana değil, doğrulanabilir işe bağlayan açık kaynak kurum–yetenek platformu.',
+  mode = 'auto',
+  width = 'narrow',
+} = Astro.props;
+const fullTitle = `${title} · nirengi`;
+const path = Astro.url.pathname;
+const hasRail = Astro.slots.has('rail');
+---
+
+<!doctype html>
+<html lang="tr" data-mode={mode === 'auto' ? 'genc' : mode}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="tr_TR" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161521" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline define:vars={{ pinned: mode }}>
+      (() => {
+        const d = document.documentElement;
+        let t;
+        try { t = localStorage.getItem('nirengi:theme'); } catch {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        d.dataset.theme = t;
+        // Keep the per-tab persona and the shown face in step before React mounts.
+        const KEY = 'nirengi:view';
+        let view = {};
+        try { view = JSON.parse(sessionStorage.getItem(KEY) || localStorage.getItem(KEY) || '{}'); } catch {}
+        if (pinned !== 'auto') {
+          view.persona = pinned === 'kurum' ? 'org' : 'person';
+          try {
+            const raw = JSON.stringify({ blind: true, revealed: [], ...view });
+            sessionStorage.setItem(KEY, raw);
+            localStorage.setItem(KEY, raw);
+          } catch {}
+        }
+        d.dataset.mode = view.persona === 'org' ? 'kurum' : 'genc';
+      })();
+    </script>
+    <style is:global>
+      html[data-mode='kurum'] .only-genc,
+      html[data-mode='genc'] .only-kurum {
+        display: none !important;
+      }
+      /* Bottom feedback bar clears the desktop sidebar only inside the app shell */
+      @media (min-width: 1024px) {
+        html[data-mode] .feedback-dock {
+          padding-left: 272px;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-dvh">
+    <a href="#icerik" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[90] focus:rounded-[12px] focus:bg-indigo focus:px-4 focus:py-2 focus:text-white">İçeriğe geç</a>
+
+    <!-- desktop sidebar -->
+    <aside class="fixed inset-y-0 left-0 z-40 hidden w-[256px] flex-col border-r-2 border-line bg-bg px-4 py-6 lg:flex" aria-label="Ana menü">
+      <a href="/" class="mb-7 flex items-center gap-2 px-3" aria-label="nirengi ana sayfa">
+        <Mark size={34} />
+        <span class="text-[28px] font-black tracking-[-0.03em] text-indigo">nirengi</span>
+      </a>
+      {
+        (['genc', 'kurum'] as const).map((m) => (
+          <nav class={`only-${m} flex flex-col gap-1.5`}>
+            {NAV[m].map((item) => {
+              const on = isActive(item, path);
+              return (
+                <a
+                  href={item.href}
+                  aria-current={on ? 'page' : undefined}
+                  class:list={[
+                    'flex items-center gap-4 rounded-[14px] border-2 px-3 py-2 text-[15px] font-extrabold uppercase tracking-[0.05em] transition-colors',
+                    on ? 'border-indigo/35 bg-indigo-tint text-indigo' : 'border-transparent text-ink-3 hover:bg-bg-2',
+                  ]}
+                >
+                  <NavIcon icon={item.icon} size={32} />
+                  {item.label}
+                </a>
+              );
+            })}
+          </nav>
+        ))
+      }
+      <div class="mt-auto space-y-3 pt-6">
+        <ModeSwitch client:only="react" />
+        <div class="flex items-center gap-2 px-1">
+          <button type="button" data-theme-toggle class="btn-quiet btn-sm flex-1 !justify-start !px-2 !text-[13px] !text-ink-3" aria-label="Aydınlık / karanlık tema">
+            <svg viewBox="0 0 20 20" class="h-5 w-5" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"></path></svg>
+            Tema
+          </button>
+          <button type="button" data-tour-open class="btn-quiet btn-sm flex-1 !justify-start !px-2 !text-[13px] !text-ink-3">Demo turu</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- phone top bar -->
+    <header class="sticky top-0 z-40 flex h-16 items-center justify-between border-b-2 border-line bg-bg/95 px-4 backdrop-blur lg:hidden">
+      <a href="/" aria-label="nirengi ana sayfa" class="flex items-center gap-2">
+        <Mark size={30} />
+        <span class="only-kurum text-[20px] font-black tracking-[-0.03em] text-indigo">nirengi</span>
+      </a>
+      <div class="only-genc"><MeStats client:only="react" /></div>
+      <details class="relative">
+        <summary class="btn-ink btn-sm cursor-pointer list-none !min-h-10 [&::-webkit-details-marker]:hidden" aria-label="Menü">Menü</summary>
+        <div class="card absolute right-0 top-14 z-50 w-72 space-y-3 p-4 shadow-[0_12px_32px_-12px_rgb(0_0_0/0.25)]">
+          <ModeSwitch client:only="react" />
+          <a href="/yontem" class="block rounded-[12px] px-3 py-2 text-[15px] font-extrabold text-ink-2 hover:bg-bg-2">Skorlar nasıl hesaplanıyor?</a>
+          <button type="button" data-theme-toggle class="block w-full rounded-[12px] px-3 py-2 text-left text-[15px] font-extrabold text-ink-2 hover:bg-bg-2">Tema değiştir</button>
+          <button type="button" data-tour-open class="block w-full rounded-[12px] px-3 py-2 text-left text-[15px] font-extrabold text-ink-2 hover:bg-bg-2">Demo turu</button>
+        </div>
+      </details>
+    </header>
+
+    <main id="icerik" class="lg:pl-[256px]">
+      <div class:list={['mx-auto flex gap-12 px-4 pb-32 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-10', width === 'wide' ? 'max-w-[1240px]' : 'max-w-[1080px]']}>
+        <div class="min-w-0 flex-1"><slot /></div>
+        {hasRail && <aside class="hidden w-[340px] shrink-0 xl:block"><slot name="rail" /></aside>}
+      </div>
+    </main>
+
+    <!-- phone tab bar -->
+    <nav class="fixed inset-x-0 bottom-0 z-40 border-t-2 border-line bg-bg pb-[env(safe-area-inset-bottom)] lg:hidden" aria-label="Sekmeler">
+      {
+        (['genc', 'kurum'] as const).map((m) => (
+          <ul class={`only-${m} mx-auto flex max-w-lg gap-1 px-1.5 py-[3px]`}>
+            {NAV[m].map((item) => {
+              const on = isActive(item, path);
+              return (
+                <li class="min-w-0 flex-1">
+                  <a
+                    href={item.href}
+                    aria-current={on ? 'page' : undefined}
+                    class:list={[
+                      'flex h-[58px] flex-col items-center justify-center gap-0.5 rounded-[14px] border-2 transition-colors',
+                      on ? 'border-indigo/35 bg-indigo-tint text-indigo' : 'border-transparent text-ink-3',
+                    ]}
+                  >
+                    <NavIcon icon={item.icon} size={26} />
+                    <span class="max-w-full truncate px-0.5 text-[11px] font-extrabold leading-tight">{item.label}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        ))
+      }
+    </nav>
+
+    <Overlays client:only="react" />
+    <DemoTour client:only="react" />
+
+    <script>
+      for (const b of document.querySelectorAll('[data-theme-toggle]'))
+        b.addEventListener('click', () => {
+          const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+          document.documentElement.dataset.theme = next;
+          try {
+            localStorage.setItem('nirengi:theme', next);
+          } catch {}
+        });
+      for (const b of document.querySelectorAll('[data-tour-open]'))
+        b.addEventListener('click', (e) => {
+          (e.currentTarget as HTMLElement).closest('details')?.removeAttribute('open');
+          window.dispatchEvent(new Event('nirengi:tour'));
+        });
+    </script>
+  </body>
+</html>

@@ -3,7 +3,7 @@
 // blind-mode preference are per-tab so two windows can play both sides live.
 
 import { useSyncExternalStore } from 'react';
-import type { Canvas, Evidence, LogEntry, NetEvent, Persona, Person, Pilot, State } from './types.ts';
+import type { Canvas, Evidence, LogEntry, NetEvent, Persona, Person, Pilot, Post, QuestDone, State, WeeklyGoal } from './types.ts';
 import { buildSeed, ROUND, STATE_VERSION } from './seed.ts';
 import { appendEntry } from './engine/ledger.ts';
 import { daysFromNow, now, uid } from './format.ts';
@@ -75,6 +75,8 @@ export interface View {
   persona: Persona;
   blind: boolean;
   revealed: string[]; // people the kurum has made first contact with
+  /** Which demo institution this tab acts as on the kurum side. */
+  orgId: string;
 }
 
 let view: View | null = null;
@@ -82,7 +84,7 @@ const viewListeners = new Set<() => void>();
 
 function getView(): View {
   if (view) return view;
-  view = { persona: 'org', blind: true, revealed: [] };
+  view = { persona: 'person', blind: true, revealed: [], orgId: 'o-kuzey' };
   if (typeof window !== 'undefined') {
     try {
       const raw = sessionStorage.getItem(VIEW_KEY) ?? localStorage.getItem(VIEW_KEY);
@@ -143,7 +145,7 @@ export const actions = {
       if (verified)
         event(s, {
           kind: 'evidence_verified',
-          text: `${person.name}: ${verified} kanıt makine doğrulamasıyla (S2) işlendi.`,
+          text: `${person.name}: ${verified} kanıt makine doğrulamasıyla işlendi (Doğrulandı).`,
           personId: person.id,
         });
     });
@@ -257,7 +259,7 @@ export const actions = {
       m.approvals.org = now();
       m.state = 'approved';
       log(p, 'org', 'approve', `Kurum onayı: ${m.title}${note ? ` — ${note}` : ''}`);
-      log(p, 'system', 'approve', 'Çift onay tamamlandı → kişinin profiline S3 kanıt olarak işlendi.');
+      log(p, 'system', 'approve', 'Çift onay tamamlandı → kişinin profiline Kurum onaylı kanıt olarak işlendi.');
       person.evidence.unshift({
         id: uid('e-pl'),
         title: `Kilometre taşı: ${m.title}`,
@@ -320,6 +322,73 @@ export const actions = {
     commit((s) => event(s, { kind: 'micro', text, personId, orgId }));
   },
 
+  // ------------------------------------------------------------ progress
+
+  setWeeklyGoal(personId: string, goal: WeeklyGoal) {
+    commit((s) => {
+      s.people.find((p) => p.id === personId)!.weeklyGoal = goal;
+    });
+  },
+
+  /** Announce (or cancel) a rest week: the streak pauses instead of breaking. */
+  toggleRestWeek(personId: string, week: string) {
+    commit((s) => {
+      const p = s.people.find((x) => x.id === personId)!;
+      const set = new Set(p.restWeeks ?? []);
+      if (set.has(week)) set.delete(week);
+      else set.add(week);
+      p.restWeeks = [...set];
+    });
+  },
+
+  recordActivity(personId: string, days: string[]) {
+    commit((s) => {
+      const p = s.people.find((x) => x.id === personId)!;
+      p.activity = [...new Set([...(p.activity ?? []), ...days])];
+    });
+  },
+
+  completeQuest(done: Omit<QuestDone, 'id' | 'at'>, evidence?: Evidence) {
+    commit((s) => {
+      if (s.quests.some((q) => q.questId === done.questId && q.personId === done.personId)) return;
+      s.quests.unshift({ ...done, id: uid('q'), at: now() });
+      const p = s.people.find((x) => x.id === done.personId)!;
+      if (evidence) p.evidence.unshift(evidence);
+      event(s, { kind: 'quest_done', text: `${p.name} bir görev tamamladı: “${done.title}”.`, personId: p.id });
+    });
+  },
+
+  // ------------------------------------------------------------ community
+
+  addPost(personId: string, kind: Post['kind'], text: string, evidenceId?: string): string {
+    const id = uid('post');
+    commit((s) => {
+      s.posts.unshift({ id, personId, kind, text, at: now(), evidenceId, supports: [], replies: [] });
+    });
+    return id;
+  },
+
+  toggleSupport(postId: string, personId: string) {
+    commit((s) => {
+      const p = s.posts.find((x) => x.id === postId)!;
+      p.supports = p.supports.includes(personId) ? p.supports.filter((x) => x !== personId) : [...p.supports, personId];
+    });
+  },
+
+  reply(postId: string, personId: string, text: string) {
+    commit((s) => {
+      s.posts.find((x) => x.id === postId)!.replies.push({ id: uid('r'), personId, text, at: now() });
+    });
+  },
+
+  /** Only the asker can mark a reply as the one that helped. */
+  markHelpful(postId: string, replyId: string) {
+    commit((s) => {
+      const r = s.posts.find((x) => x.id === postId)!.replies.find((x) => x.id === replyId)!;
+      r.helpful = !r.helpful;
+    });
+  },
+
   flag(patch: State['demo']) {
     commit((s) => {
       s.demo = { ...s.demo, ...patch };
@@ -336,6 +405,12 @@ export const byId = {
   need: (s: State, id?: string) => s.needs.find((n) => n.id === id),
   pilot: (s: State, id?: string) => s.pilots.find((p) => p.id === id),
 };
+
+/** The young person this tab acts as: the connected demo user, else the seeded Can Aksoy. */
+export const currentMe = (s: State) => s.people.find((p) => p.isDemoUser) ?? s.people.find((p) => p.id === 'p-can')!;
+
+/** The institution this tab acts as on the kurum side. */
+export const currentOrg = (s: State, v: View) => s.orgs.find((o) => o.id === v.orgId) ?? s.orgs[0];
 
 export const lastActivity = (p: Pilot) => p.log[p.log.length - 1]?.at ?? p.startedAt;
 export const SILENCE_DAYS = 7;

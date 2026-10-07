@@ -1,422 +1,720 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { Need } from '../../lib/types.ts';
-import { actions, byId, setView, useAppState, useView } from '../../lib/store.ts';
+// İhtiyaç detayı: one header for both faces, then what each side came for.
+// Kurum sees "Uyan adaylar" (score on the card, reasoning one tap below);
+// genç sees "Senin uyumun" and the gaps that would close it.
+
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useReducedMotion } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { Need, NeedStatus, Org, Pilot } from '../../lib/types.ts';
+import { actions, byId, currentMe, setView, useAppState, useView } from '../../lib/store.ts';
 import { assessCanvas, isCheckable, PUBLISH_THRESHOLD } from '../../lib/engine/canvas.ts';
-import { composeTeam, rankCandidates, similarNeeds, WEIGHTS, type Match } from '../../lib/engine/match.ts';
+import { composeTeam, findConflicts, rankCandidates, scoreMatch, similarNeeds, WEIGHTS, type Match } from '../../lib/engine/match.ts';
+import { progress, type WeekState } from '../../lib/engine/progress.ts';
 import { CONSTRAINT, NEED_STATUS, PILOT_STATUS, SCALE, SECTOR } from '../../lib/labels.ts';
 import { fmtDate } from '../../lib/format.ts';
 import { skillLabel } from '../../lib/skills.ts';
-import { Avatar, Empty, LevelGlyph, Meter, Modal, OrgMark, ScoreDial, StatusIcon, useIdentity } from '../ui/primitives.tsx';
-import { statusTone } from './NeedsPage.tsx';
+import Niri from '../ui/Niri';
+import { Bar, celebrate, EmptyState, feedback, Head, Ring, Sheet, Why } from '../ui/kit';
+import { CheckCircle, Clipboard } from '../ui/icons';
+import { LevelBadge, OrgMark, StatusIcon, useIdentity } from '../ui/primitives.tsx';
+import { calmTone, Consistency, EvidenceChips, IdName, PartBars, Who, WeekStrip } from './matchbits.tsx';
 
-const fmtW = (w: number) => w.toLocaleString('tr-TR');
+const STATUS_PILL: Record<NeedStatus, string> = {
+  published: 'bg-green-tint text-green-lip',
+  piloting: 'bg-indigo-tint text-indigo',
+  closed: 'bg-bg-3 text-ink-3',
+  draft: 'border-2 border-dashed border-line-2 bg-bg text-ink-2',
+};
 
 export default function NeedDetail({ id }: { id: string }) {
   const s = useAppState();
   const need = byId.need(s, id);
   if (!need)
     return (
-      <div className="wrap py-24">
-        <Empty title="Bu ihtiyaç bulunamadı">
-          <a className="underline" href="/ihtiyaclar">
-            İhtiyaçlara dön
-          </a>
-        </Empty>
+      <div className="mx-auto max-w-[720px]">
+        <EmptyState title="Bu ihtiyaç bulunamadı" action={<a className="btn-line" href="/ihtiyaclar">İhtiyaçlara dön</a>}>
+          Bağlantı eski olabilir ya da demo verisi sıfırlanmış olabilir.
+        </EmptyState>
       </div>
     );
   return <Detail need={need} />;
 }
 
+type Step = 'why' | 'confirm' | 'done';
+
 function Detail({ need }: { need: Need }) {
   const s = useAppState();
-  const { persona } = useView();
+  const { persona, revealed } = useView();
+  const reduce = useReducedMotion();
+  const isOrg = persona === 'org';
   const org = byId.org(s, need.orgId)!;
-  const a = assessCanvas(need.canvas, need.skills);
+  const me = currentMe(s);
+  const a = useMemo(() => assessCanvas(need.canvas, need.skills), [need]);
   const live = need.status === 'published' || need.status === 'piloting';
-  const ranked = useMemo(() => (live ? rankCandidates(s, need).slice(0, 6) : []), [s, need, live]);
-  const team = useMemo(() => (live ? composeTeam(s, need) : null), [s, need, live]);
-  const memory = similarNeeds(s, need.skills, need.id);
   const pilot = s.pilots.find((p) => p.needId === need.id);
-  const [open, setOpen] = useState<string | null>(null);
-  const [confirm, setConfirm] = useState<Match | null>(null);
+
+  const [cardOpen, setCardOpen] = useState(false);
+  const [memOpen, setMemOpen] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>('why');
+  const [wasHidden, setWasHidden] = useState(false);
+
+  const ranked = useMemo(
+    () => (isOrg && live ? rankCandidates(s, need).filter((m) => m.coverage.some((c) => c.score > 0)).slice(0, 6) : []),
+    [s, need, isOrg, live],
+  );
+  const weeks = useMemo(() => new Map(ranked.map((m) => [m.person.id, progress(s, m.person).history])), [ranked, s]);
+  const team = useMemo(() => (isOrg && live ? composeTeam(s, need) : null), [s, need, isOrg, live]);
+  const mine = useMemo(
+    () => (!isOrg && live ? scoreMatch(me, need, org, s.pilots, findConflicts(s.people)) : null),
+    [s, need, isOrg, live, me, org],
+  );
+  const memory = similarNeeds(s, need.skills, need.id);
 
   useEffect(() => {
     if (live && s.demo.viewedMatchesFor !== need.id) actions.flag({ viewedMatchesFor: need.id });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [need.id, live]);
-  useEffect(() => {
-    if (ranked[0] && !open) setOpen(ranked[0].person.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ranked.length]);
 
-  const fields: { label: string; value: ReactNode }[] = [
-    { label: 'Mevcut durum', value: need.canvas.current },
-    {
-      label: 'Acı noktası',
-      value: (
-        <>
-          {need.canvas.pain}
-          {need.canvas.painMetric && <span className="mt-2 block font-mono text-[13px] text-ink">↳ {need.canvas.painMetric}</span>}
-        </>
-      ),
-    },
-    { label: 'Hedef çıktı', value: need.canvas.outcome },
-    { label: 'Karar verici', value: need.canvas.decisionMaker },
-    { label: 'Pilot kapsamı', value: need.canvas.scope },
-  ];
+  // Keep the last match around so the sheet can finish its exit animation.
+  const current = ranked.find((m) => m.person.id === openId);
+  const last = useRef<Match | undefined>(undefined);
+  if (current) last.current = current;
+  const shown = current ?? last.current;
+
+  const openCandidate = (m: Match) => {
+    setStep('why');
+    setOpenId(m.person.id);
+  };
+
+  // First contact: the pilot opens at once, identity flips a beat later so the reveal is seen.
+  const startPilot = (m: Match, hidden: boolean) => {
+    setWasHidden(hidden);
+    setStep('done');
+    const pilotId = actions.openPilot(need.id, m.person.id);
+    window.setTimeout(() => {
+      setView({ revealed: [...new Set([...revealed, m.person.id])] });
+      feedback({
+        tone: 'good',
+        title: hidden ? 'Kimlik açıldı' : 'Pilot başladı',
+        text: hidden ? `${m.person.name} ile ilk temas kuruldu.` : `${m.person.name} ile pilot defteri açıldı.`,
+      });
+    }, reduce ? 100 : 600);
+    window.setTimeout(() => {
+      setOpenId(null);
+      celebrate({
+        title: 'Pilot başladı',
+        sub: `${m.person.name} ile ${need.canvas.criteria.filter((c) => c.text.trim()).length} kilometre taşı açıldı. Her taş iki tarafın onayıyla tamamlanır.`,
+        cta: 'Pilota git',
+        href: `/pilotlar/${pilotId}`,
+      });
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    }, reduce ? 700 : 2100);
+  };
+
+  const canPilot = isOrg && need.status === 'published';
+  const myPilot = pilot && pilot.personId === me.id;
 
   return (
-    <>
-      <header className="band">
-        <div className="wrap py-10 md:py-12">
-          <a href="/ihtiyaclar" className="text-sm text-ink-3 hover:text-ink">
-            ← İhtiyaçlar
-          </a>
-          <div className="mt-5 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <OrgMark name={org.name} />
-                <div>
-                  <p className="font-semibold">{org.name}</p>
-                  <p className="text-xs text-ink-3">
-                    {SECTOR[org.sector]} · {SCALE[org.scale]} · {org.city}
-                  </p>
-                </div>
-                <span className={`rounded-md border px-2 py-0.5 font-mono text-[11px] ${statusTone(need.status)}`}>{NEED_STATUS[need.status]}</span>
-                <span className="chip">Tur {need.round}</span>
-              </div>
-              <h1 className="display mt-5 max-w-3xl text-[30px] md:text-[42px]">{need.title}</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <ScoreDial value={a.score} size={76} label="kanvas" />
-              <div className="text-sm">
-                <p className="font-semibold">{a.canPublish ? 'Yayın eşiğini geçiyor' : 'Yayın eşiğinin altında'}</p>
-                <p className="text-ink-3">Eşik {PUBLISH_THRESHOLD} · engel {a.blockers.length}</p>
-              </div>
-            </div>
-          </div>
-          {need.status === 'draft' && (
-            <div className="mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-dashed border-line-2 bg-paper p-4">
-              <p className="flex-1 text-sm text-ink-2">
-                <strong className="font-semibold text-ink">Bu ihtiyaç taslakta.</strong>{' '}
-                {a.canPublish ? 'Kanvas yayına hazır.' : `Yayımlanmadan önce ${a.blockers.length + a.checks.filter((c) => !c.ok && !c.blocking).length} eksik kapanmalı.`}
-              </p>
-              <a href={`/ihtiyaclar/yeni?id=${need.id}`} className="btn-line btn-sm">
-                Kanvası düzenle
-              </a>
-              <button className="btn-primary btn-sm" disabled={!a.canPublish} onClick={() => actions.publishNeed(need.id)}>
-                Yayımla
-              </button>
-            </div>
-          )}
-          {pilot && (
-            <a href={`/pilotlar/${pilot.id}`} className="mt-6 flex items-center gap-3 rounded-xl border border-signal/40 bg-signal/8 p-4 text-sm hover:border-signal">
-              <span className="h-2 w-2 rounded-full bg-signal" />
-              <span className="flex-1">
-                <strong className="font-semibold">Pilot Defteri açık:</strong> {pilot.title} — {PILOT_STATUS[pilot.status]}
-              </span>
-              <span className="font-semibold">Deftere git →</span>
-            </a>
-          )}
-        </div>
-      </header>
+    <div className="mx-auto max-w-[720px]">
+      <a href={isOrg ? '/ihtiyaclar' : '/bugun#ihtiyaclar'} className="inline-flex items-center gap-1 text-[14px] font-extrabold text-ink-3 transition-colors hover:text-indigo">
+        <ChevronLeft className="h-4 w-4" strokeWidth={3} />
+        {isOrg ? 'İhtiyaçlar' : 'Sana uyan ihtiyaçlar'}
+      </a>
 
-      <div className="wrap grid gap-8 py-10 lg:grid-cols-[1fr_340px]">
-        <section>
-          <h2 className="eyebrow">İhtiyaç Kanvası</h2>
-          <dl className="card mt-3 divide-y divide-line">
-            {fields.map((f) => (
-              <div key={f.label} className="grid gap-1 p-4 sm:grid-cols-[150px_1fr] sm:gap-4">
-                <dt className="text-sm font-semibold text-ink-3">{f.label}</dt>
-                <dd className="text-[15px] leading-relaxed">{f.value || <span className="italic text-danger">Boş</span>}</dd>
-              </div>
-            ))}
-            <div className="grid gap-1 p-4 sm:grid-cols-[150px_1fr] sm:gap-4">
-              <dt className="text-sm font-semibold text-ink-3">Başarı kriterleri</dt>
-              <dd>
-                <ol className="space-y-1.5">
-                  {need.canvas.criteria.map((c, i) => (
-                    <li key={c.id} className="flex gap-2.5 text-[15px]">
-                      <span className="num pt-0.5 text-xs text-ink-3">K{i + 1}</span>
-                      <span className="flex-1">{c.text}</span>
-                      <span className={`font-mono text-[11px] ${isCheckable(c.text) ? 'text-s3' : 'text-danger'}`}>{isCheckable(c.text) ? 'ölçülebilir' : 'ölçülemez'}</span>
-                    </li>
-                  ))}
-                </ol>
-                {need.status !== 'draft' && <p className="mt-2 text-xs text-ink-3">Pilot açıldığında her kriter bir kilometre taşına dönüşür ve sonradan değiştirilemez.</p>}
-              </dd>
-            </div>
-            <div className="grid gap-1 p-4 sm:grid-cols-[150px_1fr] sm:gap-4">
-              <dt className="text-sm font-semibold text-ink-3">Kısıtlar</dt>
-              <dd className="flex flex-wrap gap-2">
-                {need.canvas.constraints.length ? (
-                  need.canvas.constraints.map((c, i) => (
-                    <span key={i} className="chip !py-1 !text-[13px]">
-                      <span className="font-semibold text-ink">{CONSTRAINT[c.kind]}:</span> {c.text}
-                    </span>
-                  ))
-                ) : (
-                  <span className="italic text-danger">Boş</span>
-                )}
-              </dd>
-            </div>
-          </dl>
+      <Header need={need} org={org} a={a} calm={isOrg} />
 
-          {live && (
-            <section id="adaylar" className="mt-12 scroll-mt-24">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <p className="eyebrow">03 · Açıklanabilir eşleşme</p>
-                  <h2 className="mt-1 text-2xl font-semibold">Adaylar</h2>
-                </div>
-                <p className="max-w-sm text-sm text-ink-3">
-                  Skor = {fmtW(WEIGHTS.evidence)} kanıt + {fmtW(WEIGHTS.context)} bağlam + {fmtW(WEIGHTS.capacity)} kapasite + {fmtW(WEIGHTS.history)} geçmiş.{' '}
-                  <a href="/yontem" className="underline">
-                    Yöntem
-                  </a>
-                </p>
-              </div>
-              <ol className="mt-5 space-y-3">
-                {ranked.map((m, i) => (
-                  <Candidate
-                    key={m.person.id}
-                    m={m}
-                    rank={i + 1}
-                    open={open === m.person.id}
-                    onToggle={() => setOpen(open === m.person.id ? null : m.person.id)}
-                    canOpenPilot={need.status === 'published' && persona === 'org'}
-                    onOpenPilot={() => setConfirm(m)}
-                  />
-                ))}
-              </ol>
-              {need.status === 'published' && persona !== 'org' && (
-                <p className="mt-3 text-sm text-ink-3">Pilotu kurum açar. Üstteki rol anahtarından “Kurum”a geçebilirsin.</p>
-              )}
-            </section>
-          )}
-        </section>
-
-        <aside className="space-y-4">
-          <div className="card p-5">
-            <p className="eyebrow">Çözülebilirlik denetimi</p>
-            <ul className="mt-3 space-y-2">
-              {a.checks.map((c) => (
-                <li key={c.id} className="flex gap-2 text-sm">
-                  <span className={c.ok ? 'text-s3' : c.blocking ? 'text-danger' : 'text-warn'}><StatusIcon kind={c.ok ? 'ok' : c.blocking ? 'fail' : 'warn'} /></span>
-                  <span className="flex-1">
-                    <span className={c.ok ? 'text-ink-2' : 'font-medium text-ink'}>{c.label}</span>
-                    {!c.ok && <span className="block text-xs text-ink-3">{c.fix}</span>}
-                  </span>
-                  <span className="num text-xs text-ink-3">{c.ok ? c.points : 0}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {team && team.members.length > 1 && (
-            <div className="card p-5">
-              <p className="eyebrow">Takım kompozisyonu</p>
-              <p className="mt-2 text-sm text-ink-2">
-                İhtiyaç bir kişiden çok bir ekip istiyor olabilir. Bu {team.members.length} kişilik ekip yetkinlik yüzeyini <span className="num font-semibold text-ink">%{Math.round(team.total * 100)}</span>{' '}
-                oranında kapatıyor.
-              </p>
-              <ul className="mt-3 space-y-2">
-                {team.coverage.map((c) => (
-                  <TeamRow key={c.skill} skill={c.skill} score={c.score} personId={c.by?.id} />
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {memory.length > 0 && (
-            <div className="card p-5">
-              <p className="eyebrow">Ekosistem hafızası</p>
-              <p className="mt-2 text-sm text-ink-2">Benzer ihtiyaçlar geçmişte şöyle sonuçlandı:</p>
-              <ul className="mt-3 space-y-3">
-                {memory.map((x) => (
-                  <li key={x.need.id} className="rounded-lg border border-line bg-paper p-3">
-                    <a href={x.pilot ? `/pilotlar/${x.pilot.id}` : `/ihtiyaclar/${x.need.id}`} className="block text-sm font-semibold leading-snug hover:underline">
-                      {x.need.title}
-                    </a>
-                    <p className="mt-1 text-xs text-ink-3">
-                      {x.org.name} · {x.pilot ? PILOT_STATUS[x.pilot.status] : NEED_STATUS[x.need.status]} · ortak: {x.overlap.map(skillLabel).join(', ')}
-                    </p>
-                    {x.pilot?.closure && <p className="mt-1.5 text-xs leading-relaxed text-ink-2">{x.pilot.closure.summary}</p>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <p className="px-1 text-xs text-ink-3">
-            Yayın: {need.publishedAt ? fmtDate(need.publishedAt) : '—'} · Oluşturma: {fmtDate(need.createdAt)}
+      {need.status === 'draft' && isOrg && (
+        <div className="mt-4 rounded-[18px] bg-bg-2 p-4 md:p-5">
+          <p className="text-[17px] font-black text-ink">Bu ihtiyaç taslakta</p>
+          <p className="mt-1 text-[15px] font-bold text-ink-2">
+            {a.canPublish
+              ? 'Kanvas yayına hazır. Yayımlayınca adaylar gerekçesiyle sıralanır.'
+              : `Yayımlanmadan önce ${a.blockers.length + a.checks.filter((c) => !c.ok && !c.blocking).length} eksik kapanmalı. Eksiklerin listesi, çözülebilirlik puanının yanındaki Neden? düğmesinde.`}
           </p>
-        </aside>
-      </div>
-
-      <Modal open={!!confirm} onClose={() => setConfirm(null)} title="Pilotu aç">
-        {confirm && <OpenPilot need={need} m={confirm} onDone={() => setConfirm(null)} />}
-      </Modal>
-    </>
-  );
-}
-
-function TeamRow({ skill, score, personId }: { skill: string; score: number; personId?: string }) {
-  const s = useAppState();
-  const p = byId.person(s, personId);
-  const id = useIdentity(p ?? s.people[0]);
-  return (
-    <li className="text-sm">
-      <div className="flex justify-between">
-        <span>{skillLabel(skill)}</span>
-        <span className="truncate pl-2 text-xs text-ink-3">{p ? id.name : 'kapsanmıyor'}</span>
-      </div>
-      <Meter value={score} tone={score >= 0.8 ? 's3' : 'warn'} className="mt-1 !h-1" />
-    </li>
-  );
-}
-
-function Candidate({
-  m,
-  rank,
-  open,
-  onToggle,
-  canOpenPilot,
-  onOpenPilot,
-}: {
-  m: Match;
-  rank: number;
-  open: boolean;
-  onToggle: () => void;
-  canOpenPilot: boolean;
-  onOpenPilot: () => void;
-}) {
-  const id = useIdentity(m.person);
-  const parts = [
-    { label: 'Kanıt yakınlığı', v: m.parts.evidence, w: WEIGHTS.evidence },
-    { label: 'Bağlam uyumu', v: m.parts.context, w: WEIGHTS.context },
-    { label: 'Kapasite', v: m.parts.capacity, w: WEIGHTS.capacity },
-    { label: 'İş birliği geçmişi', v: m.parts.history, w: WEIGHTS.history },
-  ];
-  return (
-    <li className={`card overflow-hidden ${open ? 'border-line-2' : ''}`}>
-      <button onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-4 p-4 text-left hover:bg-sunken/50">
-        <span className="num w-5 text-sm text-ink-3">{rank}</span>
-        <Avatar person={m.person} size={40} />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate font-semibold">{id.name}</span>
-          <span className="block truncate text-sm text-ink-3">{m.person.headline}</span>
-        </span>
-        <span className="hidden gap-1 sm:flex">
-          {m.coverage.map((c) => (
-            <span key={c.skill} title={`${skillLabel(c.skill)}: ${c.best ? c.best.level : 'kanıt yok'}`} className={c.best ? '' : 'opacity-25'}>
-              <LevelGlyph level={c.best?.level ?? 'S1'} size={14} />
-            </span>
-          ))}
-        </span>
-        <ScoreDial value={m.score} size={48} />
-        <span className={`text-ink-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true">
-          ▾
-        </span>
-      </button>
-      {open && (
-        <div className="rise border-t border-line bg-paper/60 p-5">
-          <div className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-            {parts.map((p) => (
-              <div key={p.label}>
-                <div className="flex justify-between text-sm">
-                  <span className="font-medium">{p.label}</span>
-                  <span className="num text-xs text-ink-3">
-                    {Math.round(p.v * 100)} × {fmtW(p.w)} = {(p.v * p.w * 100).toLocaleString('tr-TR', { maximumFractionDigits: 1 })}
-                  </span>
-                </div>
-                <Meter value={p.v} className="mt-1" />
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div>
-              <p className="eyebrow">Eşleşti çünkü</p>
-              <ul className="mt-2 space-y-1.5 text-sm leading-snug">
-                {m.reasons.map((r) => (
-                  <li key={r} className="flex gap-2">
-                    <StatusIcon kind="ok" className="text-s3" />
-                    {r}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="eyebrow">Gereksinim bazında kanıt</p>
-              <ul className="mt-2 space-y-1.5 text-sm">
-                {m.coverage.map((c) => (
-                  <li key={c.skill} className="flex items-center gap-2">
-                    {c.best ? <LevelGlyph level={c.best.level} size={13} /> : <StatusIcon kind="fail" className="text-danger" />}
-                    <span className="flex-1">{skillLabel(c.skill)}</span>
-                    <span className="num text-xs text-ink-3">{c.verified ? `${c.verified} doğrulanmış` : c.count ? 'yalnız beyan' : 'kanıt yok'}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {m.gaps.length > 0 && (
-            <p className="mt-4 rounded-lg border border-line bg-raised px-4 py-3 text-sm text-ink-2">
-              <span className="font-semibold text-ink">Adaya giden geri bildirim:</span> “Bu ihtiyaca %{m.score} uyuyorsun. Eksik olan:{' '}
-              {m.gaps.map((g) => skillLabel(g.skill)).join(', ')} alanında doğrulanmış üretim. En büyük kazanç {skillLabel([...m.gaps].sort((a, b) => b.gain - a.gain)[0].skill)} (
-              <span className="num text-s3">+{Math.max(...m.gaps.map((g) => g.gain))}</span>).” Ret değil, yol haritası.
-            </p>
-          )}
-
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <a href={`/profil/${m.person.handle}`} className="btn-line btn-sm">
-              Kanıt Kartını aç
+          <div className="mt-4 flex flex-wrap gap-3">
+            <a href={`/ihtiyaclar/yeni?id=${need.id}`} className="btn-line btn-sm">
+              Düzenle
             </a>
-            {canOpenPilot && (
-              <button className="btn-primary btn-sm" onClick={onOpenPilot}>
-                Bu adayla pilot aç
-              </button>
-            )}
+            <button
+              className="btn-primary btn-sm"
+              disabled={!a.canPublish}
+              onClick={() => {
+                actions.publishNeed(need.id);
+                celebrate({ title: 'İhtiyaç yayında', sub: 'Kanvasın yayın eşiğini geçti. Adaylar artık gerekçesiyle sıralanıyor.' });
+              }}
+            >
+              Yayımla
+            </button>
           </div>
         </div>
       )}
-    </li>
+
+      {pilot && (isOrg || myPilot) && <PilotBanner pilot={pilot} mine={!!myPilot} />}
+
+      <button type="button" onClick={() => setCardOpen(true)} className="card-press mt-4 flex w-full items-center gap-4 p-4 text-left">
+        <Clipboard size={36} />
+        <span className="min-w-0 flex-1">
+          <span className="block text-[17px] font-black text-ink">İhtiyaç kartı</span>
+          <span className="block text-[14px] font-bold text-ink-3">Mevcut durum, hedef, başarı kriterleri, kısıtlar</span>
+        </span>
+        <ChevronRight className="h-6 w-6 shrink-0 text-ink-3" strokeWidth={3} />
+      </button>
+
+      {/* Genç: my fit */}
+      {!isOrg && mine && <MyFit m={mine} org={org} />}
+      {!isOrg && !live && (
+        <div className="mt-6">
+          <EmptyState title={need.status === 'draft' ? 'Bu ihtiyaç henüz yayında değil' : 'Bu ihtiyaç kapandı'}>
+            {need.status === 'draft' ? 'Yayımlandığında uyum puanını burada göreceksin.' : 'Benzer yeni ihtiyaçlar için Bugün sayfasına dönebilirsin.'}
+          </EmptyState>
+        </div>
+      )}
+
+      {/* Kurum: ranked candidates */}
+      {isOrg && live && (
+        <section id="adaylar" className="mt-10 scroll-mt-6" aria-labelledby="adaylar-b">
+          <h2 id="adaylar-b" className="sr-only">
+            Uyan adaylar
+          </h2>
+          <Head
+            title="Uyan adaylar"
+            action={
+              <Why title="Uyum nasıl hesaplanıyor?" label="Skor nasıl?">
+                <p className="text-[15px] font-bold text-ink-2">Skor hiçbir yerde elle yazılmaz; her adayın kanıtından bu sayfa açılırken hesaplanır. Dört parçası var:</p>
+                <ul className="mt-4 space-y-3 text-[15px] font-bold text-ink-2">
+                  <li>
+                    <b className="num text-indigo">{WEIGHTS.evidence * 100} puan</b> Kanıt yakınlığı: aranan yetkinliklerde doğrulanmış iş. Beyan düşük, doğrulanmış yüksek ağırlık taşır.
+                  </li>
+                  <li>
+                    <b className="num text-indigo">{WEIGHTS.context * 100} puan</b> Bağlam: aynı sektörde ya da benzer ölçekte doğrulanmış iş.
+                  </li>
+                  <li>
+                    <b className="num text-indigo">{WEIGHTS.capacity * 100} puan</b> Kapasite: pilota ne kadar vakit ayırabildiği.
+                  </li>
+                  <li>
+                    <b className="num text-indigo">{WEIGHTS.history * 100} puan</b> İş birliği geçmişi: başarıyla kapanan pilotlar ve çift onaylı kilometre taşları.
+                  </li>
+                </ul>
+                <p className="mt-4 text-[14px] font-bold text-ink-3">Bağlam ve geçmişte kimse sıfırdan başlamaz; yeni biri bu yüzden cezalandırılmaz.</p>
+                <a href="/yontem" className="btn-line btn-block mt-5">
+                  Yöntemi oku
+                </a>
+              </Why>
+            }
+          />
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] font-bold text-ink-3">
+            Aranan yetkinlikler:
+            {need.skills.map((k) => (
+              <span key={k} className="chip">
+                {skillLabel(k)}
+              </span>
+            ))}
+          </p>
+
+          {ranked.length > 0 ? (
+            <>
+              <div className="mt-5 flex items-end gap-3">
+                <Niri mood="think" size={72} />
+                <p className="relative mb-3 flex-1 rounded-[16px] border-2 border-line bg-bg px-4 py-2.5 text-[15px] font-bold text-ink-2">
+                  <span className="absolute -left-[8px] bottom-4 h-3.5 w-3.5 rotate-45 border-b-2 border-l-2 border-line bg-bg" aria-hidden="true" />
+                  Bir adaya dokun: skorun nereden geldiğini, kanıtı ve eksiklerini gör.
+                </p>
+              </div>
+              <ol className="mt-4 space-y-3">
+                {ranked.map((m, i) => (
+                  <li key={m.person.id} className="rise" style={{ animationDelay: `${i * 40}ms` }}>
+                    <CandidateCard m={m} rank={i + 1} hist={weeks.get(m.person.id)!} inPilot={pilot?.personId === m.person.id} onOpen={() => openCandidate(m)} />
+                  </li>
+                ))}
+              </ol>
+            </>
+          ) : (
+            <div className="mt-5">
+              <EmptyState
+                title="Henüz uyan aday yok"
+                action={
+                  <a href={`/ihtiyaclar/yeni?id=${need.id}`} className="btn-line">
+                    Kanvası düzenle
+                  </a>
+                }
+              >
+                Aranan {need.skills.length} yetkinliğin hiçbirinde kanıtı olan kimse çıkmadı. Kanvasta yetkinlik yüzeyini daraltmak ya da pilot kapsamını küçültmek aday sayısını artırır.
+              </EmptyState>
+            </div>
+          )}
+        </section>
+      )}
+
+      {team && team.members.length > 1 && (
+        <section className="card mt-6 p-5">
+          <Head
+            title="Birlikte daha güçlü"
+            action={
+              <Why title="Ekip nasıl kuruldu?">
+                <p className="text-[15px] font-bold text-ink-2">Her adımda aranan yetkinliklerden en çok yeni alan kapatan kişi eklenir. Böylece bir kişinin boş bıraktığı yeri diğeri doldurur.</p>
+                <ul className="mt-5 space-y-4">
+                  {team.coverage.map((c) => (
+                    <li key={c.skill}>
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="text-[16px] font-black text-ink">{skillLabel(c.skill)}</span>
+                        <span className="truncate text-[14px] font-bold text-ink-3">{c.by ? <IdName person={c.by} /> : 'kapsanmıyor'}</span>
+                      </div>
+                      <Bar value={c.score} tone={c.score >= 0.8 ? 'green' : 'indigo'} h={10} className="mt-1.5" />
+                    </li>
+                  ))}
+                </ul>
+              </Why>
+            }
+          />
+          <div className="mt-4 flex items-center gap-4">
+            <span className="flex shrink-0 -space-x-3">
+              {team.members.map((p) => (
+                <span key={p.id} className="rounded-full border-2 border-bg bg-bg">
+                  <Who person={p} size={44} />
+                </span>
+              ))}
+            </span>
+            <p className="text-[15px] font-bold text-ink-2">
+              {team.members.map((p, i) => (
+                <span key={p.id}>
+                  {i > 0 && ', '}
+                  <b>
+                    <IdName person={p} />
+                  </b>
+                </span>
+              ))}{' '}
+              birlikte aranan yetkinliklerin <b className="num text-green-lip">%{Math.round(team.total * 100)}</b> kadarını kapatıyor.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {isOrg && memory.length > 0 && (
+        <button type="button" onClick={() => setMemOpen(true)} className="card-press mt-6 flex w-full items-center gap-4 p-4 text-left">
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] font-black text-ink">Benzer ihtiyaçlar nasıl sonuçlandı?</span>
+            <span className="block text-[14px] font-bold text-ink-3">{memory.length} benzer ihtiyaç var</span>
+          </span>
+          <ChevronRight className="h-6 w-6 shrink-0 text-ink-3" strokeWidth={3} />
+        </button>
+      )}
+
+      <p className="mt-6 text-[13px] font-bold text-ink-3">Kurumlar ve kişiler kurgusal demo verisidir.</p>
+
+      <NeedCard open={cardOpen} onClose={() => setCardOpen(false)} need={need} />
+
+      <Sheet open={memOpen} onClose={() => setMemOpen(false)} title="Benzer ihtiyaçlar">
+        <ul className="space-y-3">
+          {memory.map((x) => (
+            <li key={x.need.id}>
+              <a href={x.pilot ? `/pilotlar/${x.pilot.id}` : `/ihtiyaclar/${x.need.id}`} className="card-press block p-4">
+                <span className="block text-[16px] font-black leading-snug text-ink">{x.need.title}</span>
+                <span className="mt-1 block text-[14px] font-bold text-ink-3">
+                  {x.org.name} · {x.pilot ? PILOT_STATUS[x.pilot.status] : NEED_STATUS[x.need.status]} · ortak: {x.overlap.map(skillLabel).join(', ')}
+                </span>
+                {x.pilot?.closure && <span className="mt-2 block text-[14px] font-bold text-ink-2">{x.pilot.closure.summary}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Sheet>
+
+      <Sheet open={!!current} onClose={() => setOpenId(null)} title={step === 'done' ? 'Pilot başladı' : step === 'confirm' ? 'Pilotu başlat' : 'Neden bu uyum?'}>
+        {shown && (
+          <CandidateSheet
+            m={shown}
+            need={need}
+            org={org}
+            step={step}
+            wasHidden={wasHidden}
+            canPilot={canPilot}
+            pilot={pilot?.personId === shown.person.id ? pilot : undefined}
+            hist={weeks.get(shown.person.id)}
+            onStep={setStep}
+            onStart={startPilot}
+          />
+        )}
+      </Sheet>
+    </div>
   );
 }
 
-function OpenPilot({ need, m, onDone }: { need: Need; m: Match; onDone: () => void }) {
+// ---------------------------------------------------------------- header
+
+function Header({ need, org, a, calm }: { need: Need; org: Org; a: ReturnType<typeof assessCanvas>; calm: boolean }) {
+  return (
+    <section className="card mt-3 p-5 md:p-6">
+      <div className="flex items-center gap-3">
+        <OrgMark name={org.name} size={44} />
+        <div className="min-w-0 flex-1">
+          <p className="text-[16px] font-extrabold leading-tight text-ink">{org.name}</p>
+          <p className="text-[13px] font-bold leading-tight text-ink-3">
+            {SECTOR[org.sector]} · {SCALE[org.scale]} · {org.city}
+          </p>
+        </div>
+        <span className={`pill shrink-0 ${STATUS_PILL[need.status]}`}>{NEED_STATUS[need.status]}</span>
+      </div>
+      <h1 className="h-page mt-5">{need.title}</h1>
+      <p className="lead mt-2">{need.canvas.pain}</p>
+      <div className="mt-5 flex items-center gap-4 rounded-[16px] bg-bg-2 p-4">
+        <Ring value={a.score} size={64} label="çözülebilirlik" tone={calm ? calmTone(a.score) : undefined} />
+        <div className="min-w-0 flex-1">
+          <p className="text-[16px] font-black text-ink">Çözülebilirlik</p>
+          <p className="text-[14px] font-bold text-ink-3">
+            {a.canPublish ? 'Yayın eşiğini geçiyor' : 'Yayın eşiğinin altında'}
+            <span className="ml-1">
+              <Why title="Çözülebilirlik nasıl hesaplandı?">
+                <p className="text-[15px] font-bold text-ink-2">
+                  Kanvas on denetimden geçer, her birinin puanı var. {PUBLISH_THRESHOLD} ve üstü, engeli olmayan ihtiyaç yayımlanabilir. Şu an <b className="num">{a.score}</b>.
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {a.checks.map((c) => (
+                    <li key={c.id} className="flex gap-2.5">
+                      <StatusIcon kind={c.ok ? 'ok' : c.blocking ? 'fail' : 'warn'} className="mt-1" />
+                      <span className="min-w-0 flex-1">
+                        <span className={`block text-[15px] ${c.ok ? 'font-bold text-ink-2' : 'font-black text-ink'}`}>{c.label}</span>
+                        {!c.ok && <span className="block text-[14px] font-bold text-ink-3">{c.fix}</span>}
+                        {!c.ok && c.blocking && <span className="block text-[13px] font-extrabold text-red-lip">Yayını engelliyor</span>}
+                      </span>
+                      <span className="num shrink-0 text-[14px] font-extrabold text-ink-3">
+                        {c.ok ? c.points : 0}/{c.points}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Why>
+            </span>
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PilotBanner({ pilot, mine }: { pilot: Pilot; mine: boolean }) {
+  return (
+    <a href={`/pilotlar/${pilot.id}`} className="card-press mt-4 flex items-center gap-4 p-4">
+      <span className="min-w-0 flex-1">
+        <span className="block text-[17px] font-black text-ink">{mine ? 'Bu projede çalışıyorsun' : 'Pilot açık'}</span>
+        <span className="block truncate text-[14px] font-bold text-ink-3">
+          {pilot.title} · {PILOT_STATUS[pilot.status]}
+        </span>
+      </span>
+      <span className="btn-primary btn-sm shrink-0">Projeye git</span>
+    </a>
+  );
+}
+
+// ---------------------------------------------------------------- need card
+
+function NeedCard({ open, onClose, need }: { open: boolean; onClose: () => void; need: Need }) {
+  const c = need.canvas;
+  const field = (label: string, body: ReactNode) => (
+    <div className="border-t-2 border-line pt-4 first:border-0 first:pt-0">
+      <p className="cap">{label}</p>
+      <div className="mt-1 text-[15px] font-bold leading-relaxed text-ink-2">{body || <span className="text-red-lip">Boş</span>}</div>
+    </div>
+  );
+  return (
+    <Sheet open={open} onClose={onClose} title="İhtiyaç kartı">
+      <div className="space-y-4">
+        {field('Mevcut durum', c.current)}
+        {field(
+          'Acı noktası',
+          <>
+            {c.pain}
+            {c.painMetric && <span className="mono mt-2 block text-[13px] text-ink">{c.painMetric}</span>}
+          </>,
+        )}
+        {field('Hedef çıktı', c.outcome)}
+        {field(
+          'Başarı kriterleri',
+          <ol className="space-y-2">
+            {c.criteria.map((k, i) => (
+              <li key={k.id} className="flex gap-2.5">
+                <span className="num pt-px text-[13px] font-black text-ink-3">K{i + 1}</span>
+                <span className="min-w-0 flex-1">
+                  {k.text}
+                  <span className={`ml-2 text-[13px] font-extrabold ${isCheckable(k.text) ? 'text-green-lip' : 'text-red-lip'}`}>{isCheckable(k.text) ? 'ölçülebilir' : 'ölçülemez'}</span>
+                </span>
+              </li>
+            ))}
+          </ol>,
+        )}
+        {field(
+          'Kısıtlar',
+          c.constraints.length ? (
+            <span className="flex flex-wrap gap-2">
+              {c.constraints.map((k, i) => (
+                <span key={i} className="chip">
+                  <b>{CONSTRAINT[k.kind]}:</b> {k.text}
+                </span>
+              ))}
+            </span>
+          ) : null,
+        )}
+        {field('Karar verici', c.decisionMaker)}
+        {field('Pilot kapsamı', c.scope)}
+      </div>
+      <p className="mt-6 text-[13px] font-bold text-ink-3">
+        {need.status !== 'draft' && 'Pilot açıldığında her kriter bir kilometre taşına dönüşür ve sonradan değiştirilemez. '}
+        Yayın: {need.publishedAt ? fmtDate(need.publishedAt) : '—'} · Oluşturma: {fmtDate(need.createdAt)}
+      </p>
+    </Sheet>
+  );
+}
+
+// ---------------------------------------------------------------- kurum: candidates
+
+function CandidateCard({ m, rank, hist, inPilot, onOpen }: { m: Match; rank: number; hist: WeekState[]; inPilot: boolean; onOpen: () => void }) {
   const id = useIdentity(m.person);
-  const { revealed } = useView();
+  return (
+    <button type="button" onClick={onOpen} className="card-press block w-full p-4 text-left sm:p-5" aria-label={`${id.name}, uyum ${m.score}. Neden bu uyum, gerekçeyi aç`}>
+      <span className="flex items-center gap-3 sm:gap-4">
+        <span className="num hidden w-5 text-[15px] font-black text-ink-3 sm:block">{rank}</span>
+        <Who person={m.person} size={48} />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[17px] font-black text-ink">{id.name}</span>
+          <span className="block truncate text-[14px] font-bold text-ink-3">{m.person.headline}</span>
+          {(rank === 1 || inPilot) && (
+            <span className={`pill mt-1.5 !py-0.5 ${inPilot ? 'bg-indigo-tint text-indigo' : 'bg-green-tint text-green-lip'}`}>{inPilot ? 'Pilotta' : 'En uyumlu'}</span>
+          )}
+        </span>
+        <Ring value={m.score} size={60} tone={calmTone(m.score)} />
+      </span>
+      <span className="mt-4 block">
+        <EvidenceChips m={m} />
+      </span>
+      <span className="mt-3 flex items-center justify-between gap-3">
+        <Consistency hist={hist} />
+        <span className="flex shrink-0 items-center text-[14px] font-extrabold text-indigo">
+          Neden?
+          <ChevronRight className="h-4 w-4" strokeWidth={3} />
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function CandidateSheet({
+  m,
+  need,
+  org,
+  step,
+  wasHidden,
+  canPilot,
+  pilot,
+  hist,
+  onStep,
+  onStart,
+}: {
+  m: Match;
+  need: Need;
+  org: Org;
+  step: Step;
+  wasHidden: boolean;
+  canPilot: boolean;
+  pilot?: Pilot;
+  hist?: WeekState[];
+  onStep: (s: Step) => void;
+  onStart: (m: Match, hidden: boolean) => void;
+}) {
+  const id = useIdentity(m.person);
   const criteria = need.canvas.criteria.filter((c) => c.text.trim());
+
+  if (step === 'done')
+    return (
+      <div className="flex flex-col items-center py-4 text-center">
+        <Who person={m.person} size={96} />
+        <p className="mt-4 text-[22px] font-black text-ink">{id.name}</p>
+        <p className="mt-1 text-[15px] font-bold text-ink-3">
+          {wasHidden && id.hidden ? 'Pilot defteri açıldı. Kimlik birazdan açılıyor…' : wasHidden ? 'Kimlik açıldı. Pilot defteri başladı.' : 'Pilot defteri başladı.'}
+        </p>
+      </div>
+    );
+
+  if (step === 'confirm')
+    return (
+      <div>
+        <p className="text-[15px] font-bold text-ink-2">
+          <b>{id.name}</b> ile pilot açılacak. Kanvastaki {criteria.length} başarı kriteri olduğu gibi kilometre taşına dönüşür. Hedef sonradan değiştirilemez; her taş iki tarafın onayıyla tamamlanır.
+        </p>
+        <ol className="mt-4 space-y-2">
+          {criteria.map((c, i) => (
+            <li key={c.id} className="flex gap-3 rounded-[14px] bg-bg-2 px-3.5 py-2.5 text-[15px] font-bold text-ink-2">
+              <span className="num text-[13px] font-black text-ink-3">K{i + 1}</span>
+              {c.text}
+            </li>
+          ))}
+        </ol>
+        {id.hidden && <p className="mt-4 rounded-[14px] bg-indigo-tint px-4 py-3 text-[14px] font-bold text-ink-2">Kimlik şimdiye kadar gizliydi. Pilot açılınca ilk temas kurulur ve ad görünür olur.</p>}
+        <div className="mt-6 flex gap-3">
+          <button type="button" className="btn-quiet" onClick={() => onStep('why')}>
+            Geri
+          </button>
+          <button type="button" className="btn-primary flex-1" onClick={() => onStart(m, id.hidden)}>
+            Pilotu başlat
+          </button>
+        </div>
+      </div>
+    );
+
+  const gaps = [...m.gaps].sort((x, y) => y.gain - x.gain);
   return (
     <div>
-      <p className="text-sm text-ink-2">
-        <strong className="font-semibold text-ink">{id.name}</strong> ile pilot açılacak. Kanvastaki {criteria.length} başarı kriteri olduğu gibi kilometre taşına dönüşür. Hedef
-        sonradan değiştirilemez; her taş iki tarafın onayıyla tamamlanır.
-      </p>
-      <ol className="mt-4 space-y-2">
-        {criteria.map((c, i) => (
-          <li key={c.id} className="flex gap-3 rounded-lg border border-line bg-paper px-3 py-2 text-sm">
-            <span className="num text-xs text-ink-3">K{i + 1}</span>
-            {c.text}
+      <div className="flex items-center gap-4">
+        <Who person={m.person} size={56} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[18px] font-black text-ink">{id.name}</p>
+          <p className="text-[14px] font-bold text-ink-3">{m.person.headline}</p>
+        </div>
+        <Ring value={m.score} size={72} tone={calmTone(m.score)} />
+      </div>
+
+      <p className="mt-5 text-[15px] font-bold text-ink-2">Uyum dört parçadan çıkar. Her parçanın ne ölçtüğü ve ne kadar puan getirdiği aşağıda.</p>
+      <div className="mt-5">
+        <PartBars m={m} org={org} calm />
+      </div>
+
+      {hist && (
+        <>
+          <h3 className="mt-7 text-[17px] font-black text-ink">Düzenlilik</h3>
+          <div className="mt-2">
+            <WeekStrip hist={hist} />
+          </div>
+          <p className="mt-2 text-[13px] font-bold text-ink-3">Skora girmez; üretimin ne kadar düzenli sürdüğünü gösterir. Sayılan şey commit değil, üretim yapılan haftadır.</p>
+        </>
+      )}
+
+      <h3 className="mt-7 text-[17px] font-black text-ink">Arkasındaki kanıt</h3>
+      <ul className="mt-3 space-y-3">
+        {m.coverage.map((c) => (
+          <li key={c.skill} className="flex items-start gap-3">
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-black text-ink">{skillLabel(c.skill)}</span>
+              <span className="block text-[14px] font-bold text-ink-3">
+                {c.best ? `${c.best.title.split(' — ')[0]} · ${c.verified ? `${c.verified} doğrulanmış` : 'yalnız beyan'}` : 'Kanıt yok'}
+              </span>
+            </span>
+            {c.best ? <LevelBadge level={c.best.level} /> : <span className="pill bg-red-tint text-red-lip">Eksik</span>}
           </li>
         ))}
-      </ol>
-      <div className="mt-5 flex justify-end gap-2">
-        <button className="btn-quiet" onClick={onDone}>
-          Vazgeç
-        </button>
-        <button
-          className="btn-primary"
-          onClick={() => {
-            const pid = actions.openPilot(need.id, m.person.id);
-            setView({ revealed: [...new Set([...revealed, m.person.id])] });
-            location.href = `/pilotlar/${pid}`;
-          }}
-        >
-          Pilotu aç ve defteri başlat
-        </button>
+      </ul>
+
+      {gaps.length > 0 && (
+        <>
+          <h3 className="mt-7 text-[17px] font-black text-ink">Eksikler</h3>
+          <ul className="mt-3 space-y-2">
+            {gaps.map((g) => (
+              <li key={g.skill} className="flex items-center gap-3 rounded-[14px] bg-bg-2 px-3.5 py-2.5">
+                <span className="min-w-0 flex-1 text-[15px] font-bold text-ink-2">
+                  <b>Eksik: {skillLabel(g.skill)}</b> · {g.kind === 'claim' ? 'yalnız beyan var' : 'kanıt yok'}
+                </span>
+                {g.gain > 0 && <span className="num shrink-0 text-[14px] font-black text-green-lip">+{g.gain}</span>}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[13px] font-bold text-ink-3">Rakam, doğrulanmış bir iş eklenirse uyuma gelecek puan. Aday bu eksikleri kendi ekranında yol haritası olarak görür; ret değildir.</p>
+        </>
+      )}
+
+      <h3 className="mt-7 text-[17px] font-black text-ink">Nasıl kontrol edersin?</h3>
+      <p className="mt-1 text-[15px] font-bold text-ink-3">Kanıt kartında her işin kaynağı, doğrulayıcısı ve tarihi açıkça yazılı.</p>
+
+      <div className="sticky bottom-0 -mx-6 -mb-6 mt-6 space-y-2.5 border-t-2 border-line bg-bg px-6 pb-5 pt-4">
+        {canPilot && (
+          <button type="button" className="btn-primary btn-block" onClick={() => onStep('confirm')}>
+            Pilot teklif et
+          </button>
+        )}
+        {pilot && (
+          <a href={`/pilotlar/${pilot.id}`} className="btn-primary btn-block">
+            Projeye git
+          </a>
+        )}
+        <a href={`/profil/${m.person.handle}`} className="btn-line btn-block">
+          Kanıt kartını aç
+        </a>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------- genç: my fit
+
+function MyFit({ m, org }: { m: Match; org: Org }) {
+  const gaps = [...m.gaps].sort((x, y) => y.gain - x.gain);
+  const [head, sub] =
+    m.score >= 75
+      ? ['Çok yakınsın', 'Doğrulanmış işin bu ihtiyacın büyük kısmını karşılıyor.']
+      : m.score >= 55
+        ? ['Yakınsın', 'Birkaç doğrulanmış iş daha seni ilk sıralara taşır.']
+        : ['Yolun var, ama kısa', 'Eksik alanlara doğrulanmış iş ekleyerek hızla yaklaşabilirsin.'];
+  return (
+    <>
+      <section className="card mt-6 p-5 md:p-6" aria-labelledby="uyum">
+        <h2 id="uyum" className="h-sec">
+          Senin uyumun
+        </h2>
+        <div className="mt-5 flex items-center gap-5">
+          <Ring value={m.score} size={112} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[22px] font-black leading-tight text-ink">{head}</p>
+            <p className="mt-1 text-[15px] font-bold text-ink-3">{sub}</p>
+            <p className="mt-1">
+              <Why title="Puanın nasıl hesaplandı?">
+                <p className="text-[15px] font-bold text-ink-2">
+                  Puan senin kanıtından bu sayfa açılırken hesaplanır; kimse elle yazmaz. Dört parçası var: kanıt {WEIGHTS.evidence * 100}, bağlam {WEIGHTS.context * 100}, kapasite {WEIGHTS.capacity * 100}, iş birliği geçmişi{' '}
+                  {WEIGHTS.history * 100} puan. Bağlam ve geçmişte kimse sıfırdan başlamaz.
+                </p>
+                <a href="/yontem" className="btn-line btn-block mt-5">
+                  Yöntemi oku
+                </a>
+              </Why>
+            </p>
+          </div>
+        </div>
+        <div className="mt-6 border-t-2 border-line pt-6">
+          <PartBars m={m} org={org} you />
+        </div>
+      </section>
+
+      <section className="mt-8" aria-labelledby="eksik">
+        <h2 id="eksik" className="h-sec">
+          Seni yaklaştıracak adımlar
+        </h2>
+        {gaps.length > 0 ? (
+          <ul className="mt-4 space-y-3">
+            {gaps.map((g) => (
+              <li key={g.skill}>
+                <a href="/kanit-bagla" className="card-press flex items-center gap-4 p-4">
+                  <span className="num grid h-12 w-12 shrink-0 place-items-center rounded-full bg-green-tint text-[16px] font-black text-green-lip">+{g.gain}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[16px] font-black text-ink">{skillLabel(g.skill)} alanında doğrulanmış bir iş ekle</span>
+                    <span className="block text-[14px] font-bold text-ink-3">{g.kind === 'claim' ? 'Şu an yalnız beyanın var' : 'Henüz kanıtın yok'}</span>
+                  </span>
+                  <ChevronRight className="h-6 w-6 shrink-0 text-ink-3" strokeWidth={3} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 flex items-center gap-3 rounded-[16px] bg-green-tint p-4 text-[15px] font-bold text-ink-2">
+            <CheckCircle size={32} />
+            Aranan her yetkinlikte doğrulanmış işin var. Kapasiteni ve düzenli üretimini koruman yeter.
+          </p>
+        )}
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <a href="/kanit-bagla" className="btn-primary btn-lg">
+            Kanıt ekle
+          </a>
+          <a href="/gorevler" className="btn-line btn-lg">
+            Gelişim görevleri
+          </a>
+        </div>
+        <p className="mt-3 text-[13px] font-bold text-ink-3">Başvuru yok: kurum seni kanıtından bulur. Puanlar her kanıt eklediğinde yeniden hesaplanır.</p>
+      </section>
+    </>
   );
 }

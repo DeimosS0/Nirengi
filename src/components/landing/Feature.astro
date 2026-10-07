@@ -1,0 +1,32 @@
+---
+// One idea per section: a sentence with one coloured phrase, two lines, an
+// illustration on a tinted panel. `*phrase*` in the heading takes the tone.
+interface Props {
+  id: string;
+  heading: string;
+  body: string;
+  tone: 'orange' | 'cyan' | 'indigo' | 'purple';
+  reverse?: boolean;
+  more?: { href: string; label: string };
+}
+
+const { id, heading, body, tone, reverse = false, more } = Astro.props;
+const parts = heading.split('*');
+---
+
+<section id={id} class="scroll-mt-16 border-t-2 border-line">
+  <div class="mx-auto grid max-w-[1040px] items-center gap-8 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-24">
+    <div data-reveal class:list={['min-w-0', reverse && 'lg:order-2']}>
+      <h2 class="text-[clamp(28px,3.6vw,40px)] font-black leading-[1.12] tracking-[-0.02em] text-ink">
+        {parts.map((t, i) => (i % 2 ? <span style={`color:rgb(var(--${tone}))`}>{t}</span> : t))}
+      </h2>
+      <p class="lead mt-4 max-w-[44ch]">{body}</p>
+      {more && <a href={more.href} class="-ml-2 mt-2 inline-block rounded-full px-2 py-1 text-[15px] font-extrabold text-indigo transition-colors hover:bg-indigo-tint">{more.label}</a>}
+    </div>
+    <div data-reveal style="--d:120ms" class:list={['min-w-0', reverse && 'lg:order-1']}>
+      <div class="rounded-[28px] p-3 sm:p-8" style={`background:rgb(var(--${tone}-tint))`}>
+        <slot />
+      </div>
+    </div>
+  </div>
+</section>

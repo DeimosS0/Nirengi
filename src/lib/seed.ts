@@ -1,11 +1,12 @@
 // Demo ecosystem. All organizations and people are fictional; dates are
 // generated relative to the moment of seeding so the demo never looks stale.
 
-import type { Evidence, LogEntry, Milestone, NetEvent, Need, Org, Person, Pilot, State } from './types.ts';
+import type { Evidence, LogEntry, Milestone, NetEvent, Need, Org, Peer, Person, Pilot, Post, State, WeeklyGoal } from './types.ts';
 import { appendEntry } from './engine/ledger.ts';
 import { daysAgo, daysFromNow } from './format.ts';
+import { dayKey, weekKey } from './engine/progress.ts';
 
-export const STATE_VERSION = 3;
+export const STATE_VERSION = 5;
 export const ROUND = '2026·Ç4';
 
 type EvInput = Omit<Evidence, 'producedAt' | 'verifiedAt'> & { ago: number; verifiedAgo?: number };
@@ -849,7 +850,7 @@ function pilots(): Pilot[] {
         { ago: 11, actor: 'person', kind: 'update', text: 'İlk ölçüm: 3.000 nokta 3 dk 40 sn (8 çekirdek).' },
         { ago: 9, actor: 'person', kind: 'submit', text: 'Kilometre taşı teslim edildi: 3.000 noktalık rota hesaplaması 5 dakikanın altında tamamlanır' },
         { ago: 8, actor: 'org', kind: 'approve', text: 'Kurum onayı: ölçüm depo sunucusunda tekrarlandı (3 dk 52 sn).' },
-        { ago: 8, actor: 'system', kind: 'approve', text: 'Çift onay tamamlandı → kişinin profiline S3 kanıt olarak işlendi.' },
+        { ago: 8, actor: 'system', kind: 'approve', text: 'Çift onay tamamlandı → kişinin profiline Kurum onaylı kanıt olarak işlendi.' },
         { ago: 5, actor: 'person', kind: 'blocker', text: 'Sipariş sistemi test ortamına erişim bekleniyor.' },
         { ago: 1, actor: 'person', kind: 'submit', text: 'Kilometre taşı teslim edildi: Toplam rota mesafesi mevcut çözüme göre en fazla %2 uzun olur' },
       ]),
@@ -960,15 +961,220 @@ function events(): NetEvent[] {
   ];
 }
 
+// ---------------------------------------------------------------- progress & community
+
+/** Deterministic generator so every reset produces the same demo history. */
+function rng(seed: string) {
+  let h = 2166136261;
+  for (const c of seed) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return () => {
+    h = Math.imul(h ^ (h >>> 15), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return ((h ^= h >>> 16) >>> 0) / 4294967296;
+  };
+}
+
+interface Pace {
+  pace: number; // typical active days per week in past weeks
+  tier: number;
+  goal: WeeklyGoal;
+  thisWeek: number[]; // active weekdays this week, 0 = Monday
+  rest?: number[]; // past weeks (1 = last week) announced as rest
+  off?: number[]; // past weeks with no output and no rest: real people miss weeks
+}
+
+const PACE: Record<string, Pace> = {
+  'p-can': { pace: 4, tier: 2, goal: 3, thisWeek: [0, 1] },
+  'p-elif': { pace: 5, tier: 2, goal: 5, thisWeek: [0, 1, 2] },
+  'p-mert': { pace: 2, tier: 2, goal: 1, thisWeek: [1], off: [4] },
+  'p-zeynep': { pace: 4, tier: 2, goal: 3, thisWeek: [0, 2] },
+  'p-baran': { pace: 3, tier: 0, goal: 3, thisWeek: [0, 1, 2], off: [6, 9] },
+  'p-defne': { pace: 3, tier: 2, goal: 3, thisWeek: [1], rest: [3] },
+  'p-emir': { pace: 1, tier: 2, goal: 1, thisWeek: [], off: [2, 5, 6] },
+  'p-irem': { pace: 3, tier: 0, goal: 3, thisWeek: [0, 2], off: [7] },
+  'p-kaan': { pace: 4, tier: 2, goal: 3, thisWeek: [0, 1, 2] },
+  'p-selin': { pace: 2, tier: 2, goal: 1, thisWeek: [2], off: [3, 8] },
+};
+
+function withProgress(person: Person): Person {
+  const cfg = PACE[person.id];
+  if (!cfg) return person;
+  const r = rng(person.id);
+  const monday = new Date(`${weekKey(Date.now())}T12:00:00`);
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  const day = (weeksAgo: number, idx: number) => {
+    const d = new Date(monday);
+    d.setDate(d.getDate() - weeksAgo * 7 + idx);
+    return dayKey(d);
+  };
+  const activity = cfg.thisWeek.filter((i) => i <= todayIdx).map((i) => day(0, i));
+  for (let w = 1; w <= 12; w++) {
+    if (cfg.rest?.includes(w) || cfg.off?.includes(w)) continue;
+    const n = Math.max(0, Math.min(7, Math.round(cfg.pace + (r() - 0.5) * 2.2)));
+    const idx = [0, 1, 2, 3, 4, 5, 6];
+    for (let i = idx.length - 1; i > 0; i--) {
+      const j = Math.floor(r() * (i + 1));
+      [idx[i], idx[j]] = [idx[j], idx[i]];
+    }
+    for (const i of idx.slice(0, n)) activity.push(day(w, i));
+  }
+  return { ...person, activity, tier: cfg.tier, weeklyGoal: cfg.goal, restWeeks: (cfg.rest ?? []).map((w) => day(w, 0)) };
+}
+
+/** Fictional league members; they exist only to make the demo league a race. */
+function peers(): Peer[] {
+  const p = (id: string, name: string, area: string, tier: number, weekly: number[]): Peer => ({ id: `peer-${id}`, name, area, tier, weekly });
+  return [
+    p('ada', 'Ada Kurt', 'React', 2, [210, 180, 240]),
+    p('bora', 'Bora Şen', 'Go', 2, [160, 190, 150]),
+    p('cem', 'Cem Aydın', 'Python', 2, [130, 120, 170]),
+    p('dila', 'Dila Er', 'Figma', 2, [120, 140, 90]),
+    p('efe', 'Efe Yıldız', 'Rust', 2, [110, 60, 130]),
+    p('gizem', 'Gizem Tan', 'Veri analizi', 2, [90, 110, 100]),
+    p('hakan', 'Hakan Bulut', 'Kotlin', 2, [70, 90, 60]),
+    p('ilke', 'İlke Çınar', 'Teknik yazım', 2, [50, 80, 70]),
+    p('kerem', 'Kerem Ateş', 'DevOps', 2, [40, 30, 90]),
+    p('lale', 'Lale Ok', 'Unity', 2, [20, 50, 40]),
+    p('mina', 'Mina Doğru', 'React', 0, [140, 90, 120]),
+    p('nehir', 'Nehir Kaya', 'Python', 0, [120, 130, 80]),
+    p('onur', 'Onur Güneş', 'Flutter', 0, [100, 70, 110]),
+    p('pelin', 'Pelin Ay', 'UI/UX', 0, [90, 100, 60]),
+    p('rüzgar', 'Rüzgar Taş', 'Go', 0, [80, 40, 70]),
+    p('sena', 'Sena Yurt', 'IoT', 0, [70, 90, 50]),
+    p('tuna', 'Tuna Erdem', 'TypeScript', 0, [60, 30, 80]),
+    p('umut', 'Umut Sarp', 'C++', 0, [50, 60, 30]),
+    p('yaren', 'Yaren Göl', 'Veri analizi', 0, [40, 20, 60]),
+    p('zafer', 'Zafer Ilgın', 'Node.js', 0, [30, 50, 20]),
+    p('aras', 'Aras Polat', 'Kubernetes', 0, [20, 10, 40]),
+    p('beren', 'Beren Uz', 'Figma', 0, [10, 30, 0]),
+  ];
+}
+
+function posts(): Post[] {
+  const at = (ago: number, h = 0) => daysAgo(ago + h / 24);
+  return [
+    {
+      id: 'post-irem-openapi',
+      personId: 'p-irem',
+      kind: 'soru',
+      text: 'OpenAPI şemasında aynı hata gövdesini 12 uç noktada tekrar yazmamak için en temiz yol ne? components/responses mu, yoksa her yerde $ref mi?',
+      at: at(0, 3),
+      supports: ['p-elif'],
+      replies: [
+        {
+          id: 'r-irem-1',
+          personId: 'p-zeynep',
+          text: 'components/responses altında bir kez tanımla, uç noktalarda $ref ile çağır. Hata kodlarını da tek bir enum’da topla; istemci tarafı sana teşekkür eder.',
+          at: at(0, 1),
+        },
+      ],
+    },
+    {
+      id: 'post-can-rota',
+      personId: 'p-can',
+      kind: 'calisiyorum',
+      text: 'Kuzey Lojistik pilotunda ikinci kilometre taşındayım: rota mesafesini mevcut çözümün en fazla %2 üstünde tutmam gerekiyor. 2-opt sonrası or-opt deniyorum, ilk ölçümde %3,1.',
+      at: at(1, 2),
+      supports: ['p-mert', 'p-zeynep', 'p-kaan'],
+      replies: [
+        {
+          id: 'r-can-1',
+          personId: 'p-kaan',
+          text: 'Depoya yakın noktaları önce kümelersen or-opt’un arama alanı küçülür. Biz otobüs duraklarında böyle yapmıştık.',
+          at: at(1),
+        },
+      ],
+    },
+    {
+      id: 'post-baran-lora',
+      personId: 'p-baran',
+      kind: 'soru',
+      text: 'ESP32’de LoRa paketleri ara ara kayboluyor. Yeniden deneme mi eklemeliyim, yoksa ACK mekanizması mı kurmalıyım? Pil ömrü kritik.',
+      at: at(2, 5),
+      supports: ['p-can'],
+      replies: [
+        {
+          id: 'r-baran-1',
+          personId: 'p-can',
+          text: 'Pil kritikse önce ACK’siz, sıra numaralı gönderim dene ve alıcıda eksik numaraları say. Kayıp oranını ölçmeden yeniden deneme eklemek pili boşa harcar.',
+          at: at(2, 3),
+          helpful: true,
+        },
+        {
+          id: 'r-baran-2',
+          personId: 'p-kaan',
+          text: 'Spreading factor’ü bir kademe artırmak çoğu zaman yetiyor. Menzil ile pil arasındaki dengeyi ölçerek seç.',
+          at: at(2, 2),
+        },
+      ],
+    },
+    {
+      id: 'post-elif-kartui',
+      personId: 'p-elif',
+      kind: 'gosteri',
+      text: 'kart-ui 2.0 yayında. Bütün bileşenler ekran okuyucuyla test edildi ve ilk dış katkımızı aldık.',
+      at: at(3, 4),
+      evidenceId: 'e-elif-1',
+      supports: ['p-defne', 'p-irem', 'p-can', 'p-selin', 'p-kaan'],
+      replies: [
+        {
+          id: 'r-elif-1',
+          personId: 'p-defne',
+          text: 'Odak halkaları çok iyi olmuş. Kontrast testlerini CI’a eklemeyi düşünür müsün?',
+          at: at(3, 2),
+        },
+      ],
+    },
+    {
+      id: 'post-zeynep-model',
+      personId: 'p-zeynep',
+      kind: 'gosteri',
+      text: 'turkce-sikayet modeline 8 yeni kategori ekledim, F1 0,87’ye çıktı. Etiketli veri setini de açık lisansla paylaştım.',
+      at: at(4, 6),
+      supports: ['p-irem', 'p-selin'],
+      replies: [],
+    },
+    {
+      id: 'post-mert-tesekkur',
+      personId: 'p-mert',
+      kind: 'tesekkur',
+      text: 'Anka Oyun pilotundaki shader optimizasyonunun ilk ipucunu burada Kaan’dan almıştım. Pilot başarıyla kapandı, teşekkürler.',
+      at: at(5, 1),
+      supports: ['p-kaan', 'p-can', 'p-elif'],
+      replies: [],
+    },
+    {
+      id: 'post-defne-foto',
+      personId: 'p-defne',
+      kind: 'soru',
+      text: 'Kooperatif için ürün fotoğraflarını stüdyo kiralamadan çekmenin yolu var mı? Uygun maliyetli ışık kutusu önerisi olan?',
+      at: at(6, 2),
+      supports: [],
+      replies: [
+        {
+          id: 'r-defne-1',
+          personId: 'p-selin',
+          text: 'İki LED panel ve beyaz köpük levhayla kurduğumuz düzen 40 ürünü bir günde çıkardı. Arka plan için mat beyaz karton yeterli.',
+          at: at(6),
+          helpful: true,
+        },
+      ],
+    },
+  ];
+}
+
 export function buildSeed(): State {
   return {
     version: STATE_VERSION,
     seededAt: new Date().toISOString(),
-    people: people(),
+    people: people().map(withProgress),
     orgs,
     needs: needs(),
     pilots: pilots(),
     events: events(),
+    quests: [],
+    posts: posts(),
+    peers: peers(),
     demo: {},
   };
 }

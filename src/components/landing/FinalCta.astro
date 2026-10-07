@@ -1,28 +1,31 @@
 ---
-// Closing panel: the two ways into the loop, and what is real versus demo.
+// Closing band: solid colour, a compass on a white stage (Niri already greets in the hero), the same two keys again.
+import { Compass } from '../ui/icons';
 ---
 
-<section class="wrap pt-24 md:pt-32" aria-labelledby="cta-title">
-  <div class="overflow-hidden rounded-[10px] border border-line-2 bg-raised shadow-[0_18px_40px_-28px_rgb(0_0_0/0.45)]">
-    <div class="grid md:grid-cols-2">
-      <a href="/kanit-bagla" class="group flex flex-col gap-4 border-b border-line p-6 transition-colors hover:bg-paper md:border-b-0 md:border-r md:p-10">
-        <h2 id="cta-title" class="display text-[clamp(30px,3.4vw,46px)]">Kanıtını bağla.</h2>
-        <p class="max-w-[42ch] text-[15.5px] leading-relaxed text-ink-2">
-          GitHub hesabını ya da alan adını bağla. Sahiplik gerçek servislerle sınanır, Kanıt Kartın S2 seviyesiyle oluşur. Özgeçmiş yazmazsın.
-        </p>
-        <span class="btn-primary mt-auto self-start px-5 py-3 text-[15px]">Kanıt Kartını oluştur</span>
-      </a>
-      <a href="/ihtiyaclar/yeni" class="group flex flex-col gap-4 p-6 transition-colors hover:bg-paper md:p-10">
-        <p class="display text-[clamp(30px,3.4vw,46px)]">Şikâyetini yaz.</p>
-        <p class="max-w-[42ch] text-[15.5px] leading-relaxed text-ink-2">
-          Serbest metni yapıştır; kanvas onu taslağa çevirir, yalnızca eksik kalan kritik soruları sorar. Eşik geçilince ihtiyaç yayına çıkar ve adaylar gerekçesiyle sıralanır.
-        </p>
-        <span class="btn-ink mt-auto self-start px-5 py-3 text-[15px]">İhtiyaç Kanvasını aç</span>
-      </a>
+<section class="border-t-2 border-line bg-indigo" aria-labelledby="cta-title">
+  <div class="mx-auto flex max-w-[1040px] flex-col items-center gap-8 px-4 py-14 text-center sm:px-6 lg:flex-row lg:gap-16 lg:py-20 lg:text-left">
+    <div class="grid h-[190px] w-[190px] shrink-0 place-items-center rounded-full bg-white sm:h-[220px] sm:w-[220px]" style="box-shadow:0 6px 0 rgb(255 255 255 / 0.4)">
+      <Compass size={150} />
     </div>
-    <p class="border-t border-line bg-sunken px-6 py-3 text-[13px] text-ink-2 md:px-10">
-      <b class="text-ink">Gerçek:</b> GitHub ve DNS TXT doğrulaması, eşleşme, kanvas skoru, defter bütünlüğü. <b class="text-ink">Demo:</b> kurumlar, kişiler ve S3 tasdikleri kurgusaldır; veri tarayıcıda tutulur.
-      <a href="/yontem#veri" class="ml-1 font-semibold underline decoration-line-2 hover:text-ink">Ayrıntı</a>
-    </p>
+    <div class="w-full">
+      <h2 id="cta-title" class="text-[clamp(28px,3.6vw,40px)] font-black leading-[1.12] tracking-[-0.02em] !text-white">Küçük bir adımla başla.</h2>
+      <p class="mx-auto mt-3 max-w-[40ch] text-[17px] font-bold text-white/85 lg:mx-0">Kayıt yok. Kurgusal kurumlar ve kişilerle bütün döngüyü bir oturumda dene.</p>
+      <div class="mx-auto mt-7 flex max-w-[380px] flex-col gap-3 lg:mx-0 lg:max-w-none lg:flex-row">
+        <a
+          href="/bugun"
+          class="btn-lg inline-flex min-h-[54px] items-center justify-center rounded-[14px] bg-white px-7 text-[16px] font-black uppercase tracking-[0.06em] text-indigo transition-transform duration-100 active:translate-y-1"
+          style="box-shadow:0 4px 0 rgb(255 255 255 / 0.45)"
+        >
+          Genç olarak başla
+        </a>
+        <a
+          href="/kurum"
+          class="inline-flex min-h-[54px] items-center justify-center rounded-[14px] border-2 border-white/60 px-7 text-[16px] font-black uppercase tracking-[0.06em] text-white transition-colors hover:bg-white/10"
+        >
+          Kurum olarak ihtiyaç yaz
+        </a>
+      </div>
+    </div>
   </div>
 </section>

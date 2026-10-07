@@ -19,7 +19,7 @@ export interface Check {
 
 // A criterion is checkable if it carries a threshold or names a binary deliverable.
 const MEASURABLE = /\d|%|yüzde/;
-const DELIVERABLE = /teslim edil|yayımlan|yayınlan|belgelen|hazırlan|entegre edil|bağlanır|doğrulayıcıdan geçer/;
+const DELIVERABLE = /teslim edil|yayımlan|yayımlan|belgelen|hazırlan|entegre edil|bağlanır|doğrulayıcıdan geçer/;
 export const isMeasurable = (s: string) => MEASURABLE.test(s);
 export const isCheckable = (s: string) => MEASURABLE.test(s) || DELIVERABLE.test(s.toLocaleLowerCase('tr-TR'));
 

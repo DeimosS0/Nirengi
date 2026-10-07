@@ -101,3 +101,95 @@ test('short skill aliases need word boundaries', () => {
   assert.deepEqual(skillsInText('Go ile yazılmış servis').includes('go'), true);
   assert.equal(skillsInText('Google ile görüştük').includes('go'), false);
 });
+
+// ---------------------------------------------------------------- progress
+
+import { progress, xpEvents, weekKey, dayKey, league, questsFor, XP, TIERS } from '../src/lib/engine/progress.ts';
+
+const at = (iso: string) => new Date(iso).getTime();
+
+test('weeks run Monday to Sunday', () => {
+  assert.equal(weekKey('2026-10-07T10:00:00'), '2026-10-05'); // Wednesday
+  assert.equal(weekKey('2026-10-11T23:00:00'), '2026-10-05'); // Sunday
+  assert.equal(weekKey('2026-10-12T01:00:00'), '2026-10-12'); // next Monday
+});
+
+test('weekly goal counts days with output, not volume', () => {
+  const s = buildSeed();
+  const p = structuredClone(s.people.find((x) => x.id === 'p-can')!);
+  p.evidence = [];
+  p.weeklyGoal = 3;
+  // Ten pushes on one day are still one day.
+  p.activity = ['2026-10-05', '2026-10-05', '2026-10-05'];
+  const one = progress({ ...s, quests: [], posts: [] }, p, at('2026-10-07T12:00:00'));
+  assert.equal(one.active, 1);
+  assert.equal(one.met, false);
+  p.activity = ['2026-10-05', '2026-10-06', '2026-10-07'];
+  const three = progress({ ...s, quests: [], posts: [] }, p, at('2026-10-07T12:00:00'));
+  assert.equal(three.active, 3);
+  assert.equal(three.met, true);
+  assert.deepEqual(three.days.map((d) => d.active), [true, true, true, false, false, false, false]);
+});
+
+test('a rest week pauses the streak instead of breaking it', () => {
+  const s = { ...buildSeed(), quests: [], posts: [] };
+  const p = structuredClone(s.people.find((x) => x.id === 'p-can')!);
+  p.evidence = [];
+  p.weeklyGoal = 1;
+  // Weeks of 14 Sep and 28 Sep met, week of 21 Sep empty.
+  p.activity = ['2026-09-15', '2026-09-29'];
+  const now = at('2026-10-07T12:00:00');
+  assert.equal(progress(s, p, now).streak, 1, 'an unfinished current week does not break the streak yet');
+  p.activity.push('2026-10-06');
+  assert.equal(progress(s, p, now).streak, 2, 'current + 28 Sep, broken at 21 Sep');
+  p.restWeeks = ['2026-09-21'];
+  assert.equal(progress(s, p, now).streak, 3, 'rest week skipped: current + 28 Sep + 14 Sep');
+});
+
+test('daily XP is capped so one night cannot buy a week', () => {
+  const s = buildSeed();
+  const p = structuredClone(s.people.find((x) => x.id === 'p-can')!);
+  p.activity = [];
+  p.evidence = Array.from({ length: 10 }, (_, i) => ({
+    id: `e${i}`, title: `repo ${i}`, summary: '', source: 'github' as const, level: 'S2' as const, skills: [],
+    producedAt: '2026-10-06T10:00:00', verifiedAt: '2026-10-06T10:00:00',
+  }));
+  const st = { ...s, quests: [], posts: [] };
+  assert.equal(xpEvents(st, p).reduce((n, e) => n + e.xp, 0), 10 * XP.evidence);
+  assert.equal(progress(st, p, at('2026-10-07T12:00:00')).xpWeek, XP.dailyCap);
+});
+
+test('chatter earns a little XP but never counts as a productive day', () => {
+  const s = buildSeed();
+  const p = structuredClone(s.people.find((x) => x.id === 'p-can')!);
+  p.activity = [];
+  p.evidence = [];
+  const st = { ...s, quests: [], posts: [{ id: 'x', personId: p.id, kind: 'calisiyorum' as const, text: 't', at: '2026-10-06T10:00:00', supports: ['a', 'b'], replies: [] }] };
+  const pr = progress(st, p, at('2026-10-07T12:00:00'));
+  assert.equal(pr.active, 0);
+  assert.equal(pr.xpWeek, XP.post + 2 * XP.support);
+});
+
+test('league groups by tier, ranks by weekly XP and marks the zones', () => {
+  const s = buildSeed();
+  const me = s.people.find((x) => x.id === 'p-can')!;
+  const l = league(s, me);
+  assert.equal(l.name, TIERS[me.tier!]);
+  assert.ok(l.rows.length >= 15);
+  assert.ok(l.rows.every((r, i, a) => i === 0 || a[i - 1].xp >= r.xp));
+  assert.ok(l.rows.slice(0, 5).every((r) => r.zone === 'up'));
+  assert.ok(l.rows.some((r) => r.personId === me.id));
+});
+
+test('growth quests name the need they move you toward', () => {
+  const s = buildSeed();
+  const q = questsFor(s, s.people.find((x) => x.id === 'p-can')!);
+  assert.equal(q.filter((x) => x.kind === 'haftalik').length, 3);
+  const growth = q.filter((x) => x.kind === 'gelisim');
+  assert.ok(growth.length > 0);
+  assert.ok(growth.every((g) => /ihtiyacına uyumun \d+ → \d+/.test(g.why)));
+});
+
+test('dayKey is local and zero padded', () => {
+  assert.equal(dayKey(new Date(2026, 0, 5, 9)), '2026-01-05');
+});

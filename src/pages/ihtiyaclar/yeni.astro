@@ -1,9 +1,9 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import App from '../../layouts/App.astro';
 import CanvasEditor from '../../components/app/CanvasEditor';
 import { Loading } from '../../components/ui/primitives';
 ---
 
-<Layout title="İhtiyaç Kanvası">
+<App title="Yeni ihtiyaç" mode="kurum" width="wide" description="Derdini adım adım ölçülebilir bir ihtiyaca çevir: her adımda canlı çözülebilirlik puanı, yayın kapısı 70.">
   <CanvasEditor client:only="react"><Loading slot="fallback" /></CanvasEditor>
-</Layout>
+</App>

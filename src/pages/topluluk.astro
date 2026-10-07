@@ -1,0 +1,10 @@
+---
+import App from '../layouts/App.astro';
+import CommunityPage from '../components/genc/CommunityPage';
+import GencRail from '../components/shell/GencRail';
+---
+
+<App title="Topluluk" mode="genc" description="Çalıştığını göster, takıldığını sor, birinin emeğine teşekkür et. Birbirine yardım edenlerin yeri.">
+  <CommunityPage client:only="react" />
+  <GencRail slot="rail" client:only="react" />
+</App>
